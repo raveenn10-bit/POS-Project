@@ -6,9 +6,9 @@ Installable Android/iPhone retail POS with products, stock, billing, receipts, r
 
 1. Customer opens the deployed HTTPS app and copies the displayed Device ID.
 2. For a free trial, customer sends the Device ID to Harsh Apex through the WhatsApp button.
-3. The owner opens the private `apex-pos-license-admin.html` file, selects **7 Days**, pastes the Device ID and generates a signed trial code.
+3. The owner opens the `/admin.html` dashboard, selects **7 Days**, pastes the Device ID and generates a signed trial code.
 4. Customer pastes the code into the POS and activates it.
-5. For paid renewal, customer sends the Rs. 2,500 bank-transfer slip and Device ID through WhatsApp.
+5. For paid renewal, customer sends the payment slip and Device ID through WhatsApp.
 6. After verifying payment, the owner generates a **30 Days** code and sends it to the customer.
 
 Each signed code is bound to one Device ID and has a cryptographically verified expiry date. Changing the payload, expiry date or Device ID invalidates the signature. The private admin generator must never be uploaded to a public repository, shared with customers or hosted online.
