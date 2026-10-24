@@ -6,8 +6,8 @@
 (async function subscriptionGate() {
   const PUBLIC_KEY = {
     kty: 'EC',
-    x: 'zQFCaWS-1nu0sUjBxF1l3EDbfxyNdRI2PwMKcN77k1A',
-    y: 'OQO6puGMIn_9_k9hipetgole3JFJSKdCEc1gIGtF31c',
+    x: '9I6JTz5Tyq2nGkWNrzbblCiNGPcp3U8kzZl7aKAVdDo',
+    y: 'WJ690r0FtDp953oioGPBK1Nb_J1k5syuFLFaL6bqrqI',
     crv: 'P-256'
   };
   const DEVICE_KEY = 'apex_pos_device_id_v2';

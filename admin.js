@@ -1,6 +1,6 @@
 
 'use strict';
-const PUBLIC_KEY={kty:'EC',x:'zQFCaWS-1nu0sUjBxF1l3EDbfxyNdRI2PwMKcN77k1A',y:'OQO6puGMIn_9_k9hipetgole3JFJSKdCEc1gIGtF31c',crv:'P-256'};
+const PUBLIC_KEY={kty:'EC',x:'9I6JTz5Tyq2nGkWNrzbblCiNGPcp3U8kzZl7aKAVdDo',y:'WJ690r0FtDp953oioGPBK1Nb_J1k5syuFLFaL6bqrqI',crv:'P-256'};
 const $=id=>document.getElementById(id);let signingKey=null;let keyEpoch=0;let idleTimer;
 function lock(){keyEpoch++;signingKey=null;clearTimeout(idleTimer);$('keyFile').value='';$('code').value='';$('customer').value='';$('device').value='';$('generator').style.display='none';$('result').style.display='none';$('keyStatus').textContent='Locked. Select your private key to continue.'}
 function touch(){clearTimeout(idleTimer);idleTimer=setTimeout(lock,5*60*1000)}

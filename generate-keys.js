@@ -11,6 +11,12 @@ const path = require('path');
 const { webcrypto } = require('crypto');
 
 async function main() {
+  const privateKeyPath = path.join(__dirname, 'apex-pos-private-key.json');
+  if (fs.existsSync(privateKeyPath) && !process.argv.includes('--force')) {
+    console.log('WARNING: apex-pos-private-key.json already exists! Not overwriting.');
+    console.log('To regenerate a new key pair, run: node generate-keys.js --force');
+    return;
+  }
   console.log('Generating ECDSA P-256 cryptographic key pair for Apex POS...');
 
   const keyPair = await webcrypto.subtle.generateKey(
@@ -28,7 +34,6 @@ async function main() {
     private_jwk: privateJwk
   };
 
-  const privateKeyPath = path.join(__dirname, 'apex-pos-private-key.json');
   fs.writeFileSync(privateKeyPath, JSON.stringify(privateKeyPayload, null, 2), 'utf-8');
 
   console.log('\n======================================================');
