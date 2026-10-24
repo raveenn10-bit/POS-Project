@@ -1,41 +1,37 @@
-# Harsh Apex Retail POS — Android & iPhone SaaS PWA
+# Harsh Apex Retail POS — Production Manual Activation PWA
 
-## What it does
-Products, stock, billing, receipts, daily reports, shop details, JSON export/import. The app now has a server-side 7-day trial and Rs. 2,500 monthly license gate. POS data remains local on each device; the license is checked online.
+Installable Android/iPhone retail POS with products, stock, billing, receipts, reports, backups and offline signed-license activation.
 
-## Subscription setup
+## Customer activation flow
 
-The included `api/` folder is for Vercel Functions. The payment backend uses Supabase REST and PayHere without exposing secrets in the browser.
+1. Customer opens the deployed HTTPS app and copies the displayed Device ID.
+2. For a free trial, customer sends the Device ID to Harsh Apex through the WhatsApp button.
+3. The owner opens the private `apex-pos-license-admin.html` file, selects **7 Days**, pastes the Device ID and generates a signed trial code.
+4. Customer pastes the code into the POS and activates it.
+5. For paid renewal, customer sends the Rs. 2,500 bank-transfer slip and Device ID through WhatsApp.
+6. After verifying payment, the owner generates a **30 Days** code and sends it to the customer.
 
-1. Create a Supabase project and run `supabase-schema.sql` in its SQL editor.
-2. Create a PayHere merchant account and enable Checkout API / notification URL access. PayHere account approval and merchant settings are required before taking real payments.
-3. Deploy this folder as a Vercel project with these environment variables:
+Each signed code is bound to one Device ID and has a cryptographically verified expiry date. Changing the payload, expiry date or Device ID invalidates the signature. The private admin generator must never be uploaded to a public repository, shared with customers or hosted online.
 
-   - `APP_URL` — deployed HTTPS URL, for example `https://pos.yourdomain.com`
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY` — server-only secret
-   - `PAYHERE_MERCHANT_ID`
-   - `PAYHERE_MERCHANT_SECRET` — server-only secret
+## Publish the customer app
 
-4. In PayHere, make sure the notification URL is `https://YOUR-DOMAIN/api/payhere-notify`.
-5. Open the deployed HTTPS URL. A new device receives 7 days free. After the trial, the customer pays Rs. 2,500 and the verified callback activates another 30 days.
+Deploy the contents of this folder to Vercel or another HTTPS static host. No environment variables, Supabase project, payment gateway or server backend are required.
 
-For production, keep the Supabase service-role key and PayHere merchant secret only in Vercel environment variables. Never put them in `app.js` or the public repository.
+- Android: Chrome → Install app / Add to Home screen.
+- iPhone: Safari → Share → Add to Home Screen.
+- The app caches its files for offline POS use.
+- License activation and POS data remain on the customer's device.
 
-## Publish for everyone to install
-1. Deploy the **contents** of this folder (index.html at the website root) to a public HTTPS static host such as Netlify or Vercel.
-2. Share the deployed HTTPS URL with shop owners. Each device stores **its own separate data**.
-3. **Android:** Open URL in Chrome. Tap **Install App** if shown, otherwise Chrome **⋮ → Install app** or **Add to Home screen**. Confirm installation.
-4. **iPhone:** Open URL in Safari. Tap **Share → Add to Home Screen → Add**.
-5. Open the installed app while online once, then test offline by enabling airplane mode. Add test products and test a bill before business use.
+## Private admin tool
 
-No APK or App Store submission is required for this PWA. Install availability and menu labels depend on browser and OS version. A website URL is necessary: sharing the ZIP directly does not install the app.
+Keep `apex-pos-license-admin.html` only on the owner's trusted phone/computer. Open it directly in a modern browser. It works offline and generates 7, 30, 90 or 365-day signed codes.
 
-## Backups & important limitations
-- POS data is stored in browser localStorage on that specific device and website origin. It **does not sync** between phones or with other users. License records and payments are stored server-side.
-- Export backups regularly from Settings and store copies outside the phone. Clearing site data, uninstalling, browser eviction, or device loss may erase data.
-- Import replaces the existing dataset: back up first.
-- PDF receipt uses the system print/save flow. Receipt share uses the supported system share UI.
-- Gross profit is not net profit. No refunds, taxes, credit sales, scanner, Bluetooth printer, or multi-user access.
-- localStorage is a basic MVP approach and not a reliable production-grade database. Before broad retail distribution, migrate to IndexedDB, validate imports, test on target devices and implement a backup strategy.
-- Service workers require HTTPS (or localhost); opening index.html from Files does not install an offline PWA.
+Back up the private admin file securely. If it is lost, existing licenses continue working until expiry, but new compatible codes cannot be generated without restoring the same private key.
+
+## Data and operational limitations
+
+- POS products and sales are stored locally on each device and do not sync between devices.
+- Export JSON backups regularly. Clearing site data, reinstalling, browser storage cleanup or device loss can erase POS data and the stored license.
+- A new Device ID requires a new activation code.
+- The signed-code model blocks forged or edited licenses, but no client-only web app can completely prevent a technically skilled person from modifying their own downloaded application code. Serve the official app only from a domain controlled by Harsh Apex.
+- Test installation, offline use, backup/restore and receipt printing on each target phone before commercial rollout.
