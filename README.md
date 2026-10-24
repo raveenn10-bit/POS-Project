@@ -22,11 +22,11 @@ Deploy the contents of this folder to Vercel or another HTTPS static host. No en
 - The app caches its files for offline POS use.
 - License activation and POS data remain on the customer's device.
 
-## Private admin tool
+## Admin dashboard and private key
 
-Keep `apex-pos-license-admin.html` only on the owner's trusted phone/computer. Open it directly in a modern browser. It works offline and generates 7, 30, 90 or 365-day signed codes.
+The deployed customer project includes a public-safe `/admin.html` dashboard. It contains no private signing key. Open it, select the separate `apex-pos-private-key.json` file, then generate 7, 30, 90 or 365-day signed codes. The selected key stays in the browser tab and is not uploaded.
 
-Back up the private admin file securely. If it is lost, existing licenses continue working until expiry, but new compatible codes cannot be generated without restoring the same private key.
+Keep `apex-pos-private-key.json` only on the owner's trusted phone/computer. Never upload it to GitHub, Vercel or any website. Back it up securely. If it is lost, existing licenses continue working until expiry, but new compatible codes cannot be generated without restoring the same key.
 
 ## Data and operational limitations
 

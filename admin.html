@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0e766e">
+  <title>Apex POS License Admin</title>
+  <style>
+    :root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#172b31;background:#eef3f4}*{box-sizing:border-box}body{margin:0;padding:22px}.box{max-width:640px;margin:25px auto;background:#fff;border-radius:22px;padding:25px;box-shadow:0 12px 40px #122f3618}h1{margin:0 0 5px;color:#0e766e;font-size:25px}.notice{background:#e8f4f2;color:#075f59;padding:13px;border-radius:11px;margin:14px 0}.warning{background:#fff2d5;color:#754f00;padding:12px;border-radius:10px;margin:14px 0}label{display:block;font-size:13px;color:#496169;margin:12px 0 5px}input,select,textarea{width:100%;padding:12px;border:1px solid #d5dfe1;border-radius:10px;font-size:16px;background:#fff}textarea{font-size:12px;resize:vertical}button{width:100%;border:0;border-radius:11px;padding:13px;font-size:15px;font-weight:750;margin-top:12px;background:#0e766e;color:#fff}.secondary{background:#e8f4f2;color:#0e766e}.generator,.result{display:none;margin-top:18px;border-top:1px solid #e5ecee;padding-top:16px}.muted{font-size:12px;color:#718187}.ok{color:#0e766e;font-weight:700}
+  </style>
+</head>
+<body><main class="box">
+  <section id="adminPanel"><h1>Apex POS Admin Dashboard</h1><p class="muted">Secure manual license activation</p>
+  <div class="warning"><b>Private key required.</b> Select your private key file on every visit. The key stays in this browser tab and is never uploaded.</div>
+  <label>Private Key File</label><input id="keyFile" type="file" accept="application/json,.json">
+  <div id="keyStatus" class="notice">Waiting for the private key file.</div>
+  <section id="generator" class="generator">
+    <label>Customer / Shop Name</label><input id="customer" maxlength="100" placeholder="Customer shop name">
+    <label>Customer Device ID</label><input id="device" maxlength="80" placeholder="Paste the Device ID exactly">
+    <label>License Type</label><select id="plan"><option value="trial">Free Trial — 7 Days</option><option value="monthly">Paid Activation — 30 Days</option><option value="monthly90">Paid Activation — 90 Days</option><option value="yearly">Paid Activation — 365 Days</option></select>
+    <button id="generate">Generate Activation Code</button>
+  </section>
+  <section id="result" class="result"><label>Activation Code</label><textarea id="code" rows="8" readonly></textarea><button id="copy" class="secondary">Copy Activation Code</button><p id="summary" class="muted"></p></section></section>
+</main><script>
+'use strict';
+const PUBLIC_KEY={kty:'EC',x:'9I6JTz5Tyq2nGkWNrzbblCiNGPcp3U8kzZl7aKAVdDo',y:'WJ690r0FtDp953oioGPBK1Nb_J1k5syuFLFaL6bqrqI',crv:'P-256'};
+const $=id=>document.getElementById(id);let signingKey=null;
+const b64url=data=>{let s='';new Uint8Array(data).forEach(b=>s+=String.fromCharCode(b));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+$('keyFile').onchange=async event=>{signingKey=null;$('generator').style.display='none';$('result').style.display='none';try{const file=event.target.files[0];if(!file)throw Error('Select the private key file.');const data=JSON.parse(await file.text());const candidate=await crypto.subtle.importKey('jwk',data.private_jwk,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);const publicKey=await crypto.subtle.importKey('jwk',PUBLIC_KEY,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);const challenge=crypto.getRandomValues(new Uint8Array(32));const signature=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},candidate,challenge);if(!await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},publicKey,signature,challenge))throw Error('This key does not match Apex POS.');signingKey=candidate;$('keyStatus').innerHTML='<span class="ok">Private key verified.</span> License generator unlocked.';$('generator').style.display='block'}catch(error){$('keyStatus').textContent=error.message||'Invalid private key file.'}};
+$('generate').onclick=async()=>{if(!signingKey)return alert('Load the private key first.');const device=$('device').value.trim(),customer=$('customer').value.trim(),choice=$('plan').value;if(!device||device.length<10)return alert('Enter a valid Device ID.');if(!customer)return alert('Enter the customer or shop name.');const days=choice==='trial'?7:choice==='monthly'?30:choice==='monthly90'?90:365,plan=choice==='trial'?'trial':'monthly',now=Date.now();const payload={v:1,device,plan,customer,issued:now,expires:now+days*86400000,serial:crypto.randomUUID()};const body=b64url(new TextEncoder().encode(JSON.stringify(payload)));const signature=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},signingKey,new TextEncoder().encode(body));$('code').value=body+'.'+b64url(signature);$('summary').textContent=`${customer} • ${days} days • Expires ${new Date(payload.expires).toLocaleString()}`;$('result').style.display='block'};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('code').value);$('copy').textContent='Copied!'}catch{$('code').select();document.execCommand('copy');$('copy').textContent='Selected / Copied'}setTimeout(()=>$('copy').textContent='Copy Activation Code',1500)};
+</script></body></html>
