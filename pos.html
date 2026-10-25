@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0e766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Apex POS">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>Harsh Apex Retail POS</title>
+  <style>
+    :root {
+      --primary: #0e766e;
+      --primary-dark: #09534e;
+      --primary-light: #e8f4f2;
+      --text: #172b31;
+      --muted: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding-bottom: 84px; -webkit-tap-highlight-color: transparent; }
+    header { background: linear-gradient(135deg, #0e766e, #115e59); color: white; padding: 20px 18px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+    header small { opacity: 0.9; font-size: 13px; }
+    .wrap { max-width: 760px; margin: auto; padding: 14px; }
+    .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.03); }
+    .tabs button { border: 0; background: none; color: #64748b; font-size: 11px; font-weight: 600; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; }
+    .tabs button svg { width: 20px; height: 20px; fill: currentColor; }
+    .tabs button.active { color: var(--primary); font-weight: 800; }
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn 0.15s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    h2 { font-size: 20px; font-weight: 800; margin: 4px 0 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (min-width: 520px) { .stats-4 { grid-template-columns: repeat(4, 1fr); } }
+    .stat { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .stat span { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .stat strong { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .stat.warn strong { color: var(--warning); }
+    .stat.danger strong { color: var(--danger); }
+    label { font-size: 13px; font-weight: 600; color: #475569; display: block; margin: 10px 0 4px; }
+    input, select, textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,118,110,0.15); }
+    button { cursor: pointer; font-family: inherit; }
+    button.primary { background: var(--primary); color: white; border: 0; border-radius: 11px; padding: 12px 16px; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    button.primary:active { background: var(--primary-dark); }
+    button.secondary { background: var(--primary-light); color: var(--primary); border: 0; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    button.danger { background: var(--danger-light); color: var(--danger); border: 0; border-radius: 9px; padding: 8px 11px; font-weight: 700; font-size: 13px; }
+    button.scan-btn { background: #0f172a; color: white; border: 0; border-radius: 10px; padding: 11px 14px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .flex { display: flex; gap: 8px; align-items: center; }
+    .flex>*{ min-width: 0; }
+    .grow { flex: 1; }
+    .item { border-bottom: 1px solid #f1f5f9; padding: 12px 0; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .item:last-child { border: 0; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .right { text-align: right; }
+    .pill { font-size: 11px; font-weight: 700; background: var(--warning-light); color: #b45309; padding: 3px 8px; border-radius: 6px; display: inline-block; }
+    .pill.category { background: var(--primary-light); color: var(--primary); }
+    .pill.credit { background: #fef3c7; color: #b45309; }
+    .pill.voided { background: var(--danger-light); color: var(--danger); }
+    .pill.settled { background: var(--success-light); color: var(--success); }
+    .empty { color: var(--muted); text-align: center; padding: 24px; font-size: 14px; }
+    .total { font-size: 24px; font-weight: 800; color: var(--primary); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .actions button { flex: 1; min-width: 120px; }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { border: 1px solid var(--border); background: white; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; user-select: none; }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-group { display: flex; background: #e2e8f0; border-radius: 10px; padding: 3px; gap: 3px; overflow-x: auto; margin-bottom: 12px; }
+    .btn-group button { flex: 1; border: 0; background: transparent; padding: 8px 10px; font-size: 13px; font-weight: 700; color: #475569; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+    .btn-group button.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.65); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 14px; backdrop-filter: blur(3px); }
+    .modal-content { background: white; border-radius: 20px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); position: relative; }
+    .modal-close { position: absolute; top: 14px; right: 14px; border: 0; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .scanner-viewport { position: relative; width: 100%; height: 260px; background: #000; border-radius: 14px; overflow: hidden; margin-top: 12px; display: flex; align-items: center; justify-content: center; }
+    .scanner-viewport video { width: 100%; height: 100%; object-fit: cover; }
+    .scanner-guide { position: absolute; width: 75%; height: 50%; border: 2px solid #10b981; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); pointer-events: none; }
+    .scanner-line { position: absolute; left: 0; right: 0; height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: scanLine 2s infinite ease-in-out; }
+    @keyframes scanLine { 0%, 100% { top: 10%; } 50% { top: 90%; } }
+    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 18px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 200; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: toastPop 0.2s ease-out; }
+    @keyframes toastPop { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    #receipt { display: none; }
+    @media print {
+      body > *:not(#receipt) { display: none !important; }
+      #receipt { display: block !important; background: white; color: black; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 8px; margin: 0 auto; width: 100%; }
+      #receipt.receipt-58 { max-width: 58mm; font-size: 11px; }
+      #receipt.receipt-80 { max-width: 80mm; font-size: 12px; }
+      #receipt h2 { text-align: center; margin: 4px 0; font-size: 16px; }
+      #receipt p { margin: 3px 0; }
+      #receipt table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: inherit; }
+      #receipt table th { border-bottom: 1px dashed black; text-align: left; padding: 3px 0; }
+      #receipt table td { padding: 3px 0; vertical-align: top; }
+      #receipt td:last-child, #receipt th:last-child { text-align: right; }
+      #receipt hr { border: none; border-top: 1px dashed black; margin: 6px 0; }
+      #receipt .center { text-align: center; }
+      #receipt .right { text-align: right; }
+      #receipt .bold { font-weight: bold; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" style="width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);object-fit:cover;">
+        <div>
+          <h1 id="headerShopTitle">Harsh Apex Retail POS</h1>
+          <small id="headerShopSubtitle">Offline • Simple • Smart Retail Billing</small>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <a href="landing.html" style="background:rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:7px 10px;text-decoration:none;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;">🌐 Web</a>
+        <button id="quickScannerBtn" class="scan-btn" type="button" style="padding:8px 12px;font-size:12px">📷 Scan</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="installPanel" class="card" style="margin-bottom:14px">
+      <b>Install Apex POS on your phone</b>
+      <p class="muted" id="installHelp">Android: Chrome menu → Install app / Add to Home screen. iPhone: Safari Share → Add to Home Screen.</p>
+      <button id="installApp" class="primary" type="button" hidden>Install App</button>
+    </div>
+
+    <!-- 1. DASHBOARD -->
+    <section id="dashboard" class="panel active">
+      <h2>Dashboard</h2>
+      <div class="stats stats-4" style="margin-bottom:12px">
+        <div class="stat"><span>Today's Sales</span><strong id="todaySales">Rs. 0</strong></div>
+        <div class="stat"><span>Today's Profit</span><strong id="todayProfit">Rs. 0</strong></div>
+        <div class="stat"><span>Today's Bills</span><strong id="todayBills">0</strong></div>
+        <div class="stat warn"><span>Low Stock</span><strong id="lowCount">0</strong></div>
+      </div>
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:6px">
+          <h3>Low Stock Alerts</h3>
+          <span class="muted" id="lowStockSummary"></span>
+        </div>
+        <div id="lowList"></div>
+      </div>
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:6px">
+          <h3>Recent Sales</h3>
+          <span class="muted" style="cursor:pointer;color:var(--primary);font-weight:700" onclick="show('reports')">View All</span>
+        </div>
+        <div id="recentSales"></div>
+      </div>
+    </section>
+
+    <!-- 2. PRODUCTS & INVENTORY -->
+    <section id="products" class="panel">
+      <h2>Products & Inventory</h2>
+      <div class="card">
+        <h3 id="productHeading">Add Product</h3>
+        <form id="productForm">
+          <input type="hidden" id="editId">
+          <label>Product Name</label>
+          <input id="pName" required maxlength="100" placeholder="e.g. Anchor Milk Powder 400g">
+          
+          <label>Barcode / SKU (optional)</label>
+          <div class="flex">
+            <input id="pSku" maxlength="60" placeholder="Scan or type barcode" class="grow">
+            <button type="button" id="scanProductSkuBtn" class="scan-btn">📷 Scan</button>
+          </div>
+
+          <label>Category</label>
+          <div class="flex">
+            <select id="pCategory" class="grow">
+              <option value="General">General</option>
+              <option value="Grocery">Grocery</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Snacks">Snacks</option>
+              <option value="Bakery">Bakery</option>
+              <option value="Dairy & Frozen">Dairy & Frozen</option>
+              <option value="Household">Household</option>
+              <option value="Personal Care">Personal Care</option>
+              <option value="Other">Other</option>
+            </select>
+            <button type="button" id="btnAddNewCategory" class="secondary" style="white-space:nowrap">+ New</button>
+          </div>
+
+          <div class="flex">
+            <div class="grow">
+              <label>Selling Price (Rs.)</label>
+              <input id="pPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="grow">
+              <label>Cost Price (Rs.)</label>
+              <input id="pCost" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="flex">
+            <div class="grow">
+              <label>Stock Qty</label>
+              <input id="pStock" type="number" min="0" step="1" required placeholder="0">
+            </div>
+            <div class="grow">
+              <label>Low Stock Alert At</label>
+              <input id="pLow" type="number" min="0" step="1" value="5" required>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" type="submit">Save Product</button>
+            <button class="secondary" type="button" id="cancelEdit">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:8px">
+          <h3>Product Catalog</h3>
+          <div class="flex">
+            <button id="btnExportCsv" class="secondary" type="button" style="padding:6px 10px;font-size:12px">📥 Export CSV</button>
+            <button id="btnImportCsvTrigger" class="secondary" type="button" style="padding:6px 10px;font-size:12px">📤 Import CSV</button>
+            <input type="file" id="csvFileInput" accept=".csv,text/csv" hidden>
+          </div>
+        </div>
+
+        <div id="productCategoryFilter" class="chips"></div>
+
+        <input id="productSearch" placeholder="Search product name, barcode or category">
+        <div id="productList" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- 3. BILLING -->
+    <section id="billing" class="panel">
+      <h2>New Bill</h2>
+      
+      <div class="card">
+        <label>Find & Add Product</label>
+        <div class="flex">
+          <input id="billSearch" placeholder="Search name or barcode" class="grow">
+          <button type="button" id="scanBillBtn" class="scan-btn">📷 Scan</button>
+        </div>
+        <div id="billCategoryFilter" class="chips" style="margin-top:8px"></div>
+        <div id="billProducts" style="max-height:220px;overflow-y:auto"></div>
+      </div>
+
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3>Cart</h3>
+          <button id="clearCartBtn" class="secondary" style="padding:4px 8px;font-size:12px" type="button">Empty Cart</button>
+        </div>
+        <div id="cartList"></div>
+
+        <label>Discount (Rs.)</label>
+        <input id="discount" type="number" min="0" step="0.01" value="0">
+
+        <div class="item" style="margin-top:8px">
+          <b>Grand Total</b>
+          <span class="total" id="grandTotal">Rs. 0.00</span>
+        </div>
+
+        <label>Payment Method</label>
+        <select id="payment">
+          <option value="Cash">Cash</option>
+          <option value="Card">Card</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Credit">Credit (ණය / Customer Due)</option>
+        </select>
+
+        <div id="creditSection" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:12px;margin:10px 0">
+          <b>Customer Credit Details (ණය විස්තර)</b>
+          <label style="margin-top:6px">Customer Name *</label>
+          <input id="creditCustomer" placeholder="Enter customer name">
+          <label>Customer Phone (optional)</label>
+          <input id="creditPhone" type="tel" placeholder="07X XXXXXXX">
+        </div>
+
+        <div id="cashFields">
+          <label>Amount Received (Rs.)</label>
+          <input id="received" type="number" min="0" step="0.01" value="0">
+          <div class="item">
+            <b>Balance to Return</b>
+            <b id="balance" style="font-size:18px;color:var(--primary)">Rs. 0.00</b>
+          </div>
+        </div>
+
+        <button class="primary" id="checkout" style="width:100%;margin-top:14px;padding:14px;font-size:16px">Complete Sale</button>
+      </div>
+
+      <div id="lastReceipt" class="card" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Last Bill Actions</h3>
+          <span class="pill settled" style="font-size:10px">SUCCESS</span>
+        </div>
+        <div id="lastReceiptSummary" style="margin-bottom:12px" class="muted"></div>
+
+        <!-- WhatsApp Direct Bill Sharing -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-bottom:12px">
+          <label for="waReceiptPhone" style="margin:0 0 6px 0;font-size:12px;font-weight:700;color:#166534;display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#16a34a"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Send Bill via WhatsApp (Customer Phone):
+          </label>
+          <div style="display:flex;gap:8px">
+            <input type="tel" id="waReceiptPhone" placeholder="Enter customer phone (e.g. 0770663154)" style="flex:1;padding:9px 12px;border:1px solid #86efac;border-radius:9px;font-size:14px;background:#ffffff">
+            <button id="sendWaDirectBtn" type="button" class="primary" style="background:#16a34a;border:0;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap">
+              💬 Send Bill
+            </button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="printLast">🖨️ Print / PDF</button>
+          <button class="secondary" id="btPrintLast">📶 Thermal Bluetooth</button>
+          <button class="secondary" id="shareLast">📤 Share / Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. REPORTS & CREDIT LEDGER -->
+    <section id="reports" class="panel">
+      <h2>Sales Reports & Ledger</h2>
+
+      <div class="btn-group">
+        <button class="btn-period active" data-period="today">Today</button>
+        <button class="btn-period" data-period="yesterday">Yesterday</button>
+        <button class="btn-period" data-period="week">This Week</button>
+        <button class="btn-period" data-period="month">This Month</button>
+        <button class="btn-period" data-period="custom">Custom</button>
+      </div>
+
+      <div id="customDateWrap" class="card" style="display:none">
+        <div class="flex">
+          <div class="grow">
+            <label>Start Date</label>
+            <input type="date" id="reportFrom">
+          </div>
+          <div class="grow">
+            <label>End Date</label>
+            <input type="date" id="reportTo">
+          </div>
+        </div>
+      </div>
+
+      <div class="stats stats-4" style="margin-bottom:12px">
+        <div class="stat"><span>Sales Revenue</span><strong id="reportSales">Rs. 0</strong></div>
+        <div class="stat"><span>Gross Profit</span><strong id="reportProfit">Rs. 0</strong></div>
+        <div class="stat"><span>Completed Bills</span><strong id="reportBillsCount">0</strong></div>
+        <div class="stat warn"><span>Credit (Due)</span><strong id="reportCreditDue">Rs. 0</strong></div>
+      </div>
+
+      <!-- Customer Credit Ledger -->
+      <div class="card" id="creditLedgerCard">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3>Customer Credit Ledger (ණය පොත)</h3>
+          <span class="pill credit" id="creditCountPill">0 Due</span>
+        </div>
+        <div id="creditList"></div>
+      </div>
+
+      <!-- Top Selling Items -->
+      <div class="card">
+        <h3>Top Selling Products</h3>
+        <div id="topItemsList"></div>
+      </div>
+
+      <!-- Sales Bills History -->
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3>Bills History</h3>
+          <button id="btnExportReportCsv" class="secondary" style="padding:4px 8px;font-size:12px">📥 Export Report</button>
+        </div>
+        <div id="reportList"></div>
+      </div>
+    </section>
+
+    <!-- 5. SETTINGS, STORE DETAILS & AUTO BACKUP -->
+    <section id="settings" class="panel">
+      <h2>Store Details & Backups</h2>
+
+      <!-- Store Details Changing -->
+      <div class="card">
+        <h3>Store Profile & Receipt Customization</h3>
+        <label>Store / Shop Name</label>
+        <input id="shopName" placeholder="e.g. Apex Super Mart">
+
+        <label>Phone Number(s)</label>
+        <input id="shopPhone" placeholder="e.g. 077 1234567 / 011 2345678">
+
+        <label>Store Address</label>
+        <input id="shopAddress" placeholder="e.g. No. 45, Main Street, Colombo">
+
+        <label>Business Reg. / Tax / VAT No (Optional)</label>
+        <input id="shopReg" placeholder="e.g. PV-123456 / VAT-7890">
+
+        <div class="flex">
+          <div class="grow">
+            <label>Currency Symbol</label>
+            <input id="shopCurrency" value="Rs." placeholder="Rs.">
+          </div>
+          <div class="grow">
+            <label>Thermal Receipt Width</label>
+            <select id="receiptWidth">
+              <option value="58mm">58mm (Small Thermal)</option>
+              <option value="80mm">80mm (Standard POS)</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Receipt Footer Message</label>
+        <textarea id="shopFooter" rows="2" placeholder="e.g. Thank you for shopping with us! Returns accepted within 3 days with receipt."></textarea>
+
+        <button class="primary" id="saveShop" style="margin-top:12px;width:100%">Save Store Details</button>
+      </div>
+
+      <!-- Automated Local Snapshots & Backup -->
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;align-items:center">
+          <h3>Auto Backup & Snapshots</h3>
+          <span class="pill settled">Active</span>
+        </div>
+        <p class="muted">Your POS saves automatic local snapshots after transactions. You can restore an earlier snapshot anytime if needed.</p>
+        
+        <label>Restore from Recent Auto Snapshot</label>
+        <div class="flex">
+          <select id="snapshotSelect" class="grow">
+            <option value="">No snapshots saved yet</option>
+          </select>
+          <button id="btnRestoreSnapshot" class="secondary" type="button">Restore</button>
+        </div>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:16px 0">
+
+        <h3>Manual Backup File</h3>
+        <p class="muted">Download a full JSON backup file to keep safe on Google Drive, USB drive, or phone storage.</p>
+        <div class="actions">
+          <button class="secondary" id="exportBackup">Download Backup (JSON)</button>
+          <button class="secondary" id="importButton">Import Backup (JSON)</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card">
+        <h3>About System</h3>
+        <p style="font-weight:700;margin:4px 0">Harsh Apex Retail POS • Version 2.0 (Pro)</p>
+        <p class="muted">100% Offline PWA • Device Encrypted License • Local Browser Storage</p>
+        <a href="admin.html" target="_blank" style="display:inline-block;margin-top:6px;color:var(--primary);font-weight:700;font-size:13px;text-decoration:none">→ Open Admin Activation Dashboard</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="tabs">
+    <button class="active" data-tab="dashboard">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </button>
+    <button data-tab="products">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+      Products
+    </button>
+    <button data-tab="billing">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+      Billing
+    </button>
+    <button data-tab="reports">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      Reports
+    </button>
+    <button data-tab="settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <!-- CAMERA BARCODE SCANNER MODAL -->
+  <div id="scannerModal" class="modal-overlay" style="display:none">
+    <div class="modal-content">
+      <button id="closeScannerBtn" class="modal-close" type="button">×</button>
+      <h3 style="margin-top:0">Scan Barcode / QR Code</h3>
+      <p class="muted" style="margin:4px 0 10px">Point your phone camera at the barcode</p>
+      
+      <div class="scanner-viewport">
+        <video id="scannerVideo" playsinline autoplay muted></video>
+        <div class="scanner-guide">
+          <div class="scanner-line"></div>
+        </div>
+      </div>
+
+      <div class="flex" style="margin-top:12px;justify-content:space-between">
+        <button id="switchCameraBtn" class="secondary" type="button">🔄 Switch Camera</button>
+        <label style="margin:0;cursor:pointer" class="secondary" as="button">
+          📁 Image / Photo
+          <input type="file" id="scannerImageFile" accept="image/*" capture="environment" hidden>
+        </label>
+      </div>
+      <p id="scannerStatus" class="muted" style="text-align:center;margin-top:10px">Initializing camera...</p>
+    </div>
+  </div>
+
+  <!-- BILL DETAILS & VOID MODAL -->
+  <div id="billModal" class="modal-overlay" style="display:none">
+    <div class="modal-content">
+      <button id="closeBillModalBtn" class="modal-close" type="button">×</button>
+      <h3 id="billModalTitle" style="margin-top:0">Bill Details</h3>
+      <div id="billModalContent"></div>
+      
+      <!-- WhatsApp Direct Bill Sharing in Modal -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-top:14px">
+        <label for="modalWaReceiptPhone" style="margin:0 0 6px 0;font-size:12px;font-weight:700;color:#166534;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#16a34a"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send Bill via WhatsApp (Customer Phone):
+        </label>
+        <div style="display:flex;gap:8px">
+          <input type="tel" id="modalWaReceiptPhone" placeholder="Enter customer phone (e.g. 0770663154)" style="flex:1;padding:9px 12px;border:1px solid #86efac;border-radius:9px;font-size:14px;background:#ffffff">
+          <button id="modalSendWaDirectBtn" type="button" class="primary" style="background:#16a34a;border:0;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap">
+            💬 Send Bill
+          </button>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:14px">
+        <button id="billModalPrint" class="primary">🖨️ Print</button>
+        <button id="billModalShare" class="secondary">📤 Share / Copy</button>
+        <button id="billModalVoid" class="danger">⚠️ Void / Return</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT CONTAINER (PRINT ONLY) -->
+  <div id="receipt" class="receipt-58"></div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="app.js"></script>
+  <script src="install.js"></script>
+</body>
+</html>

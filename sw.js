@@ -1,5 +1,5 @@
-const CACHE='apex-pos-v6-enhanced';
-const ASSETS=['./','./index.html','./app.js','./manifest.webmanifest','./icon.png','./icon-192.png','./icon-512.png','./install.js','./admin.html','./admin.js'];
+const CACHE='apex-pos-v8-enhanced';
+const ASSETS=['./','./index.html','./landing.html','./landing.css','./landing.js','./app.html','./harsh-apex-logo.png','./app.js','./manifest.webmanifest','./icon.png','./icon-192.png','./icon-512.png','./install.js','./admin.html','./admin.js'];
 const allowed=new Set(ASSETS.map(path=>new URL(path,self.location.href).href));
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('apex-pos-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

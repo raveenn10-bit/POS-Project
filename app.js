@@ -881,6 +881,9 @@ $('checkout').onclick = () => {
 
   $('lastReceipt').hidden = false;
   $('lastReceiptSummary').innerHTML = `Sale <b>${sale.number}</b> · Total: <b>${money(sale.total)}</b> · Method: <b>${esc(sale.method)}</b>`;
+  if ($('waReceiptPhone')) {
+    $('waReceiptPhone').value = sale.creditPhone || '';
+  }
 
   playBeep('success');
   render();
@@ -1009,24 +1012,80 @@ async function printBluetoothThermal(s) {
   }
 }
 
-$('shareLast').onclick = async () => {
-  if (!lastSale) return;
-  const s = lastSale;
-  const lines = [
+function formatBillWhatsAppText(s) {
+  if (!s) return '';
+  return [
     `*${db.shop.name}*`,
     db.shop.address,
     `Tel: ${db.shop.phone}`,
     `--------------------------------`,
-    `Bill: ${s.number} (${new Date(s.at).toLocaleString()})`,
+    `Receipt: ${s.number} (${new Date(s.at).toLocaleString()})`,
     `Payment: ${s.method}`,
     s.isCredit ? `Customer: ${s.creditCustomer} (CREDIT)` : '',
     `--------------------------------`,
     ...s.items.map(x => `${x.name} x${x.qty} = ${money(x.qty * x.price)}`),
     `--------------------------------`,
-    `*Total: ${money(s.total)}*`,
+    `*Total Amount: ${money(s.total)}*`,
     `Paid: ${money(s.received)} | Change: ${money(s.change)}`,
-    db.shop.receiptFooter
+    db.shop.receiptFooter || 'Thank you for shopping with us!'
   ].filter(Boolean).join('\n');
+}
+
+function cleanSriLankaWhatsAppPhone(raw) {
+  if (!raw) return '';
+  let clean = raw.toString().replace(/[^0-9]/g, '');
+  if (clean.startsWith('0')) {
+    clean = '94' + clean.slice(1);
+  } else if (!clean.startsWith('94') && clean.length === 9) {
+    clean = '94' + clean;
+  }
+  return clean;
+}
+
+function sendBillToWhatsAppPhone(sale, rawPhone) {
+  if (!sale) return;
+  const billText = formatBillWhatsAppText(sale);
+  const cleanPhone = cleanSriLankaWhatsAppPhone(rawPhone);
+  
+  if (cleanPhone) {
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(billText)}`;
+    window.open(url, '_blank');
+    toast(`Opening WhatsApp for 0${cleanPhone.slice(2)}...`);
+  } else {
+    const url = `https://wa.me/?text=${encodeURIComponent(billText)}`;
+    window.open(url, '_blank');
+    toast('Opening WhatsApp contact chooser...');
+  }
+}
+
+if ($('sendWaDirectBtn')) {
+  $('sendWaDirectBtn').onclick = () => {
+    if (!lastSale) return;
+    const phoneInput = $('waReceiptPhone');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    sendBillToWhatsAppPhone(lastSale, phone);
+  };
+}
+
+if ($('modalSendWaDirectBtn')) {
+  $('modalSendWaDirectBtn').onclick = () => {
+    if (!selectedModalSale) return;
+    const phoneInput = $('modalWaReceiptPhone');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    sendBillToWhatsAppPhone(selectedModalSale, phone);
+  };
+}
+
+$('shareLast').onclick = async () => {
+  if (!lastSale) return;
+  const s = lastSale;
+  const phone = $('waReceiptPhone') ? $('waReceiptPhone').value.trim() : '';
+  const lines = formatBillWhatsAppText(s);
+
+  if (phone) {
+    sendBillToWhatsAppPhone(s, phone);
+    return;
+  }
 
   try {
     if (navigator.share) {
@@ -1036,7 +1095,9 @@ $('shareLast').onclick = async () => {
       toast('Receipt text copied to clipboard!');
     }
   } catch (e) {
-    if (e.name !== 'AbortError') alert('Sharing unavailable.');
+    if (e.name !== 'AbortError') {
+      sendBillToWhatsAppPhone(s, '');
+    }
   }
 };
 
@@ -1263,6 +1324,9 @@ function openBillModal(sale) {
   `;
 
   $('billModalContent').innerHTML = html;
+  if ($('modalWaReceiptPhone')) {
+    $('modalWaReceiptPhone').value = sale.creditPhone || '';
+  }
   $('billModalVoid').disabled = isVoided;
   $('billModalVoid').style.opacity = isVoided ? '0.5' : '1';
   modal.style.display = 'flex';
@@ -1281,7 +1345,12 @@ $('billModalPrint').onclick = () => {
 $('billModalShare').onclick = async () => {
   if (!selectedModalSale) return;
   lastSale = selectedModalSale;
-  $('shareLast').click();
+  const phone = $('modalWaReceiptPhone') ? $('modalWaReceiptPhone').value.trim() : '';
+  if (phone) {
+    sendBillToWhatsAppPhone(selectedModalSale, phone);
+  } else {
+    $('shareLast').click();
+  }
 };
 
 $('billModalVoid').onclick = () => {

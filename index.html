@@ -1,509 +1,955 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="si">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0e766e">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080e1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Apex POS">
+  <meta name="apple-mobile-web-app-title" content="Harsh Apex POS">
+  <meta name="description" content="Harsh Apex Retail POS — Next-Gen 100% Offline Retail Point of Sale software for Sri Lankan grocery stores, supermarkets, and pharmacies.">
+  
+  <title>Harsh Apex Retail POS — Sri Lanka's #1 Offline Retail POS</title>
+  
+  <link rel="icon" type="image/png" href="harsh-apex-logo.png">
+  <link rel="apple-touch-icon" href="harsh-apex-logo.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
-  <title>Harsh Apex Retail POS</title>
-  <style>
-    :root {
-      --primary: #0e766e;
-      --primary-dark: #09534e;
-      --primary-light: #e8f4f2;
-      --text: #172b31;
-      --muted: #64748b;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --danger: #ef4444;
-      --danger-light: #fee2e2;
-      --warning: #f59e0b;
-      --warning-light: #fef3c7;
-      --success: #10b981;
-      --success-light: #d1fae5;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding-bottom: 84px; -webkit-tap-highlight-color: transparent; }
-    header { background: linear-gradient(135deg, #0e766e, #115e59); color: white; padding: 20px 18px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
-    header small { opacity: 0.9; font-size: 13px; }
-    .wrap { max-width: 760px; margin: auto; padding: 14px; }
-    .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.03); }
-    .tabs button { border: 0; background: none; color: #64748b; font-size: 11px; font-weight: 600; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; }
-    .tabs button svg { width: 20px; height: 20px; fill: currentColor; }
-    .tabs button.active { color: var(--primary); font-weight: 800; }
-    .panel { display: none; }
-    .panel.active { display: block; animation: fadeIn 0.15s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    h2 { font-size: 20px; font-weight: 800; margin: 4px 0 14px; letter-spacing: -0.3px; }
-    h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
-    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    @media (min-width: 520px) { .stats-4 { grid-template-columns: repeat(4, 1fr); } }
-    .stat { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
-    .stat span { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-    .stat strong { font-size: 20px; font-weight: 800; color: var(--primary); }
-    .stat.warn strong { color: var(--warning); }
-    .stat.danger strong { color: var(--danger); }
-    label { font-size: 13px; font-weight: 600; color: #475569; display: block; margin: 10px 0 4px; }
-    input, select, textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit; }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,118,110,0.15); }
-    button { cursor: pointer; font-family: inherit; }
-    button.primary { background: var(--primary); color: white; border: 0; border-radius: 11px; padding: 12px 16px; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    button.primary:active { background: var(--primary-dark); }
-    button.secondary { background: var(--primary-light); color: var(--primary); border: 0; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    button.danger { background: var(--danger-light); color: var(--danger); border: 0; border-radius: 9px; padding: 8px 11px; font-weight: 700; font-size: 13px; }
-    button.scan-btn { background: #0f172a; color: white; border: 0; border-radius: 10px; padding: 11px 14px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .flex { display: flex; gap: 8px; align-items: center; }
-    .flex>*{ min-width: 0; }
-    .grow { flex: 1; }
-    .item { border-bottom: 1px solid #f1f5f9; padding: 12px 0; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
-    .item:last-child { border: 0; }
-    .muted { color: var(--muted); font-size: 12px; }
-    .right { text-align: right; }
-    .pill { font-size: 11px; font-weight: 700; background: var(--warning-light); color: #b45309; padding: 3px 8px; border-radius: 6px; display: inline-block; }
-    .pill.category { background: var(--primary-light); color: var(--primary); }
-    .pill.credit { background: #fef3c7; color: #b45309; }
-    .pill.voided { background: var(--danger-light); color: var(--danger); }
-    .pill.settled { background: var(--success-light); color: var(--success); }
-    .empty { color: var(--muted); text-align: center; padding: 24px; font-size: 14px; }
-    .total { font-size: 24px; font-weight: 800; color: var(--primary); }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-    .actions button { flex: 1; min-width: 120px; }
-    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .chips::-webkit-scrollbar { display: none; }
-    .chip { border: 1px solid var(--border); background: white; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; user-select: none; }
-    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .btn-group { display: flex; background: #e2e8f0; border-radius: 10px; padding: 3px; gap: 3px; overflow-x: auto; margin-bottom: 12px; }
-    .btn-group button { flex: 1; border: 0; background: transparent; padding: 8px 10px; font-size: 13px; font-weight: 700; color: #475569; border-radius: 8px; cursor: pointer; white-space: nowrap; }
-    .btn-group button.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.65); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 14px; backdrop-filter: blur(3px); }
-    .modal-content { background: white; border-radius: 20px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); position: relative; }
-    .modal-close { position: absolute; top: 14px; right: 14px; border: 0; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .scanner-viewport { position: relative; width: 100%; height: 260px; background: #000; border-radius: 14px; overflow: hidden; margin-top: 12px; display: flex; align-items: center; justify-content: center; }
-    .scanner-viewport video { width: 100%; height: 100%; object-fit: cover; }
-    .scanner-guide { position: absolute; width: 75%; height: 50%; border: 2px solid #10b981; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); pointer-events: none; }
-    .scanner-line { position: absolute; left: 0; right: 0; height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: scanLine 2s infinite ease-in-out; }
-    @keyframes scanLine { 0%, 100% { top: 10%; } 50% { top: 90%; } }
-    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 18px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 200; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: toastPop 0.2s ease-out; }
-    @keyframes toastPop { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-    #receipt { display: none; }
-    @media print {
-      body > *:not(#receipt) { display: none !important; }
-      #receipt { display: block !important; background: white; color: black; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 8px; margin: 0 auto; width: 100%; }
-      #receipt.receipt-58 { max-width: 58mm; font-size: 11px; }
-      #receipt.receipt-80 { max-width: 80mm; font-size: 12px; }
-      #receipt h2 { text-align: center; margin: 4px 0; font-size: 16px; }
-      #receipt p { margin: 3px 0; }
-      #receipt table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: inherit; }
-      #receipt table th { border-bottom: 1px dashed black; text-align: left; padding: 3px 0; }
-      #receipt table td { padding: 3px 0; vertical-align: top; }
-      #receipt td:last-child, #receipt th:last-child { text-align: right; }
-      #receipt hr { border: none; border-top: 1px dashed black; margin: 6px 0; }
-      #receipt .center { text-align: center; }
-      #receipt .right { text-align: right; }
-      #receipt .bold { font-weight: bold; }
-    }
-  </style>
+  
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
-  <header>
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <h1 id="headerShopTitle">Harsh Apex Retail POS</h1>
-        <small id="headerShopSubtitle">Offline • Simple • Smart Retail Billing</small>
+
+  <!-- Ambient Dynamic Mesh Glow Background -->
+  <div class="bg-ambient"></div>
+
+  <!-- ==========================================================================
+       Sticky Glassmorphic Navigation Bar
+       ========================================================================== -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <a href="#hero" class="brand-wrapper">
+        <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">HARSH APEX</span>
+          <span class="brand-sub">Retail POS</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#features" class="nav-link" data-i18n="nav_features">විශේෂාංග</a></li>
+          <li><a href="#install" class="nav-link" data-i18n="nav_install">ස්ථාපනය කරන අයුරු</a></li>
+          <li><a href="#screens" class="nav-link" data-i18n="nav_screens">තිර දර්ශන</a></li>
+          <li><a href="#pricing" class="nav-link" data-i18n="nav_pricing">මිල ගණන්</a></li>
+          <li><a href="#faq" class="nav-link" data-i18n="nav_faq">ප්‍රශ්නෝත්තර</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions (Language Switcher + Launch Button) -->
+      <div class="nav-actions">
+        <!-- Bilingual Switcher Toggle -->
+        <div class="lang-switch" id="langSwitch" data-lang="si">
+          <span class="lang-slider"></span>
+          <button type="button" class="lang-btn active" data-lang="si">සිංහල</button>
+          <button type="button" class="lang-btn" data-lang="en">English</button>
+        </div>
+
+        <!-- Primary POS Launch Button -->
+        <a href="app.html" class="btn btn-primary pos-launch-btn">
+          <span data-i18n="nav_launch">POS විවෘත කරන්න</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5v2z"/>
+          </svg>
+        </a>
+
+        <!-- Mobile Menu Hamburger Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">
+          <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
       </div>
-      <button id="quickScannerBtn" class="scan-btn" type="button" style="padding:8px 12px;font-size:12px">📷 Scan</button>
     </div>
   </header>
 
-  <main class="wrap">
-    <div id="installPanel" class="card" style="margin-bottom:14px">
-      <b>Install Apex POS on your phone</b>
-      <p class="muted" id="installHelp">Android: Chrome menu → Install app / Add to Home screen. iPhone: Safari Share → Add to Home Screen.</p>
-      <button id="installApp" class="primary" type="button" hidden>Install App</button>
-    </div>
+  <main>
+    <!-- ==========================================================================
+         Hero Section
+         ========================================================================== -->
+    <section class="hero" id="hero">
+      <div class="container hero-grid">
+        <!-- Hero Left Column (Copy & Call to Actions) -->
+        <div class="hero-content reveal-up">
+          <div class="pill-badge">
+            <span class="pulse-dot"></span>
+            <span data-i18n="hero_badge">✨ ශ්‍රී ලාංකික සිල්ලර වෙළඳසැල් සඳහාම නිර්මාණය වූ Offline Retail POS</span>
+          </div>
 
-    <!-- 1. DASHBOARD -->
-    <section id="dashboard" class="panel active">
-      <h2>Dashboard</h2>
-      <div class="stats stats-4" style="margin-bottom:12px">
-        <div class="stat"><span>Today's Sales</span><strong id="todaySales">Rs. 0</strong></div>
-        <div class="stat"><span>Today's Profit</span><strong id="todayProfit">Rs. 0</strong></div>
-        <div class="stat"><span>Today's Bills</span><strong id="todayBills">0</strong></div>
-        <div class="stat warn"><span>Low Stock</span><strong id="lowCount">0</strong></div>
-      </div>
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:6px">
-          <h3>Low Stock Alerts</h3>
-          <span class="muted" id="lowStockSummary"></span>
+          <h1 class="hero-title">
+            <span data-i18n="hero_title_1">අන්තර්ජාලය නැතත්</span> <br>
+            <span class="gradient-text" data-i18n="hero_title_2">තත්පරයෙන් බිල්පත් සහ තොග කළමනාකරණය</span>
+          </h1>
+
+          <p class="hero-desc" data-i18n="hero_desc">
+            ශ්‍රී ලංකාවේ සිල්ලර වෙළඳසැල්, සුපිරි වෙළඳසැල් සහ ෆාමසි සඳහාම නිපදවූ 100% Offline POS පද්ධතිය. කිසිදු Cloud ප්‍රමාදයක් නැති, දුරකථන කැමරාවෙන් Barcode ස්කෑන් කළ හැකි, 58mm/80mm Thermal Printer සහාය ඇති නවීනතම මෘදුකාංගය.
+          </p>
+
+          <div class="hero-ctas">
+            <a href="app.html" class="btn btn-primary btn-lg pos-launch-btn">
+              <span data-i18n="hero_cta_primary">POS එක විවෘත කරන්න</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5v2z"/>
+              </svg>
+            </a>
+
+            <a href="#install" class="btn btn-secondary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+              </svg>
+              <span data-i18n="hero_cta_secondary">ස්ථාපනය කරන අයුරු (Android / iPhone)</span>
+            </a>
+          </div>
+
+          <div class="hero-trust-bar">
+            <div class="trust-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span data-i18n="trust_offline">100% Offline වැඩ</span>
+            </div>
+            <div class="trust-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span data-i18n="trust_lag">0ms Cloud ප්‍රමාදය</span>
+            </div>
+            <div class="trust-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span data-i18n="trust_trial">දින 7ක නොමිලේ පරිශීලනය</span>
+            </div>
+            <div class="trust-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span data-i18n="trust_printer">Bluetooth Thermal මුද්‍රණය</span>
+            </div>
+          </div>
         </div>
-        <div id="lowList"></div>
-      </div>
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:6px">
-          <h3>Recent Sales</h3>
-          <span class="muted" style="cursor:pointer;color:var(--primary);font-weight:700" onclick="show('reports')">View All</span>
+
+        <!-- Hero Right Column (Floating 3D Phone Mockup) -->
+        <div class="hero-visual reveal-scale">
+          <div class="phone-mockup-wrapper">
+            <!-- Floating Glass Badges -->
+            <div class="floating-badge fb-1">
+              <div class="fb-icon green">⚡</div>
+              <div>
+                <div data-i18n="mockup_badge_offline">100% Offline ක්‍රියාකාරීයි</div>
+                <small style="color:var(--emerald-mint)">Zero Cloud Lag</small>
+              </div>
+            </div>
+
+            <div class="floating-badge fb-2">
+              <div class="fb-icon blue">🖨️</div>
+              <div>
+                <div data-i18n="mockup_badge_printer">Thermal Print: 58mm Ready</div>
+                <small style="color:#38bdf8">Bluetooth & USB</small>
+              </div>
+            </div>
+
+            <div class="floating-badge fb-3">
+              <div class="fb-icon gold">📷</div>
+              <div>
+                <div>Barcode Scanner</div>
+                <small style="color:#fbbf24">Camera Active</small>
+              </div>
+            </div>
+
+            <!-- Realistic Smartphone Frame -->
+            <div class="phone-frame">
+              <!-- Dynamic Island Notch -->
+              <div class="phone-island">
+                <span class="island-camera"></span>
+                <span class="island-sensor"></span>
+              </div>
+
+              <!-- Phone Screen UI Mockup -->
+              <div class="phone-screen">
+                <div class="phone-status-bar">
+                  <span>09:41</span>
+                  <div style="display:flex;gap:4px;align-items:center;">
+                    <span>📶</span>
+                    <span>🔋 100%</span>
+                  </div>
+                </div>
+
+                <!-- Apex App Header -->
+                <div class="phone-app-header">
+                  <div class="phone-app-brand">
+                    <img src="harsh-apex-logo.png" alt="Harsh Apex" class="phone-app-logo">
+                    <span class="phone-app-title">Harsh Apex POS</span>
+                  </div>
+                  <span style="font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;font-weight:700;">OFFLINE</span>
+                </div>
+
+                <!-- Phone App Body -->
+                <div class="phone-app-body">
+                  <div class="mockup-search-bar">
+                    <span>🔍</span>
+                    <span>Search or scan barcode...</span>
+                  </div>
+
+                  <div class="mockup-cat-chips">
+                    <span class="mockup-chip active">All Items</span>
+                    <span class="mockup-chip">Biscuits</span>
+                    <span class="mockup-chip">Dairy</span>
+                    <span class="mockup-chip">Spices</span>
+                  </div>
+
+                  <div class="mockup-product-list">
+                    <div class="mockup-item">
+                      <div class="mockup-item-left">
+                        <span class="mockup-item-name">Munchee Super Cream</span>
+                        <span class="mockup-item-code">4792022001124 • Stock: 48</span>
+                      </div>
+                      <span class="mockup-item-price">Rs. 140</span>
+                    </div>
+
+                    <div class="mockup-item">
+                      <div class="mockup-item-left">
+                        <span class="mockup-item-name">Anchor Milk Powder 400g</span>
+                        <span class="mockup-item-code">9414589002145 • Stock: 14</span>
+                      </div>
+                      <span class="mockup-item-price">Rs. 1,120</span>
+                    </div>
+
+                    <div class="mockup-item">
+                      <div class="mockup-item-left">
+                        <span class="mockup-item-name">Keells White Bread 450g</span>
+                        <span class="mockup-item-code">4791011003421 • Fresh</span>
+                      </div>
+                      <span class="mockup-item-price">Rs. 160</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cart Bottom Drawer -->
+                <div class="mockup-cart-drawer">
+                  <div class="mockup-cart-row">
+                    <span data-i18n="mockup_cart_title">වත්මන් බිල්පත (භාණ්ඩ 3)</span>
+                    <span style="color:var(--emerald-mint);font-size:14px;font-weight:900;">Rs. 1,420</span>
+                  </div>
+                  <button class="mockup-pay-btn" type="button">
+                    <span data-i18n="mockup_cart_btn">🖨️ බිල මුද්‍රණය (Rs. 1,420)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="recentSales"></div>
       </div>
     </section>
 
-    <!-- 2. PRODUCTS & INVENTORY -->
-    <section id="products" class="panel">
-      <h2>Products & Inventory</h2>
-      <div class="card">
-        <h3 id="productHeading">Add Product</h3>
-        <form id="productForm">
-          <input type="hidden" id="editId">
-          <label>Product Name</label>
-          <input id="pName" required maxlength="100" placeholder="e.g. Anchor Milk Powder 400g">
+    <!-- ==========================================================================
+         Trust & Key Stats Bar Section
+         ========================================================================== -->
+    <section class="stats-section">
+      <div class="container">
+        <div class="stats-card reveal-up">
+          <div class="stat-box">
+            <div class="stat-number" data-i18n="stat_1_num">100%</div>
+            <div class="stat-label" data-i18n="stat_1_label">Offline ක්‍රියාකාරීත්වය</div>
+            <div class="stat-sub" data-i18n="stat_1_sub">Internet හෝ WiFi අවශ්‍ය නැත</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number" data-i18n="stat_2_num">0ms</div>
+            <div class="stat-label" data-i18n="stat_2_label">ප්‍රතිචාර වේගය</div>
+            <div class="stat-sub" data-i18n="stat_2_sub">Zero cloud latency හෝ lag</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number" data-i18n="stat_3_num">දින 7ක්</div>
+            <div class="stat-label" data-i18n="stat_3_label">නොමිලේ අත්හදා බැලීම</div>
+            <div class="stat-sub" data-i18n="stat_3_sub">සියලුම පහසුකම් සහිතව</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number" data-i18n="stat_4_num">58 & 80</div>
+            <div class="stat-label" data-i18n="stat_4_label">Thermal මුද්‍රණය (mm)</div>
+            <div class="stat-sub" data-i18n="stat_4_sub">Bluetooth & USB Printer සහාය</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number" data-i18n="stat_5_num">24/7</div>
+            <div class="stat-label" data-i18n="stat_5_label">WhatsApp සහය</div>
+            <div class="stat-sub" data-i18n="stat_5_sub">ක්ෂණික සක්‍රිය කිරීම්</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         Interactive Bento Feature Grid
+         ========================================================================== -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div class="section-tag" data-i18n="features_tag">ප්‍රමුඛ පෙළේ විශේෂාංග</div>
+          <h2 class="section-title" data-i18n="features_title">ඔබේ සිල්ලර ව්‍යාපාරය දියුණු කරන නවීන මෙවලම්</h2>
+          <p class="section-desc" data-i18n="features_desc">සාම්ප්‍රදායික මිල අධික POS මැෂින් වෙනුවට ඔබේ ස්මාර්ට් දුරකථනයෙන්ම හෝ පරිගණකයෙන්ම සියල්ල පාලනය කරන්න.</p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Bento 1: 100% Offline Billing (Wide Col 8) -->
+          <div class="bento-card bento-col-8 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_1_title">100% Offline බිල්පත් නිකුත් කිරීම</h3>
+              <p class="bento-desc" data-i18n="bento_1_desc">අන්තර්ජාලය හෝ විදුලිය විසන්ධි වුවත් ඔබේ කඩයේ විකුණුම් නතර නොවේ. සියලුම බිල්පත් සහ ගනුදෙනු දත්ත ඔබේ දුරකථනය තුළම අකුරටම සුරක්ෂිත වේ.</p>
+            </div>
+            
+            <div class="bento-graphic offline-graphic">
+              <div class="offline-badge-live">
+                <span class="pulse-dot"></span>
+                <span>LOCAL DATABASE ACTIVE</span>
+              </div>
+              <span style="font-size:12px;color:var(--text-muted);font-family:monospace;">IndexedDB • Zero Network Required</span>
+            </div>
+          </div>
+
+          <!-- Bento 2: Camera Barcode Scanner (Col 4) -->
+          <div class="bento-card bento-col-4 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm9.5-6.5v3h-3v-3h3M19 5h-6v6h6V5zm-6 8h1.5v1.5H13V13zm1.5 1.5H16V16h-1.5v-1.5zM16 13h1.5v1.5H16V13zm-3 3h1.5v1.5H13V16zm1.5 1.5H16V19h-1.5v-1.5zM16 16h1.5v1.5H16V16zm1.5-1.5H19V16h-1.5v-1.5zm0 3H19V19h-1.5v-1.5zM17.5 13H19v1.5h-1.5V13z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_2_title">කැමරාවෙන්ම Barcode ස්කෑනරය</h3>
+              <p class="bento-desc" data-i18n="bento_2_desc">මිල අධික Barcode Scanner මැෂින් මිලදී ගැනීමට අවශ්‍ය නැත. දුරකථනයේ කැමරාවෙන්ම ක්ෂණිකව Barcode ස්කෑන් කර බඩු බිල් කරන්න.</p>
+            </div>
+
+            <div class="bento-graphic barcode-visual">
+              <div class="laser-beam"></div>
+              <div class="barcode-lines">
+                <div class="b-bar" style="width:4px;"></div>
+                <div class="b-bar" style="width:2px;"></div>
+                <div class="b-bar" style="width:6px;"></div>
+                <div class="b-bar" style="width:3px;"></div>
+                <div class="b-bar" style="width:5px;"></div>
+                <div class="b-bar" style="width:2px;"></div>
+                <div class="b-bar" style="width:4px;"></div>
+                <div class="b-bar" style="width:7px;"></div>
+                <div class="b-bar" style="width:3px;"></div>
+                <div class="b-bar" style="width:5px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bento 3: Inventory & Stock Control (Col 4) -->
+          <div class="bento-card bento-col-4 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_3_title">ස්මාර්ට් තොග (Stock) කළමනාකරණය</h3>
+              <p class="bento-desc" data-i18n="bento_3_desc">බඩු විකිණෙන විට තොග ප්‍රමාණය ස්වයංක්‍රීයව අඩුවේ. බඩු අවසන් වීමට පෙර Low Stock Alerts මගින් ඔබට කල්තියා මතක් කර දෙයි.</p>
+            </div>
+
+            <div class="bento-graphic" style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;"><span>Anchor Milk Powder</span><strong style="color:var(--gold-accent)">⚠️ 3 pcs left</strong></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+                <div style="width:18%;height:100%;background:var(--gold-accent);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bento 4: Daily Profit & Sales Analytics (Wide Col 8) -->
+          <div class="bento-card bento-col-8 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_4_title">දවසේ ආදායම සහ ශුද්ධ ලාභ (Profit) වාර්තා</h3>
+              <p class="bento-desc" data-i18n="bento_4_desc">අද දවසේ මුළු විකුණුම්, අත්පිට ලාභය, නිකුත් කළ බිල්පත් ගණන සහ වැඩිපුරම අලෙවි වූ භාණ්ඩ පිළිබඳ නිවැරදි ගණනය කිරීම් ක්ෂණිකව ලබාගන්න.</p>
+            </div>
+
+            <div class="bento-graphic chart-visual">
+              <div class="chart-header">
+                <span style="color:var(--text-muted)">Weekly Revenue Growth</span>
+                <span style="color:var(--emerald-mint);font-weight:900;">+34% Net Profit</span>
+              </div>
+              <div class="chart-bars">
+                <div class="chart-col" style="height:45%;"></div>
+                <div class="chart-col" style="height:60%;"></div>
+                <div class="chart-col" style="height:50%;"></div>
+                <div class="chart-col" style="height:80%;"></div>
+                <div class="chart-col" style="height:68%;"></div>
+                <div class="chart-col" style="height:92%;"></div>
+                <div class="chart-col" style="height:100%;background:linear-gradient(180deg,#38bdf8,#0284c7);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bento 5: Customer Credit Ledger / ණය පොත (Col 4) -->
+          <div class="bento-card bento-col-4 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_5_title">පාරිභෝගික ණය පොත (Credit Ledger)</h3>
+              <p class="bento-desc" data-i18n="bento_5_desc">ණයට බඩු ගන්නා ගනුදෙනුකරුවන්ගේ ණය මුදල්, ආපසු ගෙවීම් සහ හිඟ මුදල් නිවැරදිව සටහන් කරගන්න. ණය පියවීම් ලෙජරය 100% ක්ෂණිකයි.</p>
+            </div>
+
+            <div class="bento-graphic" style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);">Active Credit Balance</div>
+                <div style="font-size:16px;font-weight:900;color:var(--gold-accent);">Rs. 18,450.00</div>
+              </div>
+              <span style="font-size:10px;background:rgba(245,158,11,0.2);color:var(--gold-accent);padding:4px 8px;border-radius:6px;font-weight:700;">8 CUSTOMERS</span>
+            </div>
+          </div>
+
+          <!-- Bento 6: Thermal Receipt Printing (Col 4) -->
+          <div class="bento-card bento-col-4 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_6_title">58mm & 80mm Thermal Receipt මුද්‍රණය</h3>
+              <p class="bento-desc" data-i18n="bento_6_desc">වෙළඳපොලේ ඇති ඕනෑම Mini Bluetooth හෝ USB 58mm/80mm Thermal Printer එකකින් ඔබේ කඩයේ නම සහිත අලංකාර බිල්පත් මුද්‍රණය කරන්න.</p>
+            </div>
+
+            <div class="thermal-visual">
+              <div style="text-align:center;font-weight:700;">HARSH APEX MART</div>
+              <div class="dotted-line"></div>
+              <div style="display:flex;justify-content:space-between;"><span>1x Anchor Milk</span><span>1,120</span></div>
+              <div style="display:flex;justify-content:space-between;font-weight:700;"><span>TOTAL:</span><span>Rs. 1,120</span></div>
+            </div>
+          </div>
+
+          <!-- Bento 7: 1-Click Backup & Security (Col 4) -->
+          <div class="bento-card bento-col-4 reveal-up">
+            <div>
+              <div class="bento-icon-wrapper">
+                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+              </div>
+              <h3 class="bento-title" data-i18n="bento_7_title">තනි ක්ලික් එකෙන් Data Backup & Restore</h3>
+              <p class="bento-desc" data-i18n="bento_7_desc">ඔබේ වෙළඳසැලේ සියලුම තොරතුරු එක ක්ලික් එකකින් ඔබගේ දුරකථනයට සුරක්ෂිතව Download කර තබාගත හැක. නව දුරකථනයකට මාරුවීම විනාඩියෙන්.</p>
+            </div>
+
+            <div class="bento-graphic" style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:22px;">🔒</span>
+              <div style="font-size:11px;">
+                <strong style="color:#fff;">apex-pos-backup.json</strong>
+                <div style="color:var(--emerald-mint);">Encrypted Local Vault</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         Step-by-Step Installation Guide (PWA Magic)
+         ========================================================================== -->
+    <section class="install-section" id="install">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div class="section-tag" data-i18n="install_tag">ස්ථාපනය කරන අයුරු</div>
+          <h2 class="section-title" data-i18n="install_title">විනාඩියකින් ඔබේ දුරකථනයට Install කරගන්න</h2>
+          <p class="section-desc" data-i18n="install_desc">Google Play Store හෝ Apple App Store එකට යාමට අවශ්‍ය නැත. පහත සරල පියවර අනුගමනය කරන්න.</p>
+        </div>
+
+        <!-- Interactive Platform Switcher Tabs -->
+        <div class="install-tabs reveal-up">
+          <button type="button" class="install-tab-btn active" data-tab="android" data-i18n="tab_android">🤖 Android (Chrome)</button>
+          <button type="button" class="install-tab-btn" data-tab="ios" data-i18n="tab_ios">🍏 iPhone / iPad (Safari)</button>
+          <button type="button" class="install-tab-btn" data-tab="pc" data-i18n="tab_pc">💻 Windows PC / Mac</button>
+        </div>
+
+        <!-- Android Panel -->
+        <div class="install-panel active" id="panel-android">
+          <div class="steps-grid">
+            <div class="step-card reveal-up">
+              <div class="step-number">1</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">🌐</span>
+              </div>
+              <h4 class="step-title" data-i18n="android_s1_t">1. Chrome මගින් විවෘත කරන්න</h4>
+              <p class="step-desc" data-i18n="android_s1_d">ඔබගේ Android දුරකථනයේ Google Chrome මගින් POS වෙබ් අඩවිය විවෘත කරන්න.</p>
+            </div>
+
+            <div class="step-card reveal-up">
+              <div class="step-number">2</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;font-weight:900;">⋮</span>
+              </div>
+              <h4 class="step-title" data-i18n="android_s2_t">2. මෙනුව (⋮) ඔබන්න</h4>
+              <p class="step-desc" data-i18n="android_s2_d">තිරයේ ඉහළ දකුණු කෙළවරේ ඇති තිත් 3 (Menu) අයිකනය ඔබන්න.</p>
+            </div>
+
+            <div class="step-card reveal-up">
+              <div class="step-number">3</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">📲</span>
+              </div>
+              <h4 class="step-title" data-i18n="android_s3_t">3. "Install App" තෝරන්න</h4>
+              <p class="step-desc" data-i18n="android_s3_d">මෙනුවේ ඇති "Install app" හෝ "Add to Home screen" මත ක්ලික් කරන්න.</p>
+            </div>
+
+            <div class="step-card reveal-up">
+              <div class="step-number">4</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">✨</span>
+              </div>
+              <h4 class="step-title" data-i18n="android_s4_t">4. ස්ථාපනය සම්පූර්ණයි!</h4>
+              <p class="step-desc" data-i18n="android_s4_d">Apex POS ඇප් අයිකනය ඔබගේ දුරකථන මුල් තිරයේ දර්ශනය වේ. දැන් ඕනෑම වෙලාවක විවෘත කළ හැක.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- iOS / iPhone Panel -->
+        <div class="install-panel" id="panel-ios">
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-number">1</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">🧭</span>
+              </div>
+              <h4 class="step-title" data-i18n="ios_s1_t">1. Safari මගින් විවෘත කරන්න</h4>
+              <p class="step-desc" data-i18n="ios_s1_d">ඔබගේ iPhone හෝ iPad එකෙහි Safari බ්‍රවුසරය මගින් ලින්ක් එක විවෘත කරන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">2</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">📤</span>
+              </div>
+              <h4 class="step-title" data-i18n="ios_s2_t">2. Share (□↑) ඔබන්න</h4>
+              <p class="step-desc" data-i18n="ios_s2_d">තිරයේ පහළ ඇති Share අයිකනය (කොටුව සහ උඩ ඊතලය) ඔබන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">3</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">➕</span>
+              </div>
+              <h4 class="step-title" data-i18n="ios_s3_t">3. "Add to Home Screen" ඔබන්න</h4>
+              <p class="step-desc" data-i18n="ios_s3_d">පහළට Scroll කර "+" ලකුණ සහිත "Add to Home Screen" තෝරන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">4</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">📱</span>
+              </div>
+              <h4 class="step-title" data-i18n="ios_s4_t">4. "Add" ඔබන්න</h4>
+              <p class="step-desc" data-i18n="ios_s4_d">ඉහළ දකුණේ ඇති "Add" ඔබන්න. දැන් එය Native App එකක් මෙන් ක්‍රියා කරයි.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Windows / PC Panel -->
+        <div class="install-panel" id="panel-pc">
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-number">1</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">💻</span>
+              </div>
+              <h4 class="step-title" data-i18n="pc_s1_t">1. Chrome හෝ Edge විවෘත කරන්න</h4>
+              <p class="step-desc" data-i18n="pc_s1_d">ඔබේ පරිගණකයේ Google Chrome හෝ MS Edge මගින් පිවිසෙන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">2</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">🔗</span>
+              </div>
+              <h4 class="step-title" data-i18n="pc_s2_t">2. Address Bar එක බලන්න</h4>
+              <p class="step-desc" data-i18n="pc_s2_d">ලිපින තීරුවේ (URL bar) දකුණු පස ඇති Install අයිකනය ක්ලික් කරන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">3</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">⚡</span>
+              </div>
+              <h4 class="step-title" data-i18n="pc_s3_t">3. "Install" ක්ලික් කරන්න</h4>
+              <p class="step-desc" data-i18n="pc_s3_d">මතුවන තහවුරු කිරීමේ බොත්තම (Install) ක්ලික් කරන්න.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">4</div>
+              <div class="step-icon-preview">
+                <span style="font-size:32px;">🖨️</span>
+              </div>
+              <h4 class="step-title" data-i18n="pc_s4_t">4. Desktop Shortcut ලැබේ</h4>
+              <p class="step-desc" data-i18n="pc_s4_d">ඩෙස්ක්ටොප් එක මත Apex POS ලාංඡනය ලැබේ. USB Printer සමගද සුපිරියට වැඩ කරයි.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Banner -->
+        <div class="install-action-banner reveal-up">
+          <div>
+            <h4 style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;">Ready to start selling?</h4>
+            <p style="font-size:14px;color:var(--text-muted);margin:0;">Launch the web POS right now or install it to your home screen.</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-secondary pwa-direct-install-btn" style="display:none;" type="button">
+              📥 Install PWA Directly
+            </button>
+            <a href="app.html" class="btn btn-primary pos-launch-btn">
+              <span>Launch Web POS Now</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5v2z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         Live App Screen Showcase Gallery
+         ========================================================================== -->
+    <section class="screens-section" id="screens">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div class="section-tag" data-i18n="screens_tag">සජීවී තිර දර්ශන</div>
+          <h2 class="section-title" data-i18n="screens_title">භාවිතය ඉතාම සරල, නවීන අතුරුමුහුණත</h2>
+          <p class="section-desc" data-i18n="screens_desc">කිසිදු සංකීර්ණත්වයක් නැත. ඕනෑම අයෙකුට විනාඩි 2කින් වැඩ පුරුදු විය හැකි සුපැහැදිලි සිංහල/ඉංග්‍රීසි UI නිර්මාණය.</p>
+        </div>
+
+        <!-- Showcase Tab Selectors -->
+        <div class="screens-nav reveal-up">
+          <button type="button" class="screen-tab-btn active" data-screen="pos" data-i18n="screen_tab_pos">🛒 බිල්පත් නිකුත් කිරීම (POS)</button>
+          <button type="button" class="screen-tab-btn" data-screen="stock" data-i18n="screen_tab_stock">📦 භාණ්ඩ හා තොග (Products)</button>
+          <button type="button" class="screen-tab-btn" data-screen="reports" data-i18n="screen_tab_reports">📊 දෛනික ලාභ වාර්තා (Reports)</button>
+          <button type="button" class="screen-tab-btn" data-screen="credit" data-i18n="screen_tab_credit">📒 පාරිභෝගික ණය පොත (Credit)</button>
+          <button type="button" class="screen-tab-btn" data-screen="settings" data-i18n="screen_tab_settings">⚙️ සැකසුම් & මුද්‍රණ යන්ත්‍ර (Settings)</button>
+        </div>
+
+        <!-- Showcase Glass Window Mockup -->
+        <div class="screen-display-wrapper reveal-scale">
+          <div class="screen-window-bar">
+            <div class="window-dots">
+              <span class="window-dot dot-red"></span>
+              <span class="window-dot dot-yellow"></span>
+              <span class="window-dot dot-green"></span>
+            </div>
+            <div class="window-address">https://pos-project-lake.vercel.app/app.html</div>
+            <div style="font-size:11px;color:var(--text-dim);font-weight:700;">Harsh Apex POS v6</div>
+          </div>
+
+          <!-- Dynamic Live Screen View Area -->
+          <div class="screen-inner-content" id="screenLiveContainer" style="transition:opacity 0.2s ease;">
+            <!-- Populated via JavaScript dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         Pricing & Activation Section
+         ========================================================================== -->
+    <section class="pricing-section" id="pricing">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div class="section-tag" data-i18n="pricing_tag">මිල ගණන් & සක්‍රිය කිරීම්</div>
+          <h2 class="section-title" data-i18n="pricing_title">ශ්‍රී ලාංකික ව්‍යාපාර සඳහාම ගැළපෙන සාධාරණ පැකේජ</h2>
+          <p class="section-desc" data-i18n="pricing_desc">කිසිදු සැඟවුණු ගාස්තුවක් නැත. දින 7ක් නොමිලේ අත්හදා බලා කැමති නම් පමණක් සක්‍රිය කරගන්න.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <!-- Plan 1: 7-Day Free Trial -->
+          <div class="pricing-card reveal-up">
+            <div>
+              <h3 class="pricing-plan-name" data-i18n="plan_1_name">නොමිලේ අත්හදා බැලීම</h3>
+              <p class="pricing-plan-desc" data-i18n="plan_1_desc">දින 7ක් සියලුම විශේෂාංග නොමිලේ පරිශීලනය කර බලන්න.</p>
+              
+              <div class="pricing-price-wrap">
+                <span class="price-currency">Rs.</span>
+                <span class="price-amount" data-i18n="plan_1_price">0</span>
+                <span class="price-period" data-i18n="plan_1_period">/ දින 7ක් නොමිලේ</span>
+              </div>
+
+              <ul class="pricing-features-list">
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>100% Full Feature Access</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Camera Barcode Scanning</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Thermal Receipt Printing</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Credit Ledger (ණය පොත)</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>No Credit Card Required</span>
+                </li>
+              </ul>
+            </div>
+
+            <a href="app.html" class="btn btn-secondary pos-launch-btn" style="width:100%;">
+              <span data-i18n="plan_1_btn">දැන්ම පටන් ගන්න (නොමිලේ)</span>
+            </a>
+          </div>
+
+          <!-- Plan 2: Business Pro (Most Popular) -->
+          <div class="pricing-card popular reveal-up">
+            <span class="popular-badge" data-i18n="plan_2_badge">වඩාත් ජනප්‍රියයි</span>
+            <div>
+              <h3 class="pricing-plan-name" data-i18n="plan_2_name">ව්‍යාපාරික Pro බලපත්‍රය</h3>
+              <p class="pricing-plan-desc" data-i18n="plan_2_desc">සිල්ලර කඩ, සුපිරි වෙළඳසැල් සහ කුඩා ව්‍යාපාර සඳහා පූර්ණ බලපත්‍රය.</p>
+              
+              <div class="pricing-price-wrap">
+                <span class="price-currency">Rs.</span>
+                <span class="price-amount" data-i18n="plan_2_price">2,500</span>
+                <span class="price-period" data-i18n="plan_2_period">/ මාසිකව</span>
+              </div>
+
+              <ul class="pricing-features-list">
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Unlimited Invoices & Products</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>100% Offline Capability</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Camera Barcode & QR Scanner</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>58mm & 80mm Bluetooth Thermal Print</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Customer Credit Ledger (ණය පොත)</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Daily Net Profit Calculation</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>VIP WhatsApp Activation & Support</span>
+                </li>
+              </ul>
+            </div>
+
+            <a href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-whatsapp wa-contact-link" style="width:100%;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              <span data-i18n="plan_2_btn">WhatsApp මගින් ලබාගන්න</span>
+            </a>
+          </div>
+
+          <!-- Plan 3: Annual Super Saver -->
+          <div class="pricing-card reveal-up">
+            <div>
+              <h3 class="pricing-plan-name" data-i18n="plan_3_name">වාර්ෂික සුපිරි පැකේජය</h3>
+              <p class="pricing-plan-desc" data-i18n="plan_3_desc">මාස 2ක් නොමිලේ ලැබෙන, මුළු අවුරුද්දටම එකවර ගෙවන පැකේජය.</p>
+              
+              <div class="pricing-price-wrap">
+                <span class="price-currency">Rs.</span>
+                <span class="price-amount" data-i18n="plan_3_price">24,000</span>
+                <span class="price-period" data-i18n="plan_3_period">/ වාර්ෂිකව (මාස 2ක් නොමිලේ)</span>
+              </div>
+
+              <ul class="pricing-features-list">
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Includes 2 Months Completely Free</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Save Rs. 6,000 Every Year</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Full Year Uninterrupted License</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Free Remote Store Setup via WhatsApp</span>
+                </li>
+                <li class="pricing-feature-item">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Priority VIP Support Line</span>
+                </li>
+              </ul>
+            </div>
+
+            <a href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-secondary wa-contact-link" style="width:100%;">
+              <span data-i18n="plan_3_btn">වාර්ෂික පැකේජය ලබාගන්න</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         FAQ Accordion Section
+         ========================================================================== -->
+    <section class="faq-section" id="faq">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div class="section-tag" data-i18n="faq_tag">බොහෝ දෙනෙක් අසන ප්‍රශ්න</div>
+          <h2 class="section-title" data-i18n="faq_title">ඔබට දැනගැනීමට අවශ්‍ය සියල්ල</h2>
+          <p class="section-desc" data-i18n="faq_desc">Apex POS පිළිබඳව නිතර අසන ප්‍රශ්න සහ ඊට පැහැදිලි පිළිතුරු.</p>
+        </div>
+
+        <div class="faq-list">
+          <!-- FAQ 1 -->
+          <div class="faq-item open reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q1">අන්තර්ජාලය (Internet) නොමැතිව POS එක ඇත්තටම ක්‍රියාකරනවාද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer" style="max-height: 200px;">
+              <p data-i18n="faq_a1">ඔව්, සම්පූර්ණයෙන්ම! Apex POS ක්‍රියාකරන්නේ ඔබගේ දුරකථනයේ හෝ පරිගණකයේ ඇති Local Database එකෙනි. ඒ නිසා Internet හෝ WiFi නැති වුවද බිල්පත් නිකුත් කිරීම, Barcode ස්කෑන් කිරීම, තොග අඩු වීම සහ ණය පොත සාමාන්‍ය පරිදි ක්‍රියාකරයි.</p>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q2">දුරකථනය නැතිවුණොත් හෝ අලුත් එකක් ගත්තොත් මගේ දත්ත ආරක්ෂිතද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p data-i18n="faq_a2">ඔබට සැකසුම් (Settings) මෙනුවට ගොස් එක ක්ලික් එකකින් මුළු වෙළඳසැලේ දත්ත Backup ෆයිල් එකක් (JSON) දුරකථනයට හෝ Google Drive එකට Save කරගත හැක. අලුත් දුරකථනයකදී Restore Backup ක්ලික් කර එම ෆයිල් එක ලබාදුන් විට සියලුම දත්ත නැවත ලැබේ.</p>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q3">කුමන ආකාරයේ Thermal Receipt Printer භාවිතා කළ හැකිද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p data-i18n="faq_a3">වෙළඳපොලේ ඇති ඕනෑම Standard 58mm සහ 80mm Bluetooth Thermal Mini Printer හෝ USB POS Printer එකක් භාවිතා කළ හැක. Android සහ Windows පරිගණක වලට මෙය ඉතාම පහසුවෙන් සම්බන්ධ වේ.</p>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q4">Barcode Scanner යන්ත්‍රයක් වෙනම මිලදී ගත යුතුද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p data-i18n="faq_a4">අවශ්‍ය නැත! ඔබගේ දුරකථනයේ හෝ ටැබ්ලට් එකෙහි කැමරාවෙන්ම Barcode ස්කෑන් කිරීමේ විශේෂාංගය මෙහි අන්තර්ගතය. කැමති නම් සාමාන්‍ය USB / Wireless Barcode Scanner එකක් වුවද පරිගණකයට හෝ OTG හරහා දුරකථනයට සම්බන්ධ කර භාවිතා කළ හැක.</p>
+            </div>
+          </div>
+
+          <!-- FAQ 5 -->
+          <div class="faq-item reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q5">දින 7 නොමිලේ අත්හදා බැලීමෙන් පසු සක්‍රිය කරන්නේ කෙසේද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p data-i18n="faq_a5">ඔබේ යෙදුමේ Settings පිටුවේ ඇති "Device ID" එක පිටපත් කර අපගේ WhatsApp අංකයට (+94 77 000 0000) එවන්න. ගෙවීම් තහවුරු කළ පසු ක්ෂණිකව ඔබගේ Device ID එකට අදාළ 30-Day හෝ 365-Day Activation Key එකක් අපි ඔබට ලබාදෙන්නෙමු.</p>
+            </div>
+          </div>
+
+          <!-- FAQ 6 -->
+          <div class="faq-item reveal-up">
+            <button class="faq-question" type="button">
+              <span data-i18n="faq_q6">මෙය පරිගණක (Laptop/Desktop) වලත් භාවිත කළ හැකිද?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p data-i18n="faq_a6">ඔව්! Google Chrome හෝ Edge බ්‍රවුසරය හරහා ලැප්ටොප් හෝ ඩෙස්ක්ටොප් පරිගණකයකින් විවෘත කර Address bar එකෙන් "Install" කරගත හැක. එවිට desktop app එකක් ලෙස ක්‍රියා කරයි.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         Final High-Impact CTA Banner
+         ========================================================================== -->
+    <section class="final-cta-section">
+      <div class="container">
+        <div class="cta-banner-box reveal-scale">
+          <h2 class="cta-title" data-i18n="cta_banner_title">ඔබේ වෙළඳසැල අදම නවීන තාක්ෂණයෙන් සන්නද්ධ කරන්න</h2>
+          <p class="cta-desc" data-i18n="cta_banner_desc">මසකට රු. 2,500ක් වැනි සුළු මුදලකට සම්පූර්ණ Offline POS පද්ධතියක් ඔබේ සාක්කුවටම. කිසිදු මුදලක් නොගෙවා අදම දින 7ක නොමිලේ අත්හදා බලන්න.</p>
           
-          <label>Barcode / SKU (optional)</label>
-          <div class="flex">
-            <input id="pSku" maxlength="60" placeholder="Scan or type barcode" class="grow">
-            <button type="button" id="scanProductSkuBtn" class="scan-btn">📷 Scan</button>
-          </div>
-
-          <label>Category</label>
-          <div class="flex">
-            <select id="pCategory" class="grow">
-              <option value="General">General</option>
-              <option value="Grocery">Grocery</option>
-              <option value="Beverages">Beverages</option>
-              <option value="Snacks">Snacks</option>
-              <option value="Bakery">Bakery</option>
-              <option value="Dairy & Frozen">Dairy & Frozen</option>
-              <option value="Household">Household</option>
-              <option value="Personal Care">Personal Care</option>
-              <option value="Other">Other</option>
-            </select>
-            <button type="button" id="btnAddNewCategory" class="secondary" style="white-space:nowrap">+ New</button>
-          </div>
-
-          <div class="flex">
-            <div class="grow">
-              <label>Selling Price (Rs.)</label>
-              <input id="pPrice" type="number" min="0" step="0.01" required placeholder="0.00">
-            </div>
-            <div class="grow">
-              <label>Cost Price (Rs.)</label>
-              <input id="pCost" type="number" min="0" step="0.01" required placeholder="0.00">
-            </div>
-          </div>
-
-          <div class="flex">
-            <div class="grow">
-              <label>Stock Qty</label>
-              <input id="pStock" type="number" min="0" step="1" required placeholder="0">
-            </div>
-            <div class="grow">
-              <label>Low Stock Alert At</label>
-              <input id="pLow" type="number" min="0" step="1" value="5" required>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="primary" type="submit">Save Product</button>
-            <button class="secondary" type="button" id="cancelEdit">Clear</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:8px">
-          <h3>Product Catalog</h3>
-          <div class="flex">
-            <button id="btnExportCsv" class="secondary" type="button" style="padding:6px 10px;font-size:12px">📥 Export CSV</button>
-            <button id="btnImportCsvTrigger" class="secondary" type="button" style="padding:6px 10px;font-size:12px">📤 Import CSV</button>
-            <input type="file" id="csvFileInput" accept=".csv,text/csv" hidden>
+          <div class="cta-buttons">
+            <a href="app.html" class="btn btn-primary btn-lg pos-launch-btn">
+              <span data-i18n="cta_launch_btn">🚀 POS එක දැන්ම විවෘත කරන්න</span>
+            </a>
+            
+            <a href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg wa-contact-link">
+              <span data-i18n="cta_whatsapp_btn">💬 WhatsApp මගින් සම්බන්ධ වන්න</span>
+            </a>
           </div>
         </div>
-
-        <div id="productCategoryFilter" class="chips"></div>
-
-        <input id="productSearch" placeholder="Search product name, barcode or category">
-        <div id="productList" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <!-- 3. BILLING -->
-    <section id="billing" class="panel">
-      <h2>New Bill</h2>
-      
-      <div class="card">
-        <label>Find & Add Product</label>
-        <div class="flex">
-          <input id="billSearch" placeholder="Search name or barcode" class="grow">
-          <button type="button" id="scanBillBtn" class="scan-btn">📷 Scan</button>
-        </div>
-        <div id="billCategoryFilter" class="chips" style="margin-top:8px"></div>
-        <div id="billProducts" style="max-height:220px;overflow-y:auto"></div>
-      </div>
-
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3>Cart</h3>
-          <button id="clearCartBtn" class="secondary" style="padding:4px 8px;font-size:12px" type="button">Empty Cart</button>
-        </div>
-        <div id="cartList"></div>
-
-        <label>Discount (Rs.)</label>
-        <input id="discount" type="number" min="0" step="0.01" value="0">
-
-        <div class="item" style="margin-top:8px">
-          <b>Grand Total</b>
-          <span class="total" id="grandTotal">Rs. 0.00</span>
-        </div>
-
-        <label>Payment Method</label>
-        <select id="payment">
-          <option value="Cash">Cash</option>
-          <option value="Card">Card</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-          <option value="Credit">Credit (ණය / Customer Due)</option>
-        </select>
-
-        <div id="creditSection" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:12px;margin:10px 0">
-          <b>Customer Credit Details (ණය විස්තර)</b>
-          <label style="margin-top:6px">Customer Name *</label>
-          <input id="creditCustomer" placeholder="Enter customer name">
-          <label>Customer Phone (optional)</label>
-          <input id="creditPhone" type="tel" placeholder="07X XXXXXXX">
-        </div>
-
-        <div id="cashFields">
-          <label>Amount Received (Rs.)</label>
-          <input id="received" type="number" min="0" step="0.01" value="0">
-          <div class="item">
-            <b>Balance to Return</b>
-            <b id="balance" style="font-size:18px;color:var(--primary)">Rs. 0.00</b>
-          </div>
-        </div>
-
-        <button class="primary" id="checkout" style="width:100%;margin-top:14px;padding:14px;font-size:16px">Complete Sale</button>
-      </div>
-
-      <div id="lastReceipt" class="card" hidden>
-        <h3>Last Bill Actions</h3>
-        <div id="lastReceiptSummary" style="margin-bottom:12px" class="muted"></div>
-        <div class="actions">
-          <button class="primary" id="printLast">🖨️ Print / PDF</button>
-          <button class="secondary" id="btPrintLast">📶 Thermal Bluetooth</button>
-          <button class="secondary" id="shareLast">📤 Share</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. REPORTS & CREDIT LEDGER -->
-    <section id="reports" class="panel">
-      <h2>Sales Reports & Ledger</h2>
-
-      <div class="btn-group">
-        <button class="btn-period active" data-period="today">Today</button>
-        <button class="btn-period" data-period="yesterday">Yesterday</button>
-        <button class="btn-period" data-period="week">This Week</button>
-        <button class="btn-period" data-period="month">This Month</button>
-        <button class="btn-period" data-period="custom">Custom</button>
-      </div>
-
-      <div id="customDateWrap" class="card" style="display:none">
-        <div class="flex">
-          <div class="grow">
-            <label>Start Date</label>
-            <input type="date" id="reportFrom">
-          </div>
-          <div class="grow">
-            <label>End Date</label>
-            <input type="date" id="reportTo">
-          </div>
-        </div>
-      </div>
-
-      <div class="stats stats-4" style="margin-bottom:12px">
-        <div class="stat"><span>Sales Revenue</span><strong id="reportSales">Rs. 0</strong></div>
-        <div class="stat"><span>Gross Profit</span><strong id="reportProfit">Rs. 0</strong></div>
-        <div class="stat"><span>Completed Bills</span><strong id="reportBillsCount">0</strong></div>
-        <div class="stat warn"><span>Credit (Due)</span><strong id="reportCreditDue">Rs. 0</strong></div>
-      </div>
-
-      <!-- Customer Credit Ledger -->
-      <div class="card" id="creditLedgerCard">
-        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3>Customer Credit Ledger (ණය පොත)</h3>
-          <span class="pill credit" id="creditCountPill">0 Due</span>
-        </div>
-        <div id="creditList"></div>
-      </div>
-
-      <!-- Top Selling Items -->
-      <div class="card">
-        <h3>Top Selling Products</h3>
-        <div id="topItemsList"></div>
-      </div>
-
-      <!-- Sales Bills History -->
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3>Bills History</h3>
-          <button id="btnExportReportCsv" class="secondary" style="padding:4px 8px;font-size:12px">📥 Export Report</button>
-        </div>
-        <div id="reportList"></div>
-      </div>
-    </section>
-
-    <!-- 5. SETTINGS, STORE DETAILS & AUTO BACKUP -->
-    <section id="settings" class="panel">
-      <h2>Store Details & Backups</h2>
-
-      <!-- Store Details Changing -->
-      <div class="card">
-        <h3>Store Profile & Receipt Customization</h3>
-        <label>Store / Shop Name</label>
-        <input id="shopName" placeholder="e.g. Apex Super Mart">
-
-        <label>Phone Number(s)</label>
-        <input id="shopPhone" placeholder="e.g. 077 1234567 / 011 2345678">
-
-        <label>Store Address</label>
-        <input id="shopAddress" placeholder="e.g. No. 45, Main Street, Colombo">
-
-        <label>Business Reg. / Tax / VAT No (Optional)</label>
-        <input id="shopReg" placeholder="e.g. PV-123456 / VAT-7890">
-
-        <div class="flex">
-          <div class="grow">
-            <label>Currency Symbol</label>
-            <input id="shopCurrency" value="Rs." placeholder="Rs.">
-          </div>
-          <div class="grow">
-            <label>Thermal Receipt Width</label>
-            <select id="receiptWidth">
-              <option value="58mm">58mm (Small Thermal)</option>
-              <option value="80mm">80mm (Standard POS)</option>
-            </select>
-          </div>
-        </div>
-
-        <label>Receipt Footer Message</label>
-        <textarea id="shopFooter" rows="2" placeholder="e.g. Thank you for shopping with us! Returns accepted within 3 days with receipt."></textarea>
-
-        <button class="primary" id="saveShop" style="margin-top:12px;width:100%">Save Store Details</button>
-      </div>
-
-      <!-- Automated Local Snapshots & Backup -->
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;align-items:center">
-          <h3>Auto Backup & Snapshots</h3>
-          <span class="pill settled">Active</span>
-        </div>
-        <p class="muted">Your POS saves automatic local snapshots after transactions. You can restore an earlier snapshot anytime if needed.</p>
-        
-        <label>Restore from Recent Auto Snapshot</label>
-        <div class="flex">
-          <select id="snapshotSelect" class="grow">
-            <option value="">No snapshots saved yet</option>
-          </select>
-          <button id="btnRestoreSnapshot" class="secondary" type="button">Restore</button>
-        </div>
-
-        <hr style="border:0;border-top:1px solid var(--border);margin:16px 0">
-
-        <h3>Manual Backup File</h3>
-        <p class="muted">Download a full JSON backup file to keep safe on Google Drive, USB drive, or phone storage.</p>
-        <div class="actions">
-          <button class="secondary" id="exportBackup">Download Backup (JSON)</button>
-          <button class="secondary" id="importButton">Import Backup (JSON)</button>
-        </div>
-        <input type="file" id="importFile" accept="application/json,.json" hidden>
-      </div>
-
-      <div class="card">
-        <h3>About System</h3>
-        <p style="font-weight:700;margin:4px 0">Harsh Apex Retail POS • Version 2.0 (Pro)</p>
-        <p class="muted">100% Offline PWA • Device Encrypted License • Local Browser Storage</p>
-        <a href="admin.html" target="_blank" style="display:inline-block;margin-top:6px;color:var(--primary);font-weight:700;font-size:13px;text-decoration:none">→ Open Admin Activation Dashboard</a>
       </div>
     </section>
   </main>
 
-  <!-- NAVIGATION TABS -->
-  <nav class="tabs">
-    <button class="active" data-tab="dashboard">
-      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      Home
-    </button>
-    <button data-tab="products">
-      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-      Products
-    </button>
-    <button data-tab="billing">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-      Billing
-    </button>
-    <button data-tab="reports">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-      Reports
-    </button>
-    <button data-tab="settings">
-      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      Settings
-    </button>
-  </nav>
+  <!-- ==========================================================================
+       Footer
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" class="footer-logo">
+          <div>
+            <div style="font-weight:900;font-size:17px;color:#fff;">HARSH APEX DIGITAL SOLUTIONS</div>
+            <div style="font-size:12px;color:var(--text-muted);" data-i18n="footer_about">ශ්‍රී ලාංකික සිල්ලර ව්‍යාපාර බලගන්වන නවීන තාක්ෂණික මෘදුකාංග විසඳුම්.</div>
+          </div>
+        </div>
 
-  <!-- CAMERA BARCODE SCANNER MODAL -->
-  <div id="scannerModal" class="modal-overlay" style="display:none">
-    <div class="modal-content">
-      <button id="closeScannerBtn" class="modal-close" type="button">×</button>
-      <h3 style="margin-top:0">Scan Barcode / QR Code</h3>
-      <p class="muted" style="margin:4px 0 10px">Point your phone camera at the barcode</p>
-      
-      <div class="scanner-viewport">
-        <video id="scannerVideo" playsinline autoplay muted></video>
-        <div class="scanner-guide">
-          <div class="scanner-line"></div>
+        <ul class="footer-links">
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#features" data-i18n="nav_features">විශේෂාංග</a></li>
+          <li><a href="#install" data-i18n="nav_install">ස්ථාපනය කරන අයුරු</a></li>
+          <li><a href="#screens" data-i18n="nav_screens">තිර දර්ශන</a></li>
+          <li><a href="#pricing" data-i18n="nav_pricing">මිල ගණන්</a></li>
+          <li><a href="app.html" class="pos-launch-btn" data-i18n="nav_launch">POS විවෘත කරන්න</a></li>
+          <li><a href="admin.html">License Admin</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-bottom">
+        <div data-i18n="footer_copy">© 2026 Harsh Apex Digital Solutions. සියලුම හිමිකම් ඇවිරිණි. ශ්‍රී ලාංකික ව්‍යාපාර වෙනුවෙන්ම ආදරයෙන් නිපදවන ලදී.</div>
+        <div style="display:flex;gap:16px;">
+          <span>Hotline: +94 77 066 3154</span>
+          <span>Colombo, Sri Lanka</span>
         </div>
       </div>
-
-      <div class="flex" style="margin-top:12px;justify-content:space-between">
-        <button id="switchCameraBtn" class="secondary" type="button">🔄 Switch Camera</button>
-        <label style="margin:0;cursor:pointer" class="secondary" as="button">
-          📁 Image / Photo
-          <input type="file" id="scannerImageFile" accept="image/*" capture="environment" hidden>
-        </label>
-      </div>
-      <p id="scannerStatus" class="muted" style="text-align:center;margin-top:10px">Initializing camera...</p>
     </div>
+  </footer>
+
+  <!-- ==========================================================================
+       Floating WhatsApp Assistance Button (0770663154)
+       ========================================================================== -->
+  <div class="wa-floating-widget" id="waFloatingWidget">
+    <div class="wa-floating-tooltip" id="waTooltip">
+      <span class="wa-tooltip-title" data-i18n="wa_fab_title">සහාය අවශ්‍යද? WhatsApp පණිවිඩයක් එවන්න</span>
+      <a href="https://wa.me/94770663154?text=Hello%20Harsh%20Apex%2C%20I%20need%20assistance%20with%20the%20Retail%20POS%20app." target="_blank" rel="noopener" class="wa-tooltip-phone">077 066 3154 · Harsh Apex Assistance</a>
+    </div>
+    <a href="https://wa.me/94770663154?text=Hello%20Harsh%20Apex%2C%20I%20need%20assistance%20with%20the%20Retail%20POS%20app."
+       id="waFloatingBtn"
+       class="wa-floating-btn"
+       target="_blank"
+       rel="noopener"
+       aria-label="WhatsApp Assistance (0770663154)">
+      <span class="wa-floating-pulse"></span>
+      <svg class="wa-floating-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+    </a>
   </div>
 
-  <!-- BILL DETAILS & VOID MODAL -->
-  <div id="billModal" class="modal-overlay" style="display:none">
-    <div class="modal-content">
-      <button id="closeBillModalBtn" class="modal-close" type="button">×</button>
-      <h3 id="billModalTitle" style="margin-top:0">Bill Details</h3>
-      <div id="billModalContent"></div>
-      <div class="actions" style="margin-top:14px">
-        <button id="billModalPrint" class="primary">🖨️ Print</button>
-        <button id="billModalShare" class="secondary">📤 Share</button>
-        <button id="billModalVoid" class="danger">⚠️ Void / Return</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- RECEIPT CONTAINER (PRINT ONLY) -->
-  <div id="receipt" class="receipt-58"></div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="toast" style="display:none"></div>
-
-  <script src="app.js"></script>
-  <script src="install.js"></script>
+  <script src="landing.js"></script>
 </body>
 </html>
