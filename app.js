@@ -11,6 +11,36 @@ window.addEventListener('touchstart', function(e) {
 }, { passive: false });
 
 // -------------------------------------------------------------
+// Real-time Spring Sliding Expiry Clock Controller
+// -------------------------------------------------------------
+window.initExpiryClock = function(payload) {
+  if (!payload || !payload.expires) return;
+  const start = () => {
+    if (window.SlidingClock && window.SlidingClock.ExpiryCountdownClock) {
+      if (window.apexExpiryClock) {
+        try { window.apexExpiryClock.destroy(); } catch (e) {}
+      }
+      window.apexExpiryClock = new window.SlidingClock.ExpiryCountdownClock({
+        license: payload,
+        mountHeaderId: 'headerExpiryClock',
+        mountCardId: 'settingsExpiryClock'
+      });
+      window.apexExpiryClock.start();
+    }
+    const badge = document.getElementById('planStatusBadge');
+    if (badge) {
+      badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : 'Monthly Pro Active';
+      badge.className = 'pill settled';
+    }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+};
+
+// -------------------------------------------------------------
 // 1. Offline signed-license gate. Only the private admin tool can create valid codes.
 // -------------------------------------------------------------
 (async function subscriptionGate() {
@@ -58,7 +88,11 @@ window.addEventListener('touchstart', function(e) {
   const saved = localStorage.getItem(LICENSE_KEY);
   const valid = saved && await verify(saved);
   if (valid) {
+    window.apexActiveLicense = valid;
     watch(valid);
+    if (typeof window.initExpiryClock === 'function') {
+      window.initExpiryClock(valid);
+    }
     return;
   }
 
@@ -102,7 +136,11 @@ window.addEventListener('touchstart', function(e) {
       return;
     }
     localStorage.setItem(LICENSE_KEY, code);
+    window.apexActiveLicense = payload;
     watch(payload);
+    if (typeof window.initExpiryClock === 'function') {
+      window.initExpiryClock(payload);
+    }
     gate.remove();
     document.body.style.overflow = '';
     alert(`${payload.plan === 'trial' ? '7-day trial' : 'Monthly subscription'} activated successfully.`);
@@ -977,6 +1015,9 @@ $('checkout').onclick = () => {
   playBeep('success');
   render();
   toast(`Sale Completed! ${sale.number}`);
+  if (window.apexPrintManager && window.apexPrintManager.settings && window.apexPrintManager.settings.autoPrint) {
+    printReceipt(sale, { isReprint: false });
+  }
 };
 
 // -------------------------------------------------------------
@@ -1029,11 +1070,29 @@ function receiptHTML(s) {
   `;
 }
 
-function printReceipt(sale) {
+async function printReceipt(sale, options = {}) {
   if (!sale) return;
+  if (window.PrintSystem && window.PrintSystem.printManager) {
+    try {
+      const pm = window.PrintSystem.printManager;
+      const opts = Object.assign({ shop: db.shop, isReprint: !!options.isReprint }, options);
+      const res = await pm.printReceipt(sale, opts);
+      if (res && res.success) {
+        toast(res.message || 'Receipt dispatched to printer!');
+        return;
+      }
+      if (res && !res.success) {
+        console.warn('PrintManager notice:', res.error);
+      }
+    } catch (e) {
+      console.warn('PrintSystem dispatch error, fallback to browser print:', e);
+    }
+  }
   const receiptEl = $('receipt');
-  receiptEl.className = db.shop.receiptWidth === '80mm' ? 'receipt-80' : 'receipt-58';
-  receiptEl.innerHTML = receiptHTML(sale);
+  if (receiptEl) {
+    receiptEl.className = db.shop.receiptWidth === '80mm' ? 'receipt-80' : 'receipt-58';
+    receiptEl.innerHTML = receiptHTML(sale);
+  }
   window.print();
 }
 
@@ -1057,17 +1116,20 @@ if ($('printLast')) {
   $('printLast').onclick = () => { if (lastSale) downloadPdfInvoice(lastSale); };
 }
 if ($('printThermalLast')) {
-  $('printThermalLast').onclick = () => { if (lastSale) printReceipt(lastSale); };
+  $('printThermalLast').onclick = () => { if (lastSale) printReceipt(lastSale, { isReprint: true }); };
 }
 if ($('btPrintLast')) {
   $('btPrintLast').onclick = async () => {
     if (!lastSale) return;
-    await printBluetoothThermal(lastSale);
+    await printReceipt(lastSale, { isReprint: true, forceTransport: 'ble' });
   };
 }
 
 // Web Bluetooth ESC/POS Print Helper with Universal Service Scanning
 async function printBluetoothThermal(s) {
+  if (window.PrintSystem && window.PrintSystem.printManager) {
+    return printReceipt(s, { isReprint: true, forceTransport: 'ble' });
+  }
   const ESC = '\x1B', GS = '\x1D';
   let text = `${ESC}@`; // Initialize
   text += `${ESC}a\x01`; // Center
@@ -1514,12 +1576,12 @@ if ($('billModalPdf')) {
 }
 
 $('billModalPrint').onclick = () => {
-  if (selectedModalSale) printReceipt(selectedModalSale);
+  if (selectedModalSale) printReceipt(selectedModalSale, { isReprint: true });
 };
 
 if ($('billModalBt')) {
   $('billModalBt').onclick = async () => {
-    if (selectedModalSale) await printBluetoothThermal(selectedModalSale);
+    if (selectedModalSale) await printReceipt(selectedModalSale, { isReprint: true, forceTransport: 'ble' });
   };
 }
 
@@ -1740,6 +1802,345 @@ function render() {
   renderSnapshots();
 }
 
+// -------------------------------------------------------------
+// 17. Owner 4-Digit Security PIN & Session Control
+// -------------------------------------------------------------
+const OWNER_PIN_HASH_KEY = 'apex_pos_owner_pin_hash_v1';
+const OWNER_PIN_SALT = 'apex_pos_owner_salt_4892_';
+const OWNER_SESSION_KEY = 'apex_owner_session_unlocked';
+
+let pinEntryBuffer = '';
+let pinEntryMode = 'unlock'; // 'unlock', 'setup_step1', 'setup_step2'
+let tempSetupPin = '';
+
+async function hashOwnerPin(pin) {
+  const enc = new TextEncoder();
+  const data = enc.encode(OWNER_PIN_SALT + pin);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function isOwnerPinSet() {
+  return !!localStorage.getItem(OWNER_PIN_HASH_KEY);
+}
+
+function isOwnerUnlocked() {
+  if (!isOwnerPinSet()) return true; // not set yet
+  return sessionStorage.getItem(OWNER_SESSION_KEY) === '1';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = $('dot' + i);
+    if (dot) {
+      if (i < pinEntryBuffer.length) {
+        dot.classList.add('filled');
+      } else {
+        dot.classList.remove('filled');
+      }
+    }
+  }
+}
+
+function openOwnerPinModal(mode = 'unlock') {
+  pinEntryMode = mode;
+  pinEntryBuffer = '';
+  updatePinDots();
+  const modal = $('ownerPinModal');
+  const title = $('pinModalTitle');
+  const sub = $('pinModalSubtitle');
+  const err = $('pinErrorMessage');
+  const forgotBtn = $('pinForgotBtn');
+  if (err) err.textContent = '';
+  if (!modal) return;
+
+  if (mode === 'unlock') {
+    if (title) title.textContent = 'Apex POS Locked';
+    if (sub) sub.textContent = 'Enter 4-Digit Owner Security PIN';
+    if (forgotBtn) forgotBtn.style.display = 'inline-block';
+  } else if (mode === 'setup_step1') {
+    if (title) title.textContent = 'Set 4-Digit Owner PIN';
+    if (sub) sub.textContent = 'Create a 4-digit PIN for terminal security';
+    if (forgotBtn) forgotBtn.style.display = 'none';
+  } else if (mode === 'setup_step2') {
+    if (title) title.textContent = 'Confirm Owner PIN';
+    if (sub) sub.textContent = 'Re-enter the same 4-digit PIN to confirm';
+    if (forgotBtn) forgotBtn.style.display = 'none';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeOwnerPinModal() {
+  const modal = $('ownerPinModal');
+  if (modal) modal.style.display = 'none';
+  pinEntryBuffer = '';
+  updatePinDots();
+}
+
+function shakePinCard(msg) {
+  const card = document.querySelector('#ownerPinModal .pin-card');
+  const err = $('pinErrorMessage');
+  if (err) err.textContent = msg;
+  if (card) {
+    card.classList.remove('pin-shake');
+    void card.offsetWidth;
+    card.classList.add('pin-shake');
+  }
+  playBeep('error');
+  setTimeout(() => {
+    pinEntryBuffer = '';
+    updatePinDots();
+    if (err) err.textContent = '';
+  }, 900);
+}
+
+async function handlePinDigit(d) {
+  if (pinEntryBuffer.length >= 4) return;
+  pinEntryBuffer += d;
+  updatePinDots();
+
+  if (pinEntryBuffer.length === 4) {
+    const entered = pinEntryBuffer;
+    if (pinEntryMode === 'unlock') {
+      const hash = await hashOwnerPin(entered);
+      const savedHash = localStorage.getItem(OWNER_PIN_HASH_KEY);
+      if (hash === savedHash) {
+        sessionStorage.setItem(OWNER_SESSION_KEY, '1');
+        closeOwnerPinModal();
+        playBeep('success');
+        toast('Terminal Unlocked (සාදරයෙන් පිළිගනිමු)!');
+      } else {
+        shakePinCard('Incorrect PIN. Try again.');
+      }
+    } else if (pinEntryMode === 'setup_step1') {
+      tempSetupPin = entered;
+      setTimeout(() => {
+        openOwnerPinModal('setup_step2');
+      }, 200);
+    } else if (pinEntryMode === 'setup_step2') {
+      if (entered === tempSetupPin) {
+        const hash = await hashOwnerPin(entered);
+        localStorage.setItem(OWNER_PIN_HASH_KEY, hash);
+        sessionStorage.setItem(OWNER_SESSION_KEY, '1');
+        closeOwnerPinModal();
+        playBeep('success');
+        updateOwnerPinStatusUI();
+        toast('Owner 4-digit PIN configured successfully!');
+      } else {
+        shakePinCard('PINs did not match. Please start again.');
+        setTimeout(() => {
+          openOwnerPinModal('setup_step1');
+        }, 1000);
+      }
+    }
+  }
+}
+
+function updateOwnerPinStatusUI() {
+  const badge = $('ownerPinStatusBadge');
+  const btn = $('btnOpenSetPinModal');
+  const help = $('ownerPinHelpText');
+  if (!badge) return;
+  if (isOwnerPinSet()) {
+    badge.textContent = 'PIN Protected';
+    badge.className = 'pill settled';
+    if (btn) btn.textContent = '🔄 Change Owner PIN';
+    if (help) help.textContent = '4-digit security PIN is active. Terminal locks on inactivity, sign out, or manually.';
+  } else {
+    badge.textContent = 'PIN Not Set';
+    badge.className = 'pill warning';
+    if (btn) btn.textContent = '🔐 Set 4-Digit Owner PIN';
+    if (help) help.textContent = 'No PIN set yet. Create a 4-digit PIN to secure your cash register, sales ledger, and settings.';
+  }
+}
+
+function lockTerminal() {
+  if (!isOwnerPinSet()) {
+    openOwnerPinModal('setup_step1');
+    return;
+  }
+  sessionStorage.removeItem(OWNER_SESSION_KEY);
+  openOwnerPinModal('unlock');
+}
+
+function signOutOwner() {
+  if (confirm('Sign out from Apex POS Terminal?\n\nThis will lock the screen and clear temporary checkout sessions.')) {
+    sessionStorage.removeItem(OWNER_SESSION_KEY);
+    cart = [];
+    renderCart();
+    if (isOwnerPinSet()) {
+      openOwnerPinModal('unlock');
+      toast('Signed out. Terminal locked.');
+    } else {
+      window.location.href = 'landing.html';
+    }
+  }
+}
+
+function initOwnerPinSystem() {
+  document.querySelectorAll('#ownerPinModal .pin-key[data-digit]').forEach(btn => {
+    btn.onclick = () => handlePinDigit(btn.getAttribute('data-digit'));
+  });
+
+  if ($('pinClearBtn')) {
+    $('pinClearBtn').onclick = () => {
+      pinEntryBuffer = '';
+      updatePinDots();
+    };
+  }
+
+  if ($('pinBackspaceBtn')) {
+    $('pinBackspaceBtn').onclick = () => {
+      if (pinEntryBuffer.length > 0) {
+        pinEntryBuffer = pinEntryBuffer.slice(0, -1);
+        updatePinDots();
+      }
+    };
+  }
+
+  if ($('pinForgotBtn')) {
+    $('pinForgotBtn').onclick = () => {
+      const devId = localStorage.getItem('apex_pos_device_id_v2') || '';
+      const prefix = devId.slice(0, 8);
+      const answer = prompt(
+        `Owner PIN Reset Verification:\n\nTo reset your PIN, enter the first 8 characters of your Device ID:\n(Device ID begins with: ${prefix}...)\n\nEnter the 8 characters:`
+      );
+      if (answer && answer.trim().toLowerCase() === prefix.toLowerCase()) {
+        localStorage.removeItem(OWNER_PIN_HASH_KEY);
+        sessionStorage.removeItem(OWNER_SESSION_KEY);
+        updateOwnerPinStatusUI();
+        openOwnerPinModal('setup_step1');
+        alert('Verification successful. Please create your new 4-digit PIN now.');
+      } else if (answer) {
+        alert('Verification failed. Device ID mismatch.');
+      }
+    };
+  }
+
+  if ($('lockPosBtn')) $('lockPosBtn').onclick = lockTerminal;
+  if ($('btnLockPosNow')) $('btnLockPosNow').onclick = lockTerminal;
+  if ($('btnOpenSetPinModal')) $('btnOpenSetPinModal').onclick = () => openOwnerPinModal('setup_step1');
+  if ($('btnSignOutPos')) $('btnSignOutPos').onclick = signOutOwner;
+
+  updateOwnerPinStatusUI();
+
+  // Startup check
+  if (isOwnerPinSet() && !isOwnerUnlocked()) {
+    openOwnerPinModal('unlock');
+  } else if (!isOwnerPinSet()) {
+    // If first time sign up / setup, prompt to set PIN
+    const hasPrompted = localStorage.getItem('apex_pos_pin_prompted');
+    if (!hasPrompted) {
+      localStorage.setItem('apex_pos_pin_prompted', '1');
+      setTimeout(() => {
+        if (!isOwnerPinSet()) {
+          openOwnerPinModal('setup_step1');
+        }
+      }, 1000);
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// 18. Hardware-Aware Thermal Printer Subsystem Controller
+// -------------------------------------------------------------
+function initPrinterSubsystem() {
+  if (!window.PrintSystem) return;
+  const pm = window.PrintSystem.printManager;
+  window.apexPrintManager = pm;
+
+  // Platform capabilities
+  const caps = window.PrintSystem.PrinterCapabilityDetector.detect();
+  const badge = $('printerPlatformBadge');
+  const notice = $('printerPlatformNotice');
+  if (badge) {
+    badge.textContent = caps.platform.toUpperCase();
+    badge.className = 'pill settled';
+  }
+  if (notice) {
+    let msg = `<strong>Platform:</strong> ${caps.platform.toUpperCase()} • `;
+    if (caps.supportsBle) {
+      msg += `✅ Web Bluetooth BLE supported • `;
+    } else if (caps.isIos) {
+      msg += `⚠️ iOS Safari: Web Bluetooth blocked by Apple. Use <strong>AirPrint</strong> or <strong>Harsh Apex iOS Companion App</strong> • `;
+    } else {
+      msg += `ℹ️ Web Bluetooth not available in this browser. Use Browser Print, PDF, or Companion App • `;
+    }
+    notice.innerHTML = msg;
+  }
+
+  // Populate settings form
+  const transSelect = $('printerTransportSelect');
+  const widthSelect = $('printerPaperWidthSelect');
+  const cplInput = $('printerCplInput');
+  const autoPrintCb = $('printerAutoPrintCheckbox');
+  const cutPaperCb = $('printerCutPaperCheckbox');
+  const qrCb = $('printerQrCheckbox');
+
+  if (transSelect) transSelect.value = pm.settings.transport || 'browser';
+  if (widthSelect) widthSelect.value = pm.settings.paperWidth || (db.shop && db.shop.receiptWidth) || '58mm';
+  if (cplInput) cplInput.value = pm.settings.charactersPerLine || (pm.settings.paperWidth === '80mm' ? 48 : 32);
+  if (autoPrintCb) autoPrintCb.checked = !!pm.settings.autoPrint;
+  if (cutPaperCb) cutPaperCb.checked = pm.settings.cutPaper !== false;
+  if (qrCb) qrCb.checked = pm.settings.printQr !== false;
+
+  // Save button
+  const saveBtn = $('btnSavePrinterSettings');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      pm.settings.transport = transSelect ? transSelect.value : 'browser';
+      pm.settings.paperWidth = widthSelect ? widthSelect.value : '58mm';
+      pm.settings.charactersPerLine = parseInt(cplInput ? cplInput.value : 32, 10) || 32;
+      pm.settings.autoPrint = autoPrintCb ? autoPrintCb.checked : false;
+      pm.settings.cutPaper = cutPaperCb ? cutPaperCb.checked : true;
+      pm.settings.printQr = qrCb ? qrCb.checked : true;
+      pm.saveSettings();
+      if (db && db.shop) {
+        db.shop.receiptWidth = pm.settings.paperWidth;
+        save(false);
+      }
+      toast('Hardware Thermal Printer settings saved!');
+    };
+  }
+
+  // Bluetooth connect button
+  const bleBtn = $('btnBleScanConnect');
+  if (bleBtn) {
+    bleBtn.onclick = async () => {
+      try {
+        toast('Scanning for Bluetooth thermal printer...');
+        const connected = await pm.transports.ble.scanAndConnect();
+        if (connected) {
+          const devName = pm.transports.ble.device ? pm.transports.ble.device.name : 'Printer';
+          toast(`Connected to ${devName}!`);
+          bleBtn.textContent = `Connected: ${devName}`;
+        }
+      } catch (err) {
+        toast('Bluetooth connection cancelled or failed: ' + err.message);
+      }
+    };
+  }
+
+  // Test print button
+  const testBtn = $('btnTestPrintHardware');
+  if (testBtn) {
+    testBtn.onclick = async () => {
+      toast('Sending hardware test slip...');
+      try {
+        const result = await pm.testPrint(db.shop);
+        if (result && result.success) {
+          toast('Test print slip dispatched successfully!');
+        } else {
+          toast('Print test notice: ' + (result ? result.error : 'Unknown'));
+        }
+      } catch (e) {
+        toast('Test print failed: ' + e.message);
+      }
+    };
+  }
+}
+
 // Initial setup
 const now = new Date();
 const todayStr = today();
@@ -1747,6 +2148,25 @@ $('reportFrom').value = todayStr;
 $('reportTo').value = todayStr;
 
 render();
+initOwnerPinSystem();
+initPrinterSubsystem();
+
+// Auto-check cached license for sliding clock
+try {
+  const code = localStorage.getItem('apex_pos_signed_license_v2');
+  if (code && !window.apexActiveLicense) {
+    const [body] = code.trim().split('.');
+    const b = body.replace(/-/g, '+').replace(/_/g, '/');
+    const u = Uint8Array.from(atob(b + '='.repeat((4 - b.length % 4) % 4)), c => c.charCodeAt(0));
+    const p = JSON.parse(new TextDecoder().decode(u));
+    if (p && p.expires) {
+      window.apexActiveLicense = p;
+      if (typeof window.initExpiryClock === 'function') {
+        window.initExpiryClock(p);
+      }
+    }
+  }
+} catch (e) {}
 
 // Service Worker Registration for Offline PWA
 if ('serviceWorker' in navigator) {

@@ -1,4 +1,4 @@
-const CACHE = 'apex-pos-v10';
+const CACHE = 'apex-pos-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,9 @@ const ASSETS = [
   './html5-qrcode.min.js',
   './html2pdf.bundle.min.js',
   './pdf-invoice.js',
+  './sliding-clock.css',
+  './sliding-clock.js',
+  './print-system.js',
   './app.js',
   './manifest.webmanifest',
   './icon.png',
