@@ -131,11 +131,11 @@
       screens_tag: 'සජීවී තිර දර්ශන',
       screens_title: 'භාවිතය ඉතාම සරල, නවීන අතුරුමුහුණත',
       screens_desc: 'කිසිදු සංකීර්ණත්වයක් නැත. ඕනෑම අයෙකුට විනාඩි 2කින් වැඩ පුරුදු විය හැකි සුපැහැදිලි සිංහල/ඉංග්‍රීසි UI නිර්මාණය.',
-      screen_tab_pos: '🛒 බිල්පත් නිකුත් කිරීම (POS)',
+      screen_tab_dashboard: '📊 පාලක පුවරුව (Dashboard)',
+      screen_tab_pos: '🛒 බිල්පත් නිකුත් කිරීම (Billing)',
       screen_tab_stock: '📦 භාණ්ඩ හා තොග (Products)',
-      screen_tab_reports: '📊 දෛනික ලාභ වාර්තා (Reports)',
-      screen_tab_credit: '📒 පාරිභෝගික ණය පොත (Credit)',
-      screen_tab_settings: '⚙️ සැකසුම් & මුද්‍රණ යන්ත්‍ර (Settings)',
+      screen_tab_reports: '📈 විකුණුම් වාර්තා (Reports)',
+      screen_tab_settings: '⚙️ සැකසුම් & Backup (Settings)',
 
       // Pricing
       pricing_tag: 'මිල ගණන් & සක්‍රිය කිරීම්',
@@ -309,11 +309,11 @@
       screens_tag: 'Live Screen Gallery',
       screens_title: 'Designed for High-Speed Counter Operations',
       screens_desc: 'Clean, intuitive, and distraction-free UI. Any cashier or staff member can master it in less than 5 minutes.',
-      screen_tab_pos: '🛒 Billing & POS Terminal',
-      screen_tab_stock: '📦 Product & Inventory',
-      screen_tab_reports: '📊 Reports & Daily Profit',
-      screen_tab_credit: '📒 Customer Credit Ledger',
-      screen_tab_settings: '⚙️ Settings & Thermal Printer',
+      screen_tab_dashboard: '📊 Dashboard Overview',
+      screen_tab_pos: '🛒 Fast Billing Terminal',
+      screen_tab_stock: '📦 Products & Inventory',
+      screen_tab_reports: '📈 Profit & Sales Reports',
+      screen_tab_settings: '⚙️ Settings & Thermal Print',
 
       // Pricing
       pricing_tag: 'Simple & Transparent',
@@ -423,6 +423,11 @@
     if (waFab) {
       waFab.href = `https://wa.me/94770663154?text=${waText}`;
     }
+
+    // Refresh screens gallery if initialized
+    if (window.refreshScreensGallery) {
+      window.refreshScreensGallery();
+    }
   }
 
   // --- Initialize App URLs ---
@@ -466,235 +471,150 @@
     }
   }
 
-  // --- Live App Screen Showcase Gallery ---
-  const screenContentTemplates = {
-    pos: `
-      <div style="background:#f1f5f9;padding:16px;border-radius:12px;height:100%;display:flex;flex-direction:column;gap:12px;">
-        <div style="background:linear-gradient(135deg,#0e766e,#115e59);color:#fff;padding:14px 18px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
-          <div><h3 style="margin:0;font-size:16px;font-weight:800;">Apex POS Terminal</h3><small style="opacity:0.85">Cashier: Shop Owner | Mode: 100% Offline</small></div>
-          <span style="background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">🟢 Offline Ready</span>
-        </div>
-        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;flex:1;">
-          <div style="background:#fff;padding:14px;border-radius:12px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;gap:8px;">
-              <input type="text" placeholder="🔍 Search or scan barcode..." value="Munchee" style="flex:1;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;" readonly>
-              <button style="background:#0f172a;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;">📷 Scan</button>
-            </div>
-            <div style="display:flex;gap:6px;margin-top:4px;">
-              <span style="background:#0e766e;color:#fff;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700;">All</span>
-              <span style="background:#f1f5f9;color:#475569;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:600;">Biscuits</span>
-              <span style="background:#f1f5f9;color:#475569;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:600;">Dairy</span>
-              <span style="background:#f1f5f9;color:#475569;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:600;">Beverages</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;overflow-y:auto;max-height:220px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f8fafc;border:1px solid #edf2f7;">
-                <div><div style="font-weight:700;font-size:13px;">Munchee Super Cream Cracker</div><small style="color:#64748b;">Stock: 48 pcs</small></div>
-                <div style="text-align:right;"><div style="font-weight:800;color:#0e766e;font-size:13px;">Rs. 140.00</div><button style="background:#e8f4f2;color:#0e766e;border:none;padding:4px 8px;border-radius:6px;font-weight:700;font-size:11px;cursor:pointer;">+ Add</button></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f8fafc;border:1px solid #edf2f7;">
-                <div><div style="font-weight:700;font-size:13px;">Anchor Full Cream Milk Powder 400g</div><small style="color:#64748b;">Stock: 14 pcs</small></div>
-                <div style="text-align:right;"><div style="font-weight:800;color:#0e766e;font-size:13px;">Rs. 1,120.00</div><button style="background:#e8f4f2;color:#0e766e;border:none;padding:4px 8px;border-radius:6px;font-weight:700;font-size:11px;cursor:pointer;">+ Add</button></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f8fafc;border:1px solid #edf2f7;">
-                <div><div style="font-weight:700;font-size:13px;">Dilmah Premium Ceylon Tea 100g</div><small style="color:#64748b;">Stock: 25 pcs</small></div>
-                <div style="text-align:right;"><div style="font-weight:800;color:#0e766e;font-size:13px;">Rs. 280.00</div><button style="background:#e8f4f2;color:#0e766e;border:none;padding:4px 8px;border-radius:6px;font-weight:700;font-size:11px;cursor:pointer;">+ Add</button></div>
-              </div>
-            </div>
-          </div>
-          <div style="background:#fff;padding:14px;border-radius:12px;border:1px solid #e2e8f0;display:flex;flex-direction:column;justify-content:space-between;">
-            <div>
-              <div style="font-weight:800;font-size:14px;border-bottom:1px solid #edf2f7;padding-bottom:8px;margin-bottom:8px;display:flex;justify-content:space-between;">
-                <span>Cart (3 Items)</span>
-                <span style="color:#ef4444;font-size:11px;cursor:pointer;">Clear</span>
-              </div>
-              <div style="font-size:12px;display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;justify-content:space-between;"><span>1x Munchee Cracker</span><strong>Rs. 140.00</strong></div>
-                <div style="display:flex;justify-content:space-between;"><span>1x Anchor Milk 400g</span><strong>Rs. 1,120.00</strong></div>
-                <div style="display:flex;justify-content:space-between;"><span>1x Dilmah Tea 100g</span><strong>Rs. 280.00</strong></div>
-              </div>
-              <div style="border-top:1px dashed #cbd5e1;margin-top:12px;padding-top:8px;">
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;"><span>Subtotal:</span><span>Rs. 1,540.00</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:#10b981;"><span>Discount:</span><span>- Rs. 120.00</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:#0e766e;margin-top:4px;"><span>Total:</span><span>Rs. 1,420.00</span></div>
-              </div>
-            </div>
-            <button style="background:linear-gradient(135deg,#0e766e,#14b8a6);color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:14px;margin-top:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-              🖨️ Pay & Print Bill (Rs. 1,420)
-            </button>
-          </div>
-        </div>
-      </div>
-    `,
-    stock: `
-      <div style="background:#f1f5f9;padding:16px;border-radius:12px;height:100%;display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Product Catalog & Stock Management</h3><small style="color:#64748b;">48 Total Products | 3 Low Stock Warnings</small></div>
-          <button style="background:#0e766e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;">+ Add Product</button>
-        </div>
-        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;flex:1;">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
-            <thead>
-              <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#475569;font-weight:700;">
-                <th style="padding:10px 14px;">Product Name</th>
-                <th style="padding:10px;">Barcode</th>
-                <th style="padding:10px;">Cost (LKR)</th>
-                <th style="padding:10px;">Selling (LKR)</th>
-                <th style="padding:10px;">Stock</th>
-                <th style="padding:10px;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">Munchee Super Cream Cracker</td>
-                <td style="padding:10px;font-family:monospace;color:#64748b;">4792022001124</td>
-                <td style="padding:10px;">Rs. 115.00</td>
-                <td style="padding:10px;font-weight:700;color:#0e766e;">Rs. 140.00</td>
-                <td style="padding:10px;font-weight:700;">48 pcs</td>
-                <td style="padding:10px;"><span style="background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:6px;font-weight:700;font-size:10px;">In Stock</span></td>
-              </tr>
-              <tr style="border-bottom:1px solid #edf2f7;background:#fffbeb;">
-                <td style="padding:10px 14px;font-weight:700;">Anchor Full Cream Milk Powder 400g</td>
-                <td style="padding:10px;font-family:monospace;color:#64748b;">9414589002145</td>
-                <td style="padding:10px;">Rs. 980.00</td>
-                <td style="padding:10px;font-weight:700;color:#0e766e;">Rs. 1,120.00</td>
-                <td style="padding:10px;font-weight:700;color:#b45309;">3 pcs</td>
-                <td style="padding:10px;"><span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-weight:700;font-size:10px;">⚠️ Low Stock</span></td>
-              </tr>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">Dilmah Premium Ceylon Tea 100g</td>
-                <td style="padding:10px;font-family:monospace;color:#64748b;">4791011500212</td>
-                <td style="padding:10px;">Rs. 230.00</td>
-                <td style="padding:10px;font-weight:700;color:#0e766e;">Rs. 280.00</td>
-                <td style="padding:10px;font-weight:700;">25 pcs</td>
-                <td style="padding:10px;"><span style="background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:6px;font-weight:700;font-size:10px;">In Stock</span></td>
-              </tr>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">Sunlight Lemon Soap 115g</td>
-                <td style="padding:10px;font-family:monospace;color:#64748b;">8901030014521</td>
-                <td style="padding:10px;">Rs. 82.00</td>
-                <td style="padding:10px;font-weight:700;color:#0e766e;">Rs. 100.00</td>
-                <td style="padding:10px;font-weight:700;">64 pcs</td>
-                <td style="padding:10px;"><span style="background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:6px;font-weight:700;font-size:10px;">In Stock</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `,
-    reports: `
-      <div style="background:#f1f5f9;padding:16px;border-radius:12px;height:100%;display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Daily Sales & Profit Analytics</h3><small style="color:#64748b;">Today's Summary (25 Oct 2026)</small></div>
-          <span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">📈 Profitable Day</span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">TOTAL REVENUE</span><div style="font-size:18px;font-weight:900;color:#0e766e;margin-top:2px;">Rs. 42,650</div></div>
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">NET PROFIT</span><div style="font-size:18px;font-weight:900;color:#10b981;margin-top:2px;">Rs. 8,920</div></div>
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">BILLS ISSUED</span><div style="font-size:18px;font-weight:900;color:#0284c7;margin-top:2px;">64 Bills</div></div>
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">AVG. BILL VALUE</span><div style="font-size:18px;font-weight:900;color:#f59e0b;margin-top:2px;">Rs. 666</div></div>
-        </div>
-        <div style="background:#fff;padding:14px;border-radius:12px;border:1px solid #e2e8f0;flex:1;">
-          <div style="font-weight:800;font-size:13px;margin-bottom:8px;color:#334155;">Top Selling Items Today</div>
-          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;"><span>1. Keells White Bread (450g)</span><span style="font-weight:700;">28 units / Rs. 4,480</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;"><span>2. Anchor Milk Powder 400g</span><span style="font-weight:700;">11 units / Rs. 12,320</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;"><span>3. Munchee Super Cream Cracker</span><span style="font-weight:700;">22 units / Rs. 3,080</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;"><span>4. Dilmah Tea 100g</span><span style="font-weight:700;">16 units / Rs. 4,480</span></div>
-          </div>
-        </div>
-      </div>
-    `,
-    credit: `
-      <div style="background:#f1f5f9;padding:16px;border-radius:12px;height:100%;display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Customer Credit Ledger (ඩිජිටල් ණය පොත)</h3><small style="color:#64748b;">Manage customer credit balances and settlements</small></div>
-          <button style="background:#f59e0b;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;">+ Record Credit</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">TOTAL UNPAID CREDIT</span><div style="font-size:18px;font-weight:900;color:#b45309;margin-top:2px;">Rs. 18,450</div></div>
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">SETTLED THIS WEEK</span><div style="font-size:18px;font-weight:900;color:#10b981;margin-top:2px;">Rs. 14,200</div></div>
-          <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #e2e8f0;"><span style="font-size:11px;color:#64748b;font-weight:700;">ACTIVE CUSTOMERS</span><div style="font-size:18px;font-weight:900;color:#0e766e;margin-top:2px;">8 Customers</div></div>
-        </div>
-        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;flex:1;">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
-            <thead>
-              <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#475569;font-weight:700;">
-                <th style="padding:10px 14px;">Customer Name</th>
-                <th style="padding:10px;">Phone No</th>
-                <th style="padding:10px;">Due Balance</th>
-                <th style="padding:10px;">Last Purchase</th>
-                <th style="padding:10px;">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">K. D. Gamage (Teacher)</td>
-                <td style="padding:10px;color:#64748b;">077 123 4567</td>
-                <td style="padding:10px;font-weight:800;color:#b45309;">Rs. 4,250.00</td>
-                <td style="padding:10px;">Yesterday</td>
-                <td style="padding:10px;"><button style="background:#e8f4f2;color:#0e766e;border:none;padding:4px 10px;border-radius:6px;font-weight:700;font-size:11px;">Settle / Pay</button></td>
-              </tr>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">Sunil Perera (Garage)</td>
-                <td style="padding:10px;color:#64748b;">071 987 6543</td>
-                <td style="padding:10px;font-weight:800;color:#b45309;">Rs. 7,800.00</td>
-                <td style="padding:10px;">3 days ago</td>
-                <td style="padding:10px;"><button style="background:#e8f4f2;color:#0e766e;border:none;padding:4px 10px;border-radius:6px;font-weight:700;font-size:11px;">Settle / Pay</button></td>
-              </tr>
-              <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:10px 14px;font-weight:700;">Nimali Jayasuriya</td>
-                <td style="padding:10px;color:#64748b;">075 444 8888</td>
-                <td style="padding:10px;font-weight:800;color:#10b981;">Rs. 0.00 (Settled)</td>
-                <td style="padding:10px;">Today</td>
-                <td style="padding:10px;"><span style="color:#10b981;font-weight:700;font-size:11px;">✓ Cleared</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `,
-    settings: `
-      <div style="background:#f1f5f9;padding:16px;border-radius:12px;height:100%;display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Store Settings & Thermal Receipt Setup</h3><small style="color:#64748b;">Hardware, License Status & Backup Control</small></div>
-          <span style="background:#e8f4f2;color:#0e766e;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">🔐 License: Active</span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;">
-          <div style="background:#fff;padding:14px;border-radius:12px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;">
-            <div style="font-weight:800;font-size:13px;color:#0f172a;">Thermal Receipt Settings</div>
-            <label style="font-size:11px;font-weight:700;color:#64748b;">Shop Header Text</label>
-            <input type="text" value="APEX RETAIL MART - COLOMBO" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;" readonly>
-            <label style="font-size:11px;font-weight:700;color:#64748b;">Thermal Printer Width</label>
-            <select style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"><option>58mm Mini Bluetooth Printer (Default)</option><option>80mm Standard POS Thermal Printer</option></select>
-            <button style="background:#0e766e;color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;font-size:12px;margin-top:6px;">🖨️ Test Print Sample Slip</button>
-          </div>
-          <div style="background:#fff;padding:14px;border-radius:12px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;">
-            <div style="font-weight:800;font-size:13px;color:#0f172a;">Data Security & Backup</div>
-            <p style="font-size:11px;color:#64748b;margin:0;">All data is safely stored on this device. Click below to backup or restore.</p>
-            <button style="background:#0284c7;color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;font-size:12px;margin-top:4px;">⬇️ Download Full Database Backup</button>
-            <button style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:8px;border-radius:6px;font-weight:700;font-size:12px;">⬆️ Restore Backup File</button>
-            <div style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;font-size:11px;">
-              <strong>Device ID:</strong> <span style="font-family:monospace;color:#0e766e;">APX-LK-7749-8821</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
+  // --- Live App Screen Showcase Gallery with Real iPhone Screenshots ---
+  const screenData = {
+    dashboard: {
+      img: 'screen-dashboard.jpg',
+      badge: { si: '⚡ සජීවී පාලක පුවරුව (Live Dashboard)', en: '⚡ Live Business Dashboard' },
+      title: { si: 'ව්‍යාපාරයේ සියලු තොරතුරු එක තිරයකින්', en: 'Complete Retail Analytics at a Glance' },
+      desc: {
+        si: 'දවසේ මුළු විකුණුම් (Sales), ශුද්ධ ලාභය (Gross Profit), අවසන් වෙමින් පවතින තොග (Low Stock) සහ මෑතකදී නිකුත් කළ බිල්පත් ක්ෂණිකව පරික්ෂා කරන්න.',
+        en: 'Monitor daily sales revenue, gross profits, low stock alerts, quick transaction shortcuts, and real-time recent bill history on one screen.'
+      },
+      features: [
+        { icon: '💰', title: { si: 'මුළු විකුණුම් & ලාභය', en: 'Sales & Gross Profit' }, desc: { si: 'දවසේ ආදායම සහ ලාභය සජීවීව ගණනය වේ.', en: 'Live daily revenue and net margin calculations.' } },
+        { icon: '⚠️', title: { si: 'Low Stock Alerts', en: 'Low Stock Alerts' }, desc: { si: 'භාණ්ඩ අවසන් වීමට පෙර අනතුරු අඟවයි.', en: 'Instant notification before stock runs out.' } },
+        { icon: '⚡', title: { si: 'Quick Sale Shortcuts', en: 'Quick Sale Shortcuts' }, desc: { si: 'වැඩිපුරම අලෙවි වන භාණ්ඩ ක්ෂණිකව බිල් කරන්න.', en: 'One-tap billing for top-selling items.' } },
+        { icon: '🧾', title: { si: 'Recent Sales Log', en: 'Recent Sales Log' }, desc: { si: 'නිකුත් කළ බිල්පත් සහ මුදල්/ණය තත්ත්වය.', en: 'Audit past bills and cash/credit statuses.' } }
+      ]
+    },
+    pos: {
+      img: 'screen-billing.jpg',
+      badge: { si: '🛒 තත්පරයේ බිල්පත් පද්ධතිය (Checkout Terminal)', en: '🛒 Fast Billing & Checkout' },
+      title: { si: 'වේගවත් බිල්පත්, WhatsApp & Thermal මුද්‍රණය', en: 'Rapid Checkout, Thermal Print & WhatsApp' },
+      desc: {
+        si: 'භාණ්ඩ Search කිරීමෙන් හෝ Barcode Scanner එකෙන් Cart එකට එක් කර මුදල් හෝ ණය ලෙස බිල නිකුත් කරන්න. පාරිභෝගිකයාගේ WhatsApp අංකයට සෘජුවම බිල යැවිය හැක.',
+        en: 'Fast item addition via search or camera barcode scan. Accept cash or credit, print 58mm/80mm receipts, and send digital bills directly to customer WhatsApp.'
+      },
+      features: [
+        { icon: '💬', title: { si: 'WhatsApp Bill Sharing', en: 'WhatsApp Bill Sharing' }, desc: { si: 'දුරකථන අංකය ඇතුළත් කර WhatsApp එකට බිල යවන්න.', en: 'Enter phone number and send receipt to WhatsApp instantly.' } },
+        { icon: '🖨️', title: { si: 'Thermal Receipt Print', en: 'Thermal Receipt Print' }, desc: { si: '58mm හෝ 80mm Bluetooth/USB මුද්‍රණය.', en: 'Fast print/reprint on Bluetooth and USB printers.' } },
+        { icon: '💳', title: { si: 'Cash & Credit (ණය)', en: 'Cash & Credit Sales' }, desc: { si: 'අත්පිට මුදල් හෝ ණය ලෙස බිල්පත් වෙන් කරන්න.', en: 'Split transactions into cash or customer credit.' } },
+        { icon: '📷', title: { si: 'Camera Barcode Scan', en: 'Camera Barcode Scan' }, desc: { si: 'දුරකථනයේ කැමරාවෙන් බාර්කෝඩ් ස්කෑන් කරන්න.', en: 'Zero equipment needed—scan with phone camera.' } }
+      ]
+    },
+    stock: {
+      img: 'screen-products.jpg',
+      badge: { si: '📦 ස්මාර්ට් තොග කළමනාකරණය (Stock Catalog)', en: '📦 Inventory & Products' },
+      title: { si: 'භාණ්ඩ නාමාවලිය සහ තොග පාලනය', en: 'Product Catalog & Automated Stock' },
+      desc: {
+        si: 'ඕනෑම භාණ්ඩයක් තත්පර 10කින් මිල, පිරිවැය, තොග ප්‍රමාණය සහ Barcode සමග එක්කරන්න. විකිණෙන විට තොග ස්වයංක්‍රීයව අඩුවේ.',
+        en: 'Add products with barcode, cost price, selling price, and category in seconds. Stock automatically deducts upon every sale.'
+      },
+      features: [
+        { icon: '🔍', title: { si: 'ක්ෂණික භාණ්ඩ සෙවුම', en: 'Instant Product Search' }, desc: { si: 'නාමය හෝ Barcode මගින් ක්ෂණිකව සොයන්න.', en: 'Find any item instantly by name or barcode.' } },
+        { icon: '🏷️', title: { si: 'පිරිවැය & ලාභ ප්‍රතිශතය', en: 'Cost & Selling Margins' }, desc: { si: 'භාණ්ඩයක ලාභය නිවැරදිව කළමනාකරණය.', en: 'Keep track of unit costs and profit margins.' } },
+        { icon: '📊', title: { si: 'තොග යාවත්කාලීන කිරීම්', en: 'Stock Adjustments' }, desc: { si: 'අලුත් තොග ලැබුණු විට ක්ෂණිකව සංස්කරණය.', en: 'Update inventory quantities when restocked.' } },
+        { icon: '📁', title: { si: 'කාණ්ඩ (Categories)', en: 'Smart Categories' }, desc: { si: 'බීම, කෑම, සබන් ආදී වශයෙන් වර්ගීකරණය.', en: 'Organize catalog into fast-filter categories.' } }
+      ]
+    },
+    reports: {
+      img: 'screen-reports.jpg',
+      badge: { si: '📈 ලාභ වාර්තා & ණය ලෙජරය (Reports & Ledger)', en: '📈 Reports & Financial Ledger' },
+      title: { si: 'දෛනික ආදායම, ලාභය සහ ණය ලෙජරය', en: 'Revenue, Gross Margins & Credit Book' },
+      desc: {
+        si: 'දවසේ ආදායම, සම්පූර්ණ ලාභය, නිකුත් කළ බිල්පත් ගණන සහ පාරිභෝගික ණය මුදල් එක තැනකින් බලාගන්න. දිනය අනුව වාර්තා පෙරන්න.',
+        en: 'Deep financial visibility: daily revenue, gross profit margin, bill counts, unpaid customer credits, and settled debts by custom date range.'
+      },
+      features: [
+        { icon: '💵', title: { si: 'දෛනික ශුද්ධ ලාභය', en: 'Net & Gross Profit' }, desc: { si: 'කඩයේ සැබෑ ලාභය නිවැරදිව ගණනය කෙරේ.', en: 'Precise margin and profit metrics calculated locally.' } },
+        { icon: '📒', title: { si: 'පාරිභෝගික ණය ලෙජරය', en: 'Customer Credit Book' }, desc: { si: 'ණයට ගත් අය සහ ගෙවූ මුදල් පැහැදිලිව.', en: 'Track outstanding balances and partial repayments.' } },
+        { icon: '📅', title: { si: 'දින පෙරහන් (Date Filters)', en: 'Date Range Filters' }, desc: { si: 'ඕනෑම දවසක හෝ මාසයක වාර්තා ලබාගන්න.', en: 'Review any past date, week, or monthly cycle.' } },
+        { icon: '📤', title: { si: 'Excel / CSV Export', en: 'Data Export' }, desc: { si: 'ගිණුම් කටයුතු සඳහා Backup ලබාගන්න.', en: 'Download transaction logs for accounting.' } }
+      ]
+    },
+    settings: {
+      img: 'screen-settings.jpg',
+      badge: { si: '⚙️ සැකසුම් & Data Backup (Store Hardware)', en: '⚙️ Store Setup & Hardware' },
+      title: { si: 'වෙළඳසැල් විස්තර, මුද්‍රණ යන්ත්‍ර & දත්ත සුරැකුම', en: 'Shop Profile, Printer & 1-Click Backup' },
+      desc: {
+        si: 'ඔබේ කඩයේ නම, ලිපිනය, දුරකථන අංකය සහ බිල්පතේ අගට වැටෙන පණිවිඩය සකසන්න. 58mm/80mm Thermal Printer එක සකසා තනි ක්ලික් එකෙන් Backup ලබාගන්න.',
+        en: 'Configure shop identity, receipt header/footer notes, 58mm/80mm printer paper width, and download complete encrypted local backups anytime.'
+      },
+      features: [
+        { icon: '🏪', title: { si: 'කඩයේ නම & බිල්පත් Header', en: 'Custom Receipt Header' }, desc: { si: 'ඔබේ වෙළඳසැලේ නම සහ දුරකථනය බිලට වැටේ.', en: 'Display your shop name, address, and telephone.' } },
+        { icon: '🖨️', title: { si: '58mm & 80mm Printer', en: 'Thermal Printer Width' }, desc: { si: 'Mini Bluetooth හෝ Standard POS Printer.', en: 'Support for both 58mm portable and 80mm desktop printers.' } },
+        { icon: '💾', title: { si: '1-Click Data Backup', en: '1-Click Local Backup' }, desc: { si: 'සියලු දත්ත දුරකථනයට Download කරගන්න.', en: 'Export full offline database file for safekeeping.' } },
+        { icon: '🔑', title: { si: 'Device ID & Activation', en: 'Hardware Activation' }, desc: { si: 'දින 7ක Trial එකෙන් පසු WhatsApp මගින් සක්‍රියයි.', en: 'Offline machine license activation via WhatsApp.' } }
+      ]
+    }
   };
+
+  let currentActiveScreen = 'dashboard';
+
+  function buildScreenHtml(screenKey, lang) {
+    const item = screenData[screenKey] || screenData.dashboard;
+    const l = lang === 'si' ? 'si' : 'en';
+    const appUrl = getAppUrl();
+    const tryBtnText = l === 'si' ? 'POS එකෙහි අත්හදා බලන්න' : 'Try Feature in POS';
+    const fullImgBtnText = l === 'si' ? '🔍 සම්පූර්ණ Screenshot එක බලන්න' : '🔍 View Full Screenshot';
+
+    const featuresHtml = item.features.map(f => `
+      <div class="showcase-feature-item">
+        <div class="showcase-feature-icon">${f.icon}</div>
+        <div class="showcase-feature-text">
+          <strong>${f.title[l]}</strong>
+          <span>${f.desc[l]}</span>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="showcase-card-grid">
+        <div class="showcase-shot-col">
+          <div class="showcase-device-frame">
+            <img src="${item.img}" alt="${item.title[l]}" class="showcase-img" loading="lazy">
+          </div>
+        </div>
+        <div class="showcase-detail-col">
+          <div class="showcase-tag-badge">${item.badge[l]}</div>
+          <h3 class="showcase-title">${item.title[l]}</h3>
+          <p class="showcase-desc">${item.desc[l]}</p>
+          <div class="showcase-features-list">
+            ${featuresHtml}
+          </div>
+          <div class="showcase-actions">
+            <a href="${appUrl}" class="btn btn-primary pos-launch-btn">
+              <span>${tryBtnText}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5v2z"/></svg>
+            </a>
+            <a href="${item.img}" target="_blank" rel="noopener" class="btn btn-secondary">
+              <span>${fullImgBtnText}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   function initScreensGallery() {
     const screenTabBtns = document.querySelectorAll('.screen-tab-btn');
     const screenContainer = document.getElementById('screenLiveContainer');
 
     function renderScreen(screenKey) {
-      if (screenContainer && screenContentTemplates[screenKey]) {
-        screenContainer.style.opacity = '0';
-        setTimeout(() => {
-          screenContainer.innerHTML = screenContentTemplates[screenKey];
-          screenContainer.style.opacity = '1';
-        }, 150);
-      }
+      if (!screenContainer) return;
+      currentActiveScreen = screenKey || currentActiveScreen;
+      screenContainer.style.opacity = '0';
+      setTimeout(() => {
+        screenContainer.innerHTML = buildScreenHtml(currentActiveScreen, currentLang);
+        screenContainer.style.opacity = '1';
+      }, 150);
     }
+
+    // Expose for language changes
+    window.refreshScreensGallery = function () {
+      renderScreen(currentActiveScreen);
+    };
 
     screenTabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -706,7 +626,7 @@
     });
 
     // Initial render
-    renderScreen('pos');
+    renderScreen('dashboard');
   }
 
   // --- FAQ Accordion ---

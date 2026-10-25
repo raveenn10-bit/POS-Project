@@ -75,6 +75,9 @@
          Hero Section
          ========================================================================== -->
     <section class="hero" id="hero">
+      <div class="hero-bg-watermark">
+        <img src="harsh-apex-logo.png" alt="" aria-hidden="true">
+      </div>
       <div class="container hero-grid">
         <!-- Hero Left Column (Copy & Call to Actions) -->
         <div class="hero-content reveal-up">
@@ -164,76 +167,9 @@
                 <span class="island-sensor"></span>
               </div>
 
-              <!-- Phone Screen UI Mockup -->
-              <div class="phone-screen">
-                <div class="phone-status-bar">
-                  <span>09:41</span>
-                  <div style="display:flex;gap:4px;align-items:center;">
-                    <span>📶</span>
-                    <span>🔋 100%</span>
-                  </div>
-                </div>
-
-                <!-- Apex App Header -->
-                <div class="phone-app-header">
-                  <div class="phone-app-brand">
-                    <img src="harsh-apex-logo.png" alt="Harsh Apex" class="phone-app-logo">
-                    <span class="phone-app-title">Harsh Apex POS</span>
-                  </div>
-                  <span style="font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;font-weight:700;">OFFLINE</span>
-                </div>
-
-                <!-- Phone App Body -->
-                <div class="phone-app-body">
-                  <div class="mockup-search-bar">
-                    <span>🔍</span>
-                    <span>Search or scan barcode...</span>
-                  </div>
-
-                  <div class="mockup-cat-chips">
-                    <span class="mockup-chip active">All Items</span>
-                    <span class="mockup-chip">Biscuits</span>
-                    <span class="mockup-chip">Dairy</span>
-                    <span class="mockup-chip">Spices</span>
-                  </div>
-
-                  <div class="mockup-product-list">
-                    <div class="mockup-item">
-                      <div class="mockup-item-left">
-                        <span class="mockup-item-name">Munchee Super Cream</span>
-                        <span class="mockup-item-code">4792022001124 • Stock: 48</span>
-                      </div>
-                      <span class="mockup-item-price">Rs. 140</span>
-                    </div>
-
-                    <div class="mockup-item">
-                      <div class="mockup-item-left">
-                        <span class="mockup-item-name">Anchor Milk Powder 400g</span>
-                        <span class="mockup-item-code">9414589002145 • Stock: 14</span>
-                      </div>
-                      <span class="mockup-item-price">Rs. 1,120</span>
-                    </div>
-
-                    <div class="mockup-item">
-                      <div class="mockup-item-left">
-                        <span class="mockup-item-name">Keells White Bread 450g</span>
-                        <span class="mockup-item-code">4791011003421 • Fresh</span>
-                      </div>
-                      <span class="mockup-item-price">Rs. 160</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cart Bottom Drawer -->
-                <div class="mockup-cart-drawer">
-                  <div class="mockup-cart-row">
-                    <span data-i18n="mockup_cart_title">වත්මන් බිල්පත (භාණ්ඩ 3)</span>
-                    <span style="color:var(--emerald-mint);font-size:14px;font-weight:900;">Rs. 1,420</span>
-                  </div>
-                  <button class="mockup-pay-btn" type="button">
-                    <span data-i18n="mockup_cart_btn">🖨️ බිල මුද්‍රණය (Rs. 1,420)</span>
-                  </button>
-                </div>
+              <!-- Phone Screen Real UI Screenshot -->
+              <div class="phone-screen" style="position:relative;background:#0d1525;border-radius:36px;overflow:hidden;">
+                <img src="screen-dashboard.jpg" alt="Harsh Apex Retail POS Dashboard Screenshot" class="phone-screenshot-img">
               </div>
             </div>
           </div>
@@ -615,11 +551,11 @@
 
         <!-- Showcase Tab Selectors -->
         <div class="screens-nav reveal-up">
-          <button type="button" class="screen-tab-btn active" data-screen="pos" data-i18n="screen_tab_pos">🛒 බිල්පත් නිකුත් කිරීම (POS)</button>
+          <button type="button" class="screen-tab-btn active" data-screen="dashboard" data-i18n="screen_tab_dashboard">📊 පාලක පුවරුව (Dashboard)</button>
+          <button type="button" class="screen-tab-btn" data-screen="pos" data-i18n="screen_tab_pos">🛒 බිල්පත් නිකුත් කිරීම (Billing)</button>
           <button type="button" class="screen-tab-btn" data-screen="stock" data-i18n="screen_tab_stock">📦 භාණ්ඩ හා තොග (Products)</button>
-          <button type="button" class="screen-tab-btn" data-screen="reports" data-i18n="screen_tab_reports">📊 දෛනික ලාභ වාර්තා (Reports)</button>
-          <button type="button" class="screen-tab-btn" data-screen="credit" data-i18n="screen_tab_credit">📒 පාරිභෝගික ණය පොත (Credit)</button>
-          <button type="button" class="screen-tab-btn" data-screen="settings" data-i18n="screen_tab_settings">⚙️ සැකසුම් & මුද්‍රණ යන්ත්‍ර (Settings)</button>
+          <button type="button" class="screen-tab-btn" data-screen="reports" data-i18n="screen_tab_reports">📈 විකුණුම් වාර්තා (Reports)</button>
+          <button type="button" class="screen-tab-btn" data-screen="settings" data-i18n="screen_tab_settings">⚙️ සැකසුම් & Backup (Settings)</button>
         </div>
 
         <!-- Showcase Glass Window Mockup -->
