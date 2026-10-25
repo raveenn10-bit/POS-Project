@@ -380,10 +380,7 @@
 
   // Smart App Launch URL
   function getAppUrl() {
-    const isLocal = window.location.protocol === 'file:' || 
-                    window.location.hostname === 'localhost' || 
-                    window.location.hostname === '127.0.0.1';
-    return isLocal ? 'app.html' : 'https://pos-project-lake.vercel.app/app.html';
+    return 'app.html';
   }
 
   // Apply Language to all data-i18n elements
