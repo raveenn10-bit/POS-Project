@@ -1,5 +1,15 @@
 'use strict';
 
+// Gesture prevention for iOS Safari / Chrome to prevent pinch-to-zoom
+document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+window.addEventListener('touchstart', function(e) {
+  if (e.touches && e.touches.length > 1) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 // -------------------------------------------------------------
 // 1. Offline signed-license gate. Only the private admin tool can create valid codes.
 // -------------------------------------------------------------
@@ -131,7 +141,8 @@ if (!db || !Array.isArray(db.products) || !Array.isArray(db.sales)) {
       regNo: '',
       currency: 'Rs.',
       receiptWidth: '58mm',
-      receiptFooter: 'Thank you for shopping with us! Returns accepted within 3 days with receipt.'
+      receiptFooter: 'Thank you for shopping with us! Returns accepted within 3 days with receipt.',
+      logo: 'harsh-apex-logo.png'
     },
     categories: ['General', 'Grocery', 'Beverages', 'Snacks', 'Bakery', 'Dairy & Frozen', 'Household', 'Personal Care', 'Other']
   };
@@ -146,6 +157,7 @@ db.shop.regNo ||= '';
 db.shop.currency ||= 'Rs.';
 db.shop.receiptWidth ||= '58mm';
 db.shop.receiptFooter ||= 'Thank you for shopping with us! Returns accepted within 3 days with receipt.';
+db.shop.logo ||= 'harsh-apex-logo.png';
 db.categories ||= ['General', 'Grocery', 'Beverages', 'Snacks', 'Bakery', 'Dairy & Frozen', 'Household', 'Personal Care', 'Other'];
 db.products.forEach(p => { if (!p.category) p.category = 'General'; });
 
@@ -276,25 +288,69 @@ window.show = show;
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => show(b.dataset.tab));
 
 // -------------------------------------------------------------
-// 6. Camera Barcode Scanner
+// 6. Camera Barcode Scanner (Universal iOS & Android Support)
 // -------------------------------------------------------------
+let html5QrScanner = null;
+
 async function openScanner(target) {
   scannerTarget = target;
   const modal = $('scannerModal');
-  const video = $('scannerVideo');
   const status = $('scannerStatus');
   modal.style.display = 'flex';
-  status.textContent = 'Requesting camera access...';
+  status.textContent = 'Starting camera scanner...';
 
+  // 1. Try Html5Qrcode (Full cross-platform support including iOS Safari)
+  if (typeof Html5Qrcode !== 'undefined') {
+    try {
+      if (!html5QrScanner) {
+        html5QrScanner = new Html5Qrcode('scannerReader', { verbose: false });
+      }
+      if (html5QrScanner.isScanning) {
+        await html5QrScanner.stop();
+      }
+      const qrConfig = {
+        fps: 20,
+        qrbox: (viewWidth, viewHeight) => {
+          const edge = Math.min(viewWidth, viewHeight);
+          return {
+            width: Math.floor(edge * 0.8),
+            height: Math.floor(edge * 0.55)
+          };
+        },
+        aspectRatio: 1.333333
+      };
+      await html5QrScanner.start(
+        { facingMode: currentFacingMode },
+        qrConfig,
+        (decodedText) => {
+          handleScannedBarcode(decodedText);
+        },
+        () => {
+          // ignore per-frame decode misses
+        }
+      );
+      scannerActive = true;
+      status.textContent = 'Align barcode inside frame';
+      return;
+    } catch (err) {
+      console.warn('Html5Qrcode start error, trying standard getUserMedia:', err);
+    }
+  }
+
+  // 2. Fallback: getUserMedia + BarcodeDetector
   try {
     if (scannerStream) {
       scannerStream.getTracks().forEach(t => t.stop());
     }
+    const video = $('scannerVideo');
+    if (video) video.style.display = 'block';
     scannerStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
     });
-    video.srcObject = scannerStream;
-    await video.play();
+    if (video) {
+      video.srcObject = scannerStream;
+      await video.play();
+    }
     scannerActive = true;
     status.textContent = 'Align barcode inside the green box';
     startBarcodeDetection(video);
@@ -304,15 +360,24 @@ async function openScanner(target) {
   }
 }
 
-function closeScanner() {
+async function closeScanner() {
   scannerActive = false;
+  if (html5QrScanner && html5QrScanner.isScanning) {
+    try {
+      await html5QrScanner.stop();
+    } catch (e) {}
+  }
   if (scannerStream) {
     scannerStream.getTracks().forEach(t => t.stop());
     scannerStream = null;
   }
   const video = $('scannerVideo');
-  if (video) video.srcObject = null;
-  $('scannerModal').style.display = 'none';
+  if (video) {
+    video.srcObject = null;
+    video.style.display = 'none';
+  }
+  const modal = $('scannerModal');
+  if (modal) modal.style.display = 'none';
 }
 
 $('closeScannerBtn').onclick = closeScanner;
@@ -320,13 +385,14 @@ $('closeScannerBtn').onclick = closeScanner;
 $('switchCameraBtn').onclick = async () => {
   currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
   if (scannerActive) {
+    await closeScanner();
     await openScanner(scannerTarget);
   }
 };
 
 async function startBarcodeDetection(video) {
   if (!('BarcodeDetector' in window)) {
-    $('scannerStatus').innerHTML = 'Live scanning requires Chrome/Edge. Tap <b>📁 Image</b> below to scan photos.';
+    $('scannerStatus').innerHTML = 'Camera preview active. Tap <b>📁 Image</b> below to scan photos if needed.';
     return;
   }
 
@@ -391,31 +457,54 @@ function handleScannedBarcode(code) {
   }
 }
 
-// Scanner fallback from image file
+// Universal photo barcode detection
 $('scannerImageFile').onchange = async e => {
-  const file = e.target.files[0];
+  const file = e.target.files && e.target.files[0];
   if (!file) return;
-  if (!('BarcodeDetector' in window)) {
-    return alert('Barcode detection is not supported in this browser version.');
-  }
-  try {
-    const detector = new window.BarcodeDetector({
-      formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code']
-    });
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
-    await img.decode();
-    const barcodes = await detector.detect(img);
-    if (barcodes.length > 0) {
-      handleScannedBarcode(barcodes[0].rawValue.trim());
-    } else {
-      alert('No barcode detected in this image. Try a clearer photo.');
+
+  const status = $('scannerStatus');
+  if (status) status.textContent = 'Scanning image file...';
+
+  // 1. Try Html5Qrcode file scan (Universal iOS & Android)
+  if (typeof Html5Qrcode !== 'undefined') {
+    try {
+      if (!html5QrScanner) {
+        html5QrScanner = new Html5Qrcode('scannerReader', { verbose: false });
+      }
+      const text = await html5QrScanner.scanFile(file, true);
+      if (text) {
+        handleScannedBarcode(text.trim());
+        e.target.value = '';
+        return;
+      }
+    } catch (err) {
+      console.warn('Html5Qrcode file scan note:', err);
     }
-  } catch (err) {
-    alert('Failed to read image: ' + err.message);
-  } finally {
-    e.target.value = '';
   }
+
+  // 2. Fallback: native BarcodeDetector if available
+  if ('BarcodeDetector' in window) {
+    try {
+      const detector = new window.BarcodeDetector({
+        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code', 'itf']
+      });
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      await img.decode();
+      const barcodes = await detector.detect(img);
+      if (barcodes.length > 0) {
+        handleScannedBarcode(barcodes[0].rawValue.trim());
+        e.target.value = '';
+        return;
+      }
+    } catch (err) {
+      console.warn('BarcodeDetector error:', err);
+    }
+  }
+
+  alert('No barcode detected in this image. Try taking a clearer photo with proper lighting.');
+  if (status) status.textContent = 'Align barcode inside frame or choose another image';
+  e.target.value = '';
 };
 
 $('quickScannerBtn').onclick = () => { show('billing'); openScanner('bill'); };
@@ -893,9 +982,13 @@ $('checkout').onclick = () => {
 // -------------------------------------------------------------
 // 10. Thermal Receipt Formatting & Direct Bluetooth Printing
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// 10. Thermal Receipt Formatting, PDF Invoice & Bluetooth Thermal
+// -------------------------------------------------------------
 function receiptHTML(s) {
   const shop = db.shop;
   return `
+    ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" style="max-height:48px;max-width:130px;object-fit:contain"></div>` : ''}
     <h2>${esc(shop.name || 'Harsh Apex POS')}</h2>
     ${shop.address ? `<p class="center">${esc(shop.address)}</p>` : ''}
     ${shop.phone ? `<p class="center">Tel: ${esc(shop.phone)}</p>` : ''}
@@ -944,66 +1037,142 @@ function printReceipt(sale) {
   window.print();
 }
 
-$('printLast').onclick = () => { if (lastSale) printReceipt(lastSale); };
+// Download Crisp A4 PDF Invoice matching reference specification
+function downloadPdfInvoice(sale) {
+  if (!sale) return;
+  toast('Generating A4 PDF invoice...');
+  if (typeof generateInvoicePDF === 'function') {
+    generateInvoicePDF(sale, db.shop, 'download')
+      .then(() => toast('PDF invoice downloaded!'))
+      .catch(err => {
+        console.warn('PDF generation error, fallback to print:', err);
+        printReceipt(sale);
+      });
+  } else {
+    printReceipt(sale);
+  }
+}
 
-$('btPrintLast').onclick = async () => {
-  if (!lastSale) return;
-  await printBluetoothThermal(lastSale);
-};
+if ($('printLast')) {
+  $('printLast').onclick = () => { if (lastSale) downloadPdfInvoice(lastSale); };
+}
+if ($('printThermalLast')) {
+  $('printThermalLast').onclick = () => { if (lastSale) printReceipt(lastSale); };
+}
+if ($('btPrintLast')) {
+  $('btPrintLast').onclick = async () => {
+    if (!lastSale) return;
+    await printBluetoothThermal(lastSale);
+  };
+}
 
-// Web Bluetooth ESC/POS Print Helper
+// Web Bluetooth ESC/POS Print Helper with Universal Service Scanning
 async function printBluetoothThermal(s) {
+  const ESC = '\x1B', GS = '\x1D';
+  let text = `${ESC}@`; // Initialize
+  text += `${ESC}a\x01`; // Center
+  text += `${db.shop.name || 'Harsh Apex POS'}\n`;
+  if (db.shop.address) text += `${db.shop.address}\n`;
+  if (db.shop.phone) text += `Tel: ${db.shop.phone}\n`;
+  text += `--------------------------------\n`;
+  text += `${ESC}a\x00`; // Left align
+  text += `Bill: ${s.number}\nDate: ${new Date(s.at).toLocaleString()}\nPay: ${s.method}\n`;
+  if (s.isCredit) text += `Credit To: ${s.creditCustomer}\n`;
+  text += `--------------------------------\n`;
+  s.items.forEach(x => {
+    text += `${x.name}\n  ${x.qty} x ${x.price} = ${(x.qty * x.price).toFixed(2)}\n`;
+  });
+  text += `--------------------------------\n`;
+  text += `Total: Rs. ${s.total.toFixed(2)}\n`;
+  text += `Paid:  Rs. ${s.received.toFixed(2)}\n`;
+  text += `Bal:   Rs. ${s.change.toFixed(2)}\n`;
+  text += `--------------------------------\n`;
+  text += `${ESC}a\x01`; // Center
+  if (db.shop.receiptFooter) text += `${db.shop.receiptFooter}\n`;
+  text += `\n\n\n${GS}V\x41\x00`; // Cut paper
+
   if (!navigator.bluetooth) {
-    if (confirm('Web Bluetooth is supported on Android Chrome. Would you like to use standard system print instead?')) {
+    const doPrint = confirm(
+      'Web Bluetooth is supported on Android Chrome.\n\n' +
+      'On iPhone / iPad, you can:\n' +
+      '1. Tap OK to open the Thermal Slip Print dialog (AirPrint).\n' +
+      '2. Or download the high-resolution PDF Invoice.'
+    );
+    if (doPrint) {
       printReceipt(s);
     }
     return;
   }
 
+  const KNOWN_SERVICES = [
+    '000018f0-0000-1000-8000-00805f9b34fb',
+    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+    '0000e781-0000-1000-8000-00805f9b34fb',
+    '0000ff00-0000-1000-8000-00805f9b34fb',
+    '0000ae00-0000-1000-8000-00805f9b34fb',
+    '000018f1-0000-1000-8000-00805f9b34fb'
+  ];
+
   try {
     toast('Searching for Bluetooth Thermal Printer...');
     const device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
-      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
+      acceptAllDevices: true,
+      optionalServices: KNOWN_SERVICES
     });
 
+    toast('Connecting to printer...');
     const server = await device.gatt.connect();
-    toast('Connected! Sending print data...');
-    
-    // ESC/POS Commands
-    const ESC = '\x1B', GS = '\x1D';
-    let text = `${ESC}@`; // Initialize
-    text += `${ESC}a\x01`; // Center
-    text += `${db.shop.name || 'Harsh Apex POS'}\n`;
-    if (db.shop.address) text += `${db.shop.address}\n`;
-    if (db.shop.phone) text += `Tel: ${db.shop.phone}\n`;
-    text += `--------------------------------\n`;
-    text += `${ESC}a\x00`; // Left align
-    text += `Bill: ${s.number}\nDate: ${new Date(s.at).toLocaleString()}\nPay: ${s.method}\n`;
-    if (s.isCredit) text += `Credit To: ${s.creditCustomer}\n`;
-    text += `--------------------------------\n`;
-    s.items.forEach(x => {
-      text += `${x.name}\n  ${x.qty} x ${x.price} = ${(x.qty * x.price).toFixed(2)}\n`;
-    });
-    text += `--------------------------------\n`;
-    text += `Total: Rs. ${s.total.toFixed(2)}\n`;
-    text += `Paid:  Rs. ${s.received.toFixed(2)}\n`;
-    text += `Bal:   Rs. ${s.change.toFixed(2)}\n`;
-    text += `--------------------------------\n`;
-    text += `${ESC}a\x01`; // Center
-    if (db.shop.receiptFooter) text += `${db.shop.receiptFooter}\n`;
-    text += `\n\n\n${GS}V\x41\x00`; // Cut paper
 
+    let writeChar = null;
+    for (const sUuid of KNOWN_SERVICES) {
+      try {
+        const service = await server.getPrimaryService(sUuid);
+        const chars = await service.getCharacteristics();
+        for (const ch of chars) {
+          if (ch.properties.write || ch.properties.writeWithoutResponse) {
+            writeChar = ch;
+            break;
+          }
+        }
+        if (writeChar) break;
+      } catch (e) {}
+    }
+
+    if (!writeChar) {
+      try {
+        const services = await server.getPrimaryServices();
+        for (const service of services) {
+          const chars = await service.getCharacteristics();
+          for (const ch of chars) {
+            if (ch.properties.write || ch.properties.writeWithoutResponse) {
+              writeChar = ch;
+              break;
+            }
+          }
+          if (writeChar) break;
+        }
+      } catch (e) {}
+    }
+
+    if (!writeChar) {
+      throw new Error('No writable printer characteristic found on this device.');
+    }
+
+    toast('Sending ESC/POS print data...');
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
-
-    // Send chunks to Bluetooth characteristic
-    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-    const char = (await service.getCharacteristics())[0];
-    for (let i = 0; i < data.length; i += 100) {
-      await char.writeValue(data.slice(i, i + 100));
+    const CHUNK_SIZE = 40;
+    for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+      const chunk = data.slice(i, i + CHUNK_SIZE);
+      if (writeChar.properties.writeWithoutResponse) {
+        await writeChar.writeValueWithoutResponse(chunk);
+      } else {
+        await writeChar.writeValue(chunk);
+      }
+      await new Promise(r => setTimeout(r, 20));
     }
-    toast('Printed successfully via Bluetooth!');
+    toast('Printed successfully via Bluetooth Thermal!');
   } catch (err) {
     if (err.name !== 'NotFoundError') {
       alert('Bluetooth print note: ' + err.message);
@@ -1338,9 +1507,21 @@ function closeBillModal() {
 }
 $('closeBillModalBtn').onclick = closeBillModal;
 
+if ($('billModalPdf')) {
+  $('billModalPdf').onclick = () => {
+    if (selectedModalSale) downloadPdfInvoice(selectedModalSale);
+  };
+}
+
 $('billModalPrint').onclick = () => {
   if (selectedModalSale) printReceipt(selectedModalSale);
 };
+
+if ($('billModalBt')) {
+  $('billModalBt').onclick = async () => {
+    if (selectedModalSale) await printBluetoothThermal(selectedModalSale);
+  };
+}
 
 $('billModalShare').onclick = async () => {
   if (!selectedModalSale) return;
@@ -1424,7 +1605,8 @@ $('saveShop').onclick = () => {
     regNo: $('shopReg').value.trim(),
     currency: $('shopCurrency').value.trim() || 'Rs.',
     receiptWidth: $('receiptWidth').value || '58mm',
-    receiptFooter: $('shopFooter').value.trim()
+    receiptFooter: $('shopFooter').value.trim(),
+    logo: db.shop.logo || 'harsh-apex-logo.png'
   };
 
   if (save()) {
@@ -1443,6 +1625,53 @@ function updateShopDisplay() {
   $('shopCurrency').value = db.shop.currency || 'Rs.';
   $('receiptWidth').value = db.shop.receiptWidth || '58mm';
   $('shopFooter').value = db.shop.receiptFooter || '';
+  const currentLogo = db.shop.logo || 'harsh-apex-logo.png';
+  if ($('headerShopLogo')) $('headerShopLogo').src = currentLogo;
+  if ($('shopLogoPreview')) $('shopLogoPreview').src = currentLogo;
+}
+
+// Business Logo Upload & Reset
+if ($('shopLogoInput')) {
+  $('shopLogoInput').onchange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 256;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else { w = Math.round((w * maxDim) / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/png', 0.9);
+        db.shop.logo = compressed;
+        save();
+        updateShopDisplay();
+        toast('Business logo saved successfully!');
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+}
+
+if ($('resetShopLogoBtn')) {
+  $('resetShopLogoBtn').onclick = () => {
+    if (confirm('Reset business logo to default?')) {
+      db.shop.logo = 'harsh-apex-logo.png';
+      save();
+      updateShopDisplay();
+      toast('Logo reset to default.');
+    }
+  };
 }
 
 // -------------------------------------------------------------

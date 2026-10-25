@@ -390,14 +390,16 @@
     localStorage.setItem('apex_pos_lang', lang);
     document.documentElement.lang = lang;
 
-    // Update Language Toggle Switch
-    const langSwitch = document.getElementById('langSwitch');
-    if (langSwitch) {
-      langSwitch.setAttribute('data-lang', lang);
-      langSwitch.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-      });
-    }
+    // Update Language Toggle Switches (Navbar & Drawer)
+    ['langSwitch', 'drawerLangSwitch'].forEach(id => {
+      const sw = document.getElementById(id);
+      if (sw) {
+        sw.setAttribute('data-lang', lang);
+        sw.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+      }
+    });
 
     // Update all text nodes with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -687,35 +689,92 @@
     }, { passive: true });
   }
 
-  // --- Mobile Hamburger Menu ---
+  // --- Mobile Hamburger Drawer & Layout Lock ---
   function initMobileMenu() {
     const menuBtn = document.getElementById('mobileMenuBtn');
-    const navLinks = document.querySelector('.nav-links');
-    if (menuBtn && navLinks) {
-      menuBtn.addEventListener('click', () => {
-        const isVisible = navLinks.style.display === 'flex';
-        navLinks.style.display = isVisible ? 'none' : 'flex';
-        if (!isVisible) {
-          navLinks.style.position = 'absolute';
-          navLinks.style.top = '76px';
-          navLinks.style.left = '0';
-          navLinks.style.right = '0';
-          navLinks.style.background = 'rgba(8, 14, 26, 0.98)';
-          navLinks.style.flexDirection = 'column';
-          navLinks.style.padding = '20px';
-          navLinks.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+    const closeBtn = document.getElementById('drawerCloseBtn');
+
+    function openDrawer() {
+      if (menuBtn) menuBtn.classList.add('active');
+      if (drawer) {
+        drawer.classList.add('active');
+        drawer.setAttribute('aria-hidden', 'false');
+      }
+      if (overlay) overlay.classList.add('active');
+      document.body.classList.add('drawer-open');
+    }
+
+    function closeDrawer() {
+      if (menuBtn) menuBtn.classList.remove('active');
+      if (drawer) {
+        drawer.classList.remove('active');
+        drawer.setAttribute('aria-hidden', 'true');
+      }
+      if (overlay) overlay.classList.remove('active');
+      document.body.classList.remove('drawer-open');
+    }
+
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (drawer && drawer.classList.contains('active')) {
+          closeDrawer();
+        } else {
+          openDrawer();
         }
       });
+    }
 
-      // Close menu when a link is clicked
-      navLinks.querySelectorAll('a').forEach(link => {
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeDrawer();
+      });
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', closeDrawer);
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    // Close when clicking any nav link in the drawer
+    if (drawer) {
+      drawer.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-          if (window.innerWidth <= 768) {
-            navLinks.style.display = 'none';
+          closeDrawer();
+        });
+      });
+    }
+
+    // Connect drawer language switch to main language system
+    const drawerLangSwitch = document.getElementById('drawerLangSwitch');
+    if (drawerLangSwitch) {
+      drawerLangSwitch.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lang = btn.dataset.lang;
+          if (typeof setLanguage === 'function') {
+            setLanguage(lang);
           }
         });
       });
     }
+
+    // Guard against iOS pinch-to-zoom gesture on mobile
+    document.addEventListener('gesturestart', (e) => {
+      if (window.innerWidth <= 840) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', (e) => {
+      if (window.innerWidth <= 840) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', (e) => {
+      if (window.innerWidth <= 840) e.preventDefault();
+    }, { passive: false });
   }
 
   // --- PWA Native Install Prompt Hook ---

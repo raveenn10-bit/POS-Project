@@ -2,23 +2,273 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0e766e">
   <title>Apex POS License Admin</title>
   <style>
-    :root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#172b31;background:#eef3f4}*{box-sizing:border-box}body{margin:0;padding:22px}.box{max-width:640px;margin:25px auto;background:#fff;border-radius:22px;padding:25px;box-shadow:0 12px 40px #122f3618}h1{margin:0 0 5px;color:#0e766e;font-size:25px}.notice{background:#e8f4f2;color:#075f59;padding:13px;border-radius:11px;margin:14px 0}.warning{background:#fff2d5;color:#754f00;padding:12px;border-radius:10px;margin:14px 0}label{display:block;font-size:13px;color:#496169;margin:12px 0 5px}input,select,textarea{width:100%;padding:12px;border:1px solid #d5dfe1;border-radius:10px;font-size:16px;background:#fff}textarea{font-size:12px;resize:vertical}button{width:100%;border:0;border-radius:11px;padding:13px;font-size:15px;font-weight:750;margin-top:12px;background:#0e766e;color:#fff}.secondary{background:#e8f4f2;color:#0e766e}.generator,.result{display:none;margin-top:18px;border-top:1px solid #e5ecee;padding-top:16px}.muted{font-size:12px;color:#718187}.ok{color:#0e766e;font-weight:700}
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #172b31;
+      background: #080e1a;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      touch-action: pan-y;
+      -webkit-text-size-adjust: 100%;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 20%, rgba(14, 118, 110, 0.25) 0%, transparent 60%), #080e1a;
+    }
+    .box {
+      width: 100%;
+      max-width: 520px;
+      margin: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px -10px rgba(20, 184, 166, 0.25);
+      color: #f1f5f9;
+    }
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .brand-header img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 0 16px rgba(20, 184, 166, 0.4);
+    }
+    h1 {
+      margin: 0 0 4px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin: 0;
+    }
+    .notice {
+      background: rgba(14, 118, 110, 0.2);
+      border: 1px solid rgba(20, 184, 166, 0.4);
+      color: #2dd4bf;
+      padding: 13px;
+      border-radius: 12px;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+    .warning {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+    .error-box {
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 11px 14px;
+      border-radius: 10px;
+      margin: 12px 0;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin: 14px 0 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      font-size: 15px;
+      background: rgba(8, 14, 26, 0.85);
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      touch-action: manipulation;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.25);
+    }
+    textarea {
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 800;
+      margin-top: 14px;
+      background: linear-gradient(135deg, #0e766e, #14b8a6);
+      color: #fff;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: opacity 0.2s, transform 0.15s;
+      font-family: inherit;
+    }
+    button:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+    }
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+    button.danger {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .generator, .result {
+      display: none;
+      margin-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+    }
+    .muted {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .ok {
+      color: #2dd4bf;
+      font-weight: 700;
+    }
+    .admin-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .admin-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
   </style>
 </head>
-<body><main class="box">
-  <section id="adminPanel"><h1>Apex POS Admin Dashboard</h1><p class="muted">Secure manual license activation</p>
-  <div class="warning"><b>Private key required.</b> Select your private key file on every visit. The key stays in this browser tab and is never uploaded.</div>
-  <label>Private Key File</label><input id="keyFile" type="file" accept="application/json,.json">
-  <button id="lockAdmin" class="secondary" type="button">Lock Dashboard</button><div id="keyStatus" class="notice">Waiting for the private key file.</div>
-  <section id="generator" class="generator">
-    <label>Customer / Shop Name</label><input id="customer" maxlength="100" placeholder="Customer shop name">
-    <label>Customer Device ID</label><input id="device" maxlength="80" placeholder="Paste the Device ID exactly">
-    <label>License Type</label><select id="plan"><option value="trial">Free Trial — 7 Days</option><option value="monthly">Paid Activation — 30 Days</option><option value="monthly90">Paid Activation — 90 Days</option><option value="yearly">Paid Activation — 365 Days</option></select>
-    <button id="generate">Generate Activation Code</button>
+<body>
+<main class="box">
+
+  <!-- 1. SECURE ADMIN LOGIN SECTION -->
+  <section id="loginSection">
+    <div class="brand-header">
+      <img src="harsh-apex-logo.png" alt="Harsh Apex Logo">
+      <div>
+        <h1>Apex POS Admin</h1>
+        <p class="subtitle">Authorized Administrator Access Only</p>
+      </div>
+    </div>
+
+    <form id="adminLoginForm" autocomplete="off" onsubmit="return false;">
+      <label for="adminEmail">Email Address</label>
+      <input id="adminEmail" type="email" required autocomplete="username" placeholder="name@domain.com">
+
+      <label for="adminPassword">Password</label>
+      <input id="adminPassword" type="password" required autocomplete="current-password" placeholder="••••••••">
+
+      <div id="loginError" class="error-box"></div>
+
+      <button id="loginBtn" type="submit">Sign In to Admin Portal</button>
+    </form>
+    <div style="text-align:center;margin-top:16px;">
+      <a href="app.html" style="color:#14b8a6;font-size:13px;text-decoration:none;font-weight:600;">← Return to POS Application</a>
+    </div>
   </section>
-  <section id="result" class="result"><label>Activation Code</label><textarea id="code" rows="8" readonly></textarea><button id="copy" class="secondary">Copy Activation Code</button><p id="summary" class="muted"></p></section></section>
-</main><script src="admin.js"></script></body></html>
+
+  <!-- 2. PROTECTED ADMIN DASHBOARD (VISIBLE AFTER AUTH) -->
+  <section id="adminPanel" style="display:none;">
+    <div class="admin-bar">
+      <div class="admin-status-badge">
+        <span>●</span> Authenticated
+      </div>
+      <button id="logoutAdminBtn" type="button" class="danger" style="width:auto;margin:0;padding:6px 12px;font-size:12px;">Sign Out</button>
+    </div>
+
+    <div class="brand-header" style="margin-bottom:12px;">
+      <img src="harsh-apex-logo.png" alt="Harsh Apex Logo">
+      <div>
+        <h1>License Administrator</h1>
+        <p class="subtitle">Cryptographic ECDSA P-256 License Key Generator</p>
+      </div>
+    </div>
+
+    <div class="warning">
+      <b>Private Key Required.</b> Select your <code>apex-pos-private-key.json</code> file to sign licenses. The key stays in this browser tab and is never uploaded.
+    </div>
+
+    <label for="keyFile">Private Key File (.json)</label>
+    <input id="keyFile" type="file" accept="application/json,.json">
+
+    <div id="keyStatus" class="notice">Waiting for the private key file.</div>
+
+    <section id="generator" class="generator">
+      <label for="customer">Customer / Shop Name</label>
+      <input id="customer" maxlength="100" placeholder="e.g. Perera Stores - Colombo">
+
+      <label for="device">Customer Device ID</label>
+      <input id="device" maxlength="80" placeholder="Paste the Device ID exactly (e.g. APX-LK-...)">
+
+      <label for="plan">License Duration</label>
+      <select id="plan">
+        <option value="trial">Free Trial — 7 Days</option>
+        <option value="monthly">Paid Activation — 30 Days (Rs. 2,500)</option>
+        <option value="monthly90">Paid Activation — 90 Days</option>
+        <option value="yearly">Paid Activation — 365 Days (Rs. 24,000)</option>
+      </select>
+
+      <button id="generate" type="button">Generate Activation Code</button>
+    </section>
+
+    <section id="result" class="result">
+      <label for="code">Activation Code</label>
+      <textarea id="code" rows="8" readonly></textarea>
+      <button id="copy" class="secondary" type="button">Copy Activation Code</button>
+      <p id="summary" class="muted" style="margin-top:8px;"></p>
+    </section>
+  </section>
+
+</main>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0e766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Apex POS">
@@ -30,6 +30,12 @@
       background: var(--bg);
     }
     * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      touch-action: pan-y;
+      -webkit-text-size-adjust: 100%;
+    }
     body { margin: 0; padding-bottom: 84px; -webkit-tap-highlight-color: transparent; }
     header { background: linear-gradient(135deg, #0e766e, #115e59); color: white; padding: 20px 18px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
@@ -53,12 +59,12 @@
     .stat.warn strong { color: var(--warning); }
     .stat.danger strong { color: var(--danger); }
     label { font-size: 13px; font-weight: 600; color: #475569; display: block; margin: 10px 0 4px; }
-    input, select, textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit; }
+    input, select, textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit; touch-action: manipulation; }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,118,110,0.15); }
-    button { cursor: pointer; font-family: inherit; }
-    button.primary { background: var(--primary); color: white; border: 0; border-radius: 11px; padding: 12px 16px; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    button.primary:active { background: var(--primary-dark); }
-    button.secondary { background: var(--primary-light); color: var(--primary); border: 0; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    button { cursor: pointer; font-family: inherit; touch-action: manipulation; }
+    button.primary, label.primary { background: var(--primary); color: white; border: 0; border-radius: 11px; padding: 12px 16px; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    button.primary:active, label.primary:active { background: var(--primary-dark); }
+    button.secondary, label.secondary { background: var(--primary-light); color: var(--primary); border: 0; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     button.danger { background: var(--danger-light); color: var(--danger); border: 0; border-radius: 9px; padding: 8px 11px; font-weight: 700; font-size: 13px; }
     button.scan-btn { background: #0f172a; color: white; border: 0; border-radius: 10px; padding: 11px 14px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .flex { display: flex; gap: 8px; align-items: center; }
@@ -89,15 +95,21 @@
     .modal-close { position: absolute; top: 14px; right: 14px; border: 0; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .scanner-viewport { position: relative; width: 100%; height: 260px; background: #000; border-radius: 14px; overflow: hidden; margin-top: 12px; display: flex; align-items: center; justify-content: center; }
     .scanner-viewport video { width: 100%; height: 100%; object-fit: cover; }
+    #scannerReader { width: 100% !important; height: 100% !important; border: 0 !important; }
+    #scannerReader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+    #scannerReader__scan_region { background: transparent !important; }
+    #scannerReader__dashboard { display: none !important; }
+    #scannerReader img[alt="Info icon"] { display: none !important; }
     .scanner-guide { position: absolute; width: 75%; height: 50%; border: 2px solid #10b981; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); pointer-events: none; }
     .scanner-line { position: absolute; left: 0; right: 0; height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: scanLine 2s infinite ease-in-out; }
     @keyframes scanLine { 0%, 100% { top: 10%; } 50% { top: 90%; } }
     .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 18px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 200; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: toastPop 0.2s ease-out; }
     @keyframes toastPop { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-    #receipt { display: none; }
+    #receipt, #invoicePrintContainer { display: none; }
     @media print {
-      body > *:not(#receipt) { display: none !important; }
-      #receipt { display: block !important; background: white; color: black; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 8px; margin: 0 auto; width: 100%; }
+      body > *:not(#receipt):not(#invoicePrintContainer) { display: none !important; }
+      #receipt:not(:empty) { display: block !important; background: white; color: black; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 8px; margin: 0 auto; width: 100%; }
+      #receipt:empty { display: none !important; }
       #receipt.receipt-58 { max-width: 58mm; font-size: 11px; }
       #receipt.receipt-80 { max-width: 80mm; font-size: 12px; }
       #receipt h2 { text-align: center; margin: 4px 0; font-size: 16px; }
@@ -110,6 +122,11 @@
       #receipt .center { text-align: center; }
       #receipt .right { text-align: right; }
       #receipt .bold { font-weight: bold; }
+
+      #invoicePrintContainer { display: block !important; background: white !important; color: #172b31 !important; margin: 0 auto !important; padding: 0 !important; width: 100% !important; }
+      #invoicePrintContainer:empty { display: none !important; }
+      .pdf-invoice-container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 12px !important; }
+      @page { margin: 10mm; size: auto; }
     }
   </style>
 </head>
@@ -117,7 +134,7 @@
   <header>
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="display:flex;align-items:center;gap:10px;">
-        <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" style="width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);object-fit:cover;">
+        <img id="headerShopLogo" src="harsh-apex-logo.png" alt="Harsh Apex Logo" style="width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);object-fit:cover;">
         <div>
           <h1 id="headerShopTitle">Harsh Apex Retail POS</h1>
           <small id="headerShopSubtitle">Offline • Simple • Smart Retail Billing</small>
@@ -318,10 +335,11 @@
           </div>
         </div>
 
-        <div class="actions">
-          <button class="primary" id="printLast">🖨️ Print / PDF</button>
-          <button class="secondary" id="btPrintLast">📶 Thermal Bluetooth</button>
-          <button class="secondary" id="shareLast">📤 Share / Copy</button>
+        <div class="actions" style="flex-wrap:wrap">
+          <button class="primary" id="printLast">📄 Download PDF Invoice</button>
+          <button class="secondary" id="printThermalLast">🖨️ Thermal Print</button>
+          <button class="secondary" id="btPrintLast">📶 Bluetooth Thermal</button>
+          <button class="secondary" id="shareLast">📤 WhatsApp / Share</button>
         </div>
       </div>
     </section>
@@ -386,6 +404,22 @@
     <!-- 5. SETTINGS, STORE DETAILS & AUTO BACKUP -->
     <section id="settings" class="panel">
       <h2>Store Details & Backups</h2>
+
+      <!-- Business Logo & Branding -->
+      <div class="card">
+        <h3>Business Logo & Branding (ව්‍යාපාරික ලාංඡනය)</h3>
+        <p class="muted">Upload your shop logo. It will appear on your top header, thermal receipts, and PDF invoices.</p>
+        <div class="flex" style="align-items:center;gap:14px;margin-top:10px">
+          <img id="shopLogoPreview" src="harsh-apex-logo.png" alt="Shop Logo" style="width:64px;height:64px;border-radius:12px;border:1px solid var(--border);object-fit:cover;background:#fff">
+          <div style="flex:1">
+            <label style="margin:0 0 6px 0;cursor:pointer" class="primary" as="button">
+              📷 Upload Business Logo
+              <input type="file" id="shopLogoInput" accept="image/*" hidden>
+            </label>
+            <button type="button" id="resetShopLogoBtn" class="secondary" style="margin-top:6px;font-size:12px">🔄 Reset to Default Logo</button>
+          </div>
+        </div>
+      </div>
 
       <!-- Store Details Changing -->
       <div class="card">
@@ -490,7 +524,8 @@
       <p class="muted" style="margin:4px 0 10px">Point your phone camera at the barcode</p>
       
       <div class="scanner-viewport">
-        <video id="scannerVideo" playsinline autoplay muted></video>
+        <div id="scannerReader" style="width:100%;height:100%"></div>
+        <video id="scannerVideo" playsinline autoplay muted style="display:none"></video>
         <div class="scanner-guide">
           <div class="scanner-line"></div>
         </div>
@@ -528,20 +563,26 @@
         </div>
       </div>
 
-      <div class="actions" style="margin-top:14px">
-        <button id="billModalPrint" class="primary">🖨️ Print</button>
-        <button id="billModalShare" class="secondary">📤 Share / Copy</button>
-        <button id="billModalVoid" class="danger">⚠️ Void / Return</button>
+      <div class="actions" style="margin-top:14px;flex-wrap:wrap">
+        <button id="billModalPdf" class="primary">📄 Download PDF</button>
+        <button id="billModalPrint" class="secondary">🖨️ Thermal Slip</button>
+        <button id="billModalBt" class="secondary">📶 Bluetooth</button>
+        <button id="billModalShare" class="secondary">📤 WhatsApp</button>
+        <button id="billModalVoid" class="danger">⚠️ Void Bill</button>
       </div>
     </div>
   </div>
 
-  <!-- RECEIPT CONTAINER (PRINT ONLY) -->
+  <!-- RECEIPT & INVOICE CONTAINERS (PRINT ONLY) -->
   <div id="receipt" class="receipt-58"></div>
+  <div id="invoicePrintContainer"></div>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="toast" style="display:none"></div>
 
+  <script src="html5-qrcode.min.js"></script>
+  <script src="html2pdf.bundle.min.js"></script>
+  <script src="pdf-invoice.js"></script>
   <script src="app.js"></script>
   <script src="install.js"></script>
 </body>
