@@ -316,8 +316,9 @@
         items: (sale.items || []).map(item => ({
           name: item.name || 'Item',
           qty: Number(item.qty || 1),
+          unit: item.sellUnit || item.unit || '',
           price: Number(item.price || 0),
-          total: Number((item.qty || 1) * (item.price || 0))
+          total: Number(item.total !== undefined ? item.total : (Number(item.qty || 1) * Number(item.price || 0)))
         })),
         subtotal: Number(sale.subtotal || sale.total || 0),
         discount: Number(sale.discount || 0),
@@ -387,7 +388,8 @@
 
       canonical.items.forEach(item => {
         const itemLine = `${item.name}`;
-        const subDetail = `  ${item.qty} x ${item.price.toFixed(2)}`;
+        const unitSuffix = item.unit ? ` ${item.unit}` : '';
+        const subDetail = `  ${item.qty}${unitSuffix} x ${item.price.toFixed(2)}`;
         const totalStr = item.total.toFixed(2);
 
         enc.line(itemLine);
@@ -412,6 +414,12 @@
       if (canonical.payment.method === 'Cash') {
         enc.row('Cash Tendered:', `${curr} ${canonical.payment.received.toFixed(2)}`);
         enc.row('Change Due:', `${curr} ${canonical.payment.change.toFixed(2)}`);
+      } else if (canonical.payment.method === 'Card') {
+        enc.row('Payment Method:', 'Card');
+        enc.row('Payment Status:', 'Paid / Approved');
+      } else {
+        enc.row('Payment Method:', canonical.payment.method);
+        enc.row('Payment Status:', canonical.payment.isCredit ? (canonical.payment.creditSettled ? 'Settled' : 'Unpaid') : 'Completed');
       }
 
       enc.rule('=');
@@ -426,6 +434,7 @@
       // Footer
       enc.alignCenter();
       if (canonical.store.footer) enc.line(canonical.store.footer);
+      else enc.line('Thank you for shopping with us! Please come again.');
       enc.line('Powered by Harsh Apex Retail POS');
 
       enc.feed(settings.feedLines || 3);
@@ -445,7 +454,7 @@
 
       return `
         <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="max-width:${maxWidth};margin:0 auto;font-family:'Courier New',Courier,monospace;font-size:${fontSize};color:#000;padding:6px;background:#fff">
-          ${canonical.store.logo ? `<div style="text-align:center;margin-bottom:8px"><img src="${canonical.store.logo}" style="max-height:48px;max-width:130px;object-fit:contain"></div>` : ''}
+          ${canonical.store.logo ? `<div style="text-align:center;margin-bottom:8px"><img src="${canonical.store.logo}" style="max-height:48px;max-width:130px;object-fit:contain;image-rendering:crisp-edges"></div>` : ''}
           <div style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:4px">${canonical.store.name}</div>
           ${canonical.store.address ? `<div style="text-align:center">${canonical.store.address}</div>` : ''}
           ${canonical.store.phone ? `<div style="text-align:center">Tel: ${canonical.store.phone}</div>` : ''}
@@ -479,7 +488,7 @@
             <tbody>
               ${canonical.items.map(it => `
                 <tr>
-                  <td style="padding:2px 0"><b>${it.name}</b><br><span style="font-size:0.9em">${it.qty} × ${this.formatMoney(it.price, curr)}</span></td>
+                  <td style="padding:2px 0"><b>${it.name}</b><br><span style="font-size:0.9em">${it.qty}${it.unit ? ' ' + it.unit : ''} × ${this.formatMoney(it.price, curr)}</span></td>
                   <td style="text-align:right;vertical-align:bottom;padding:2px 0">${this.formatMoney(it.total, curr)}</td>
                 </tr>
               `).join('')}
@@ -496,10 +505,16 @@
           ${canonical.payment.method === 'Cash' ? `
             <div style="display:flex;justify-content:space-between"><span>Cash Paid:</span><span>${this.formatMoney(canonical.payment.received, curr)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>Change:</span><span>${this.formatMoney(canonical.payment.change, curr)}</span></div>
-          ` : ''}
+          ` : canonical.payment.method === 'Card' ? `
+            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>Card</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>Paid / Approved</span></div>
+          ` : `
+            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>${canonical.payment.method}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>${canonical.payment.isCredit ? (canonical.payment.creditSettled ? 'Settled' : 'Unpaid') : 'Completed'}</span></div>
+          `}
 
           <div style="border-top:1px dashed #000;margin:6px 0"></div>
-          <div style="text-align:center;font-size:0.9em;margin-top:4px">${canonical.store.footer}</div>
+          <div style="text-align:center;font-size:0.9em;margin-top:6px">${canonical.store.footer || 'Thank you for shopping with us! Please come again.'}</div>
           <div style="text-align:center;font-size:0.8em;color:#555;margin-top:4px">Powered by Harsh Apex Retail POS</div>
         </div>
       `;

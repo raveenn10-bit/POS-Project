@@ -619,7 +619,10 @@
           var itemDesc = item.description || item.category || (item.barcode ? 'Barcode: ' + item.barcode : '');
           var itemPrice = Number(item.price || 0);
           var itemQty = Number(item.qty || 1);
+          var itemUnit = item.sellUnit || item.unit || '';
           var itemTotal = Number(item.total !== undefined ? item.total : itemPrice * itemQty);
+          var qtyDisplay = itemUnit ? (itemQty + ' ' + itemUnit) : itemQty;
+          var priceDisplay = formatMoney(itemPrice, currency) + (itemUnit ? ' / ' + itemUnit : '');
 
           return `
             <tr class="${rowClass}">
@@ -628,8 +631,8 @@
                 <div class="item-title">${escapeHtml(itemName)}</div>
                 ${itemDesc ? `<div class="item-desc">${escapeHtml(itemDesc)}</div>` : ''}
               </td>
-              <td class="col-price">${formatMoney(itemPrice, currency)}</td>
-              <td class="col-qty">${itemQty}</td>
+              <td class="col-price">${priceDisplay}</td>
+              <td class="col-qty">${qtyDisplay}</td>
               <td class="col-total">${formatMoney(itemTotal, currency)}</td>
             </tr>
           `;
@@ -640,16 +643,22 @@
     // Payment details snippet
     var paymentDetailsHtml = '';
     if (paymentMethod === 'Cash') {
-      if (sale.received) {
+      if (sale.received !== undefined && sale.received !== null) {
         paymentDetailsHtml += `<div>Amount Tendered: ${formatMoney(sale.received, currency)}</div>`;
       }
-      if (sale.change) {
+      if (sale.change !== undefined && sale.change !== null) {
         paymentDetailsHtml += `<div>Change Due: ${formatMoney(sale.change, currency)}</div>`;
       }
     } else if (paymentMethod === 'Credit') {
-      paymentDetailsHtml += `<div>Status: ${sale.creditSettled ? 'Settled' : 'Unpaid Account'}</div>`;
+      paymentDetailsHtml += `<div>Customer: ${escapeHtml(sale.creditCustomer || 'Credit Customer')}</div>`;
+      if (sale.creditPhone) {
+        paymentDetailsHtml += `<div>Tel: ${escapeHtml(sale.creditPhone)}</div>`;
+      }
+      paymentDetailsHtml += `<div>Status: ${sale.creditSettled ? 'Settled' : 'Unpaid Credit Account'}</div>`;
+    } else if (paymentMethod === 'Card') {
+      paymentDetailsHtml += `<div>Card Payment: Approved / Verified</div>`;
     } else {
-      paymentDetailsHtml += `<div>Payment Status: Completed</div>`;
+      paymentDetailsHtml += `<div>Payment Status: Completed (${escapeHtml(paymentMethod)})</div>`;
     }
 
     return `
@@ -659,9 +668,9 @@
           <!-- Header -->
           <div class="invoice-header">
             <div class="brand-group">
-              <div class="brand-logo-badge">
-                <img src="${escapeHtml(shopLogo)}" alt="Logo" class="brand-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                <span style="display:none;">${escapeHtml(initialLetter)}</span>
+              <div class="brand-logo-badge" style="background:#fff;border:1px solid #e2e8f0;padding:2px">
+                <img src="${escapeHtml(shopLogo)}" alt="Logo" class="brand-logo-img" style="object-fit:contain;width:100%;height:100%" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                <span style="display:none;color:#e11d48;font-size:24px;font-weight:800">${escapeHtml(initialLetter)}</span>
               </div>
               <div class="brand-info">
                 <div class="brand-name">${escapeHtml(shopName)}</div>

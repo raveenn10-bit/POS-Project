@@ -29,8 +29,90 @@ window.initExpiryClock = function(payload) {
     }
     const badge = document.getElementById('planStatusBadge');
     if (badge) {
-      badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : 'Monthly Pro Active';
+      badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
       badge.className = 'pill settled';
+    }
+
+    // Populate Detailed Subscription Metadata in Settings
+    const subCustomer = document.getElementById('subInfoCustomer');
+    if (subCustomer) subCustomer.textContent = payload.customer || 'Harsh Apex Customer';
+
+    const subPlan = document.getElementById('subInfoPlan');
+    if (subPlan) {
+      subPlan.textContent = payload.plan === 'trial' ? 'Free Trial (7 Days)' : payload.plan === 'custom' ? 'Custom Plan' : payload.plan === 'yearly' ? 'Yearly Pro' : 'Monthly Pro (30 Days)';
+    }
+
+    const subExpiry = document.getElementById('subInfoExpiry');
+    if (subExpiry) {
+      try {
+        subExpiry.textContent = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Colombo',
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        }).format(new Date(payload.expires)) + ' (Asia/Colombo)';
+      } catch (err) {
+        subExpiry.textContent = new Date(payload.expires).toLocaleString();
+      }
+    }
+
+    const subRemaining = document.getElementById('subInfoRemaining');
+    if (subRemaining) {
+      const diffMs = payload.expires - Date.now();
+      if (diffMs > 0) {
+        const d = Math.floor(diffMs / 86400000);
+        const h = Math.floor((diffMs % 86400000) / 3600000);
+        const m = Math.floor((diffMs % 3600000) / 60000);
+        subRemaining.textContent = `${d}d ${h}h ${m}m remaining`;
+      } else {
+        subRemaining.textContent = 'Expired';
+      }
+    }
+
+    const currentDeviceId = localStorage.getItem('apex_pos_device_id_v2') || '';
+    const posCurrentDeviceId = document.getElementById('posCurrentDeviceId');
+    if (posCurrentDeviceId) posCurrentDeviceId.value = currentDeviceId;
+
+    const btnCopyPosDeviceId = document.getElementById('btnCopyPosDeviceId');
+    if (btnCopyPosDeviceId) {
+      btnCopyPosDeviceId.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(currentDeviceId);
+          btnCopyPosDeviceId.textContent = 'Copied!';
+        } catch {
+          if (posCurrentDeviceId) {
+            posCurrentDeviceId.select();
+            document.execCommand('copy');
+            btnCopyPosDeviceId.textContent = 'Copied!';
+          }
+        }
+        setTimeout(() => { btnCopyPosDeviceId.textContent = '📋 Copy'; }, 2000);
+      };
+    }
+
+    const posDeviceNameInput = document.getElementById('posDeviceNameInput');
+    const savedDeviceName = localStorage.getItem('apex_pos_device_name_v1') || 'Main POS Counter';
+    if (posDeviceNameInput) {
+      posDeviceNameInput.value = savedDeviceName;
+    }
+    const btnSavePosDeviceName = document.getElementById('btnSavePosDeviceName');
+    if (btnSavePosDeviceName && posDeviceNameInput) {
+      btnSavePosDeviceName.onclick = () => {
+        const val = posDeviceNameInput.value.trim() || 'Main POS Counter';
+        localStorage.setItem('apex_pos_device_name_v1', val);
+        btnSavePosDeviceName.textContent = 'Saved!';
+        setTimeout(() => { btnSavePosDeviceName.textContent = '💾 Save'; }, 2000);
+      };
+    }
+
+    const btnRequestSecondDeviceWa = document.getElementById('btnRequestSecondDeviceWa');
+    if (btnRequestSecondDeviceWa) {
+      const waText = `Hello Harsh Apex POS Support, I would like to link a second device under my active subscription.\nCustomer: ${payload.customer || ''}\nMain Device ID: ${currentDeviceId}\nPlan: ${payload.plan || ''}`;
+      btnRequestSecondDeviceWa.href = `https://wa.me/94770663154?text=${encodeURIComponent(waText)}`;
     }
   };
   if (document.readyState === 'loading') {
@@ -67,7 +149,7 @@ window.initExpiryClock = function(payload) {
       const payload = JSON.parse(new TextDecoder().decode(bytes(body)));
       const key = await crypto.subtle.importKey('jwk', PUBLIC_KEY, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
       const valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, bytes(sig), new TextEncoder().encode(body));
-      if (!valid || payload.v !== 1 || payload.device !== deviceId || !['trial', 'monthly'].includes(payload.plan) ||
+      if (!valid || payload.v !== 1 || payload.device !== deviceId || !['trial', 'monthly', 'custom', 'monthly90', 'yearly'].includes(payload.plan) ||
           !Number.isFinite(payload.issued) || !Number.isFinite(payload.expires) ||
           payload.expires <= payload.issued || payload.expires <= Date.now() || payload.issued > Date.now() + 300000) {
         return null;
@@ -85,6 +167,41 @@ window.initExpiryClock = function(payload) {
     window.addEventListener('focus', check);
   }
 
+  // Online Device Check-in: gently updates last_seen_at and verifies binding without blocking offline POS
+  async function performOnlineCheckin() {
+    if (!navigator.onLine) return;
+    const token = localStorage.getItem(LICENSE_KEY);
+    if (!token) return;
+    const devName = localStorage.getItem('apex_pos_device_name_v1') || 'Main POS Counter';
+    const activeLic = window.apexActiveLicense;
+    try {
+      const res = await fetch('/api/device-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceId,
+          deviceName: devName,
+          licenseToken: token,
+          customer: activeLic ? activeLic.customer : undefined,
+          plan: activeLic ? activeLic.plan : undefined,
+          expires: activeLic ? activeLic.expires : undefined,
+          timestamp: Date.now()
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && (data.revoked || data.status === 'revoked' || data.bindingStatus === 'revoked' || data.bindingStatus === 'replaced')) {
+          console.warn('POS Device binding has been revoked or replaced remotely.');
+          alert('This device activation has been transferred or revoked by the administrator.');
+          localStorage.removeItem(LICENSE_KEY);
+          location.reload();
+        }
+      }
+    } catch (e) {
+      // Offline fallback: 100% offline cryptographic signature verification remains active!
+    }
+  }
+
   const saved = localStorage.getItem(LICENSE_KEY);
   const valid = saved && await verify(saved);
   if (valid) {
@@ -93,6 +210,10 @@ window.initExpiryClock = function(payload) {
     if (typeof window.initExpiryClock === 'function') {
       window.initExpiryClock(valid);
     }
+    // Gentle online checkin
+    performOnlineCheckin();
+    window.addEventListener('online', performOnlineCheckin);
+    setInterval(performOnlineCheckin, 30 * 60 * 1000);
     return;
   }
 
@@ -101,7 +222,10 @@ window.initExpiryClock = function(payload) {
   const wa = `https://wa.me/94770663154?text=${encodeURIComponent('Hello Harsh Apex, I need an Apex POS activation. Device ID: ' + deviceId)}`;
   gate.innerHTML = `
     <div style="width:min(490px,100%);background:#fff;border-radius:22px;padding:25px;box-shadow:0 12px 40px #122f3620">
-      <h2>Apex POS Activation</h2>
+      <div style="text-align:center;margin-bottom:12px">
+        <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" style="width:52px;height:52px;border-radius:12px;object-fit:contain;background:#fff;padding:2px;box-shadow:0 3px 10px rgba(0,0,0,0.08);image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges">
+      </div>
+      <h2 style="text-align:center;margin-top:0">Apex POS Activation</h2>
       <p style="color:#60747a">Request a free 7-day trial code, or send the monthly payment slip through WhatsApp.</p>
       <label style="font-weight:600;font-size:13px;display:block;margin-bottom:4px">Your Device ID</label>
       <div style="display:flex;gap:8px">
@@ -113,7 +237,10 @@ window.initExpiryClock = function(payload) {
       <textarea id="activationCode" rows="4" style="width:100%;padding:10px;border:1px solid #d5dfe1;border-radius:10px;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Paste your activation code here"></textarea>
       <button id="activateLicense" style="width:100%;margin-top:12px;padding:12px;background:#0e766e;color:#fff;border:0;border-radius:11px;font-weight:700;cursor:pointer">Activate POS</button>
       <div id="licenseError" style="display:none;color:#a52f2f;background:#fff0ef;padding:11px;border-radius:10px;font-size:13px;margin-top:12px"></div>
-      <p style="color:#718187;font-size:12px;margin-top:14px">Codes work only on this device. Keep a backup of your POS data before reinstalling.</p>
+      <div style="margin-top:14px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;color:#134e4a">
+        <b>උපදෙස්:</b> Devices දෙකටම එකම subscription කාලය අදාළ වේ. Products, stock සහ sales දත්ත ස්වයංක්‍රීයව devices අතර sync නොවේ.
+      </div>
+      <p style="color:#718187;font-size:12px;margin-top:10px">Codes work only on this device. Keep a backup of your POS data before reinstalling.</p>
     </div>
   `;
   document.body.appendChild(gate);
@@ -141,9 +268,10 @@ window.initExpiryClock = function(payload) {
     if (typeof window.initExpiryClock === 'function') {
       window.initExpiryClock(payload);
     }
+    performOnlineCheckin();
     gate.remove();
     document.body.style.overflow = '';
-    alert(`${payload.plan === 'trial' ? '7-day trial' : 'Monthly subscription'} activated successfully.`);
+    alert(`${payload.plan === 'trial' ? '7-day trial' : payload.plan === 'custom' ? 'Custom plan' : 'Monthly subscription'} activated successfully.`);
   };
 })();
 
@@ -196,10 +324,81 @@ db.shop.currency ||= 'Rs.';
 db.shop.receiptWidth ||= '58mm';
 db.shop.receiptFooter ||= 'Thank you for shopping with us! Returns accepted within 3 days with receipt.';
 db.shop.logo ||= 'harsh-apex-logo.png';
+db.shop.allowNegativeStock = Boolean(db.shop.allowNegativeStock);
 db.categories ||= ['General', 'Grocery', 'Beverages', 'Snacks', 'Bakery', 'Dairy & Frozen', 'Household', 'Personal Care', 'Other'];
-db.products.forEach(p => { if (!p.category) p.category = 'General'; });
+db.products.forEach(p => {
+  if (!p.category) p.category = 'General';
+  if (!p.unit) p.unit = 'pcs';
+});
+
+if (db.products.length === 0) {
+  db.products = [
+    { id: uid(), name: 'Samba Rice White', sku: '2001', category: 'Grocery', unit: 'kg', price: 230, cost: 195, stock: 50, low: 10 },
+    { id: uid(), name: 'Red Dhal (Mysore)', sku: '2002', category: 'Grocery', unit: 'kg', price: 320, cost: 275, stock: 35.5, low: 5 },
+    { id: uid(), name: 'White Sugar', sku: '2003', category: 'Grocery', unit: 'kg', price: 260, cost: 225, stock: 40, low: 10 },
+    { id: uid(), name: 'Wheat Flour Premix', sku: '2004', category: 'Grocery', unit: 'kg', price: 180, cost: 150, stock: 25, low: 5 },
+    { id: uid(), name: 'Fresh Potatoes (Nuwara Eliya)', sku: '2005', category: 'Grocery', unit: 'kg', price: 290, cost: 235, stock: 18.25, low: 5 },
+    { id: uid(), name: 'Pure Coconut Oil', sku: '2006', category: 'Grocery', unit: 'L', price: 850, cost: 740, stock: 20, low: 3 },
+    { id: uid(), name: 'Whole Cardamom (කරදමුංගු)', sku: '2007', category: 'Grocery', unit: 'g', price: 6.5, cost: 4.8, stock: 1500, low: 200 },
+    { id: uid(), name: 'Anchor Full Cream Milk Powder 400g', sku: '4792011001', category: 'Dairy & Frozen', unit: 'pcs', price: 1150, cost: 1020, stock: 24, low: 6 }
+  ];
+}
 
 const money = n => `${db.shop.currency || 'Rs.'} ${Number(n || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// -------------------------------------------------------------
+// Grocery Unit Utilities & Accurate Decimal Conversions
+// -------------------------------------------------------------
+const SUPPORTED_UNITS = ['pcs', 'kg', 'g', 'L', 'ml'];
+
+function getCompatibleUnits(baseUnit) {
+  baseUnit = (baseUnit || 'pcs').toLowerCase();
+  if (baseUnit === 'kg' || baseUnit === 'g') return ['kg', 'g'];
+  if (baseUnit === 'l' || baseUnit === 'ml') return ['L', 'ml'];
+  return ['pcs'];
+}
+
+function convertQuantity(qty, fromUnit, toUnit) {
+  qty = Number(qty || 0);
+  fromUnit = (fromUnit || 'pcs').toLowerCase();
+  toUnit = (toUnit || 'pcs').toLowerCase();
+  if (fromUnit === toUnit) return qty;
+
+  // Mass conversions (kg <-> g)
+  if (fromUnit === 'g' && toUnit === 'kg') return qty / 1000;
+  if (fromUnit === 'kg' && toUnit === 'g') return qty * 1000;
+
+  // Volume conversions (L <-> ml)
+  if (fromUnit === 'ml' && toUnit === 'l') return qty / 1000;
+  if (fromUnit === 'l' && toUnit === 'ml') return qty * 1000;
+
+  return qty;
+}
+
+function getCartItemUnitPrice(item) {
+  const basePrice = Number(item.basePrice !== undefined ? item.basePrice : item.price);
+  const baseUnit = (item.baseUnit || 'pcs').toLowerCase();
+  const sellUnit = (item.sellUnit || item.unit || baseUnit).toLowerCase();
+
+  if (baseUnit === sellUnit) {
+    return basePrice;
+  }
+  const ratio = convertQuantity(1, sellUnit, baseUnit);
+  return Number((basePrice * ratio).toFixed(4));
+}
+
+function getCartItemLineTotal(item) {
+  const qty = Number(item.qty || 0);
+  const unitPrice = getCartItemUnitPrice(item);
+  return Number((qty * unitPrice).toFixed(2));
+}
+
+function getCartItemBaseQty(item) {
+  const qty = Number(item.qty || 0);
+  const baseUnit = item.baseUnit || 'pcs';
+  const sellUnit = item.sellUnit || item.unit || baseUnit;
+  return Number(convertQuantity(qty, sellUnit, baseUnit).toFixed(4));
+}
 
 let cart = [];
 let lastSale = null;
@@ -467,22 +666,12 @@ function handleScannedBarcode(code) {
     // Billing scan
     const product = db.products.find(p => p.sku && p.sku.toLowerCase() === code.toLowerCase());
     if (product) {
-      if (product.stock <= 0) {
+      if (!db.shop.allowNegativeStock && product.stock <= 0) {
         playBeep('error');
         return alert(`Product "${product.name}" is out of stock!`);
       }
-      const existing = cart.find(x => x.id === product.id);
-      if ((existing?.qty || 0) >= product.stock) {
-        playBeep('error');
-        return alert(`Cannot add more. Available stock: ${product.stock}`);
-      }
-      if (existing) {
-        existing.qty++;
-      } else {
-        cart.push({ id: product.id, name: product.name, price: product.price, cost: product.cost, qty: 1, category: product.category });
-      }
+      addToCart(product);
       toast(`Added: ${product.name}`);
-      renderCart();
     } else {
       playBeep('error');
       if (confirm(`Barcode "${code}" not found in inventory. Would you like to add this product now?`)) {
@@ -603,7 +792,7 @@ function productRow(p, actions = true) {
           <span class="pill category">${esc(p.category || 'General')}</span>
         </div>
         <div class="muted">
-          ${p.sku ? `SKU: ${esc(p.sku)} · ` : ''}Cost: ${money(p.cost)} · Price: <b>${money(p.price)}</b> · Stock: <b>${esc(p.stock)}</b>
+          ${p.sku ? `SKU: ${esc(p.sku)} · ` : ''}Cost: ${money(p.cost)} · Price: <b>${money(p.price)} / ${esc(p.unit || 'pcs')}</b> · Stock: <b>${esc(p.stock)} ${esc(p.unit || 'pcs')}</b>
         </div>
       </div>
       ${isLow ? '<span class="pill">Low Stock</span>' : ''}
@@ -631,6 +820,7 @@ $('productSearch').oninput = renderProducts;
 function clearProduct() {
   $('productForm').reset();
   $('editId').value = '';
+  if ($('pUnit')) $('pUnit').value = 'pcs';
   $('pLow').value = 5;
   $('productHeading').textContent = 'Add Product';
 }
@@ -644,14 +834,14 @@ $('productForm').onsubmit = e => {
     name: $('pName').value.trim(),
     sku: $('pSku').value.trim(),
     category: $('pCategory').value || 'General',
-    price: Number($('pPrice').value),
-    cost: Number($('pCost').value),
-    stock: Number($('pStock').value),
-    low: Number($('pLow').value)
+    unit: $('pUnit') ? ($('pUnit').value || 'pcs') : 'pcs',
+    price: Number(Number($('pPrice').value).toFixed(2)),
+    cost: Number(Number($('pCost').value).toFixed(2)),
+    stock: Number(Number($('pStock').value).toFixed(4)),
+    low: Number(Number($('pLow').value).toFixed(4))
   };
 
-  if (!p.name || [p.price, p.cost, p.stock, p.low].some(n => !Number.isFinite(n) || n < 0) ||
-      !Number.isInteger(p.stock) || !Number.isInteger(p.low)) {
+  if (!p.name || [p.price, p.cost, p.stock, p.low].some(n => !Number.isFinite(n) || n < 0)) {
     return alert('Please enter valid product details.');
   }
 
@@ -692,6 +882,7 @@ $('productList').onclick = e => {
   $('pName').value = p.name;
   $('pSku').value = p.sku || '';
   $('pCategory').value = p.category || 'General';
+  if ($('pUnit')) $('pUnit').value = p.unit || 'pcs';
   $('pPrice').value = p.price;
   $('pCost').value = p.cost;
   $('pStock').value = p.stock;
@@ -706,7 +897,7 @@ $('productList').onclick = e => {
 // -------------------------------------------------------------
 $('btnExportCsv').onclick = () => {
   if (!db.products.length) return alert('No products to export.');
-  const headers = ['Name', 'Barcode_SKU', 'Category', 'Selling_Price', 'Cost_Price', 'Stock_Qty', 'Low_Stock_Alert'];
+  const headers = ['Name', 'Barcode_SKU', 'Category', 'Selling_Price', 'Cost_Price', 'Stock_Qty', 'Low_Stock_Alert', 'Unit'];
   const rows = db.products.map(p => [
     `"${(p.name || '').replace(/"/g, '""')}"`,
     `"${(p.sku || '').replace(/"/g, '""')}"`,
@@ -714,7 +905,8 @@ $('btnExportCsv').onclick = () => {
     p.price,
     p.cost,
     p.stock,
-    p.low
+    p.low,
+    `"${p.unit || 'pcs'}"`
   ]);
   const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -746,7 +938,7 @@ $('csvFileInput').onchange = async e => {
       const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
       const matches = [];
       let match;
-      while ((match = regex.exec(lines[i])) !== null && matches.length < 7) {
+      while ((match = regex.exec(lines[i])) !== null && matches.length < 8) {
         let val = match[1] || '';
         if (val.startsWith('"') && val.endsWith('"')) {
           val = val.substring(1, val.length - 1).replace(/""/g, '"');
@@ -758,10 +950,12 @@ $('csvFileInput').onchange = async e => {
         const name = matches[0];
         const sku = matches[1] || '';
         const category = matches[2] || 'General';
-        const price = parseFloat(matches[3]) || 0;
-        const cost = parseFloat(matches[4]) || 0;
-        const stock = parseInt(matches[5], 10) || 0;
-        const low = parseInt(matches[6], 10) || 5;
+        const price = Number((parseFloat(matches[3]) || 0).toFixed(2));
+        const cost = Number((parseFloat(matches[4]) || 0).toFixed(2));
+        const stock = Number((parseFloat(matches[5]) || 0).toFixed(4));
+        const low = Number((parseFloat(matches[6]) || 5).toFixed(4));
+        let unit = (matches[7] || '').toLowerCase().trim();
+        if (!SUPPORTED_UNITS.includes(unit)) unit = 'pcs';
 
         if (name) {
           // Check if exists by SKU or Name
@@ -775,6 +969,7 @@ $('csvFileInput').onchange = async e => {
             existing.stock = stock;
             existing.low = low;
             existing.category = category;
+            existing.unit = unit;
             if (sku) existing.sku = sku;
           } else {
             db.products.push({
@@ -782,6 +977,7 @@ $('csvFileInput').onchange = async e => {
               name,
               sku,
               category,
+              unit,
               price,
               cost,
               stock,
@@ -828,10 +1024,12 @@ $('billCategoryFilter').onclick = e => {
 
 function renderBillProducts() {
   const q = $('billSearch').value.trim().toLowerCase();
+  const allowNegative = Boolean(db.shop && db.shop.allowNegativeStock);
   const available = db.products.filter(p => {
     const matchCat = activeBillCategory === 'All' || (p.category || 'General') === activeBillCategory;
     const matchQuery = !q || (p.name + ' ' + (p.sku || '')).toLowerCase().includes(q);
-    return p.stock > 0 && matchCat && matchQuery;
+    const hasStock = allowNegative || p.stock > 0;
+    return hasStock && matchCat && matchQuery;
   });
 
   if (!q && activeBillCategory === 'All') {
@@ -839,39 +1037,72 @@ function renderBillProducts() {
     return;
   }
 
-  $('billProducts').innerHTML = available.slice(0, 40).map(p => `
-    <div class="item">
-      <div class="grow">
-        <b>${esc(p.name)}</b>
-        <div class="muted">${money(p.price)} · <span style="color:var(--primary);font-weight:700">${esc(p.stock)} in stock</span></div>
+  $('billProducts').innerHTML = available.slice(0, 40).map(p => {
+    const unitStr = p.unit || 'pcs';
+    const isOut = p.stock <= 0;
+    const stockClass = isOut ? 'color:var(--danger)' : (p.stock <= p.low ? 'color:var(--warning)' : 'color:var(--primary)');
+    return `
+      <div class="item">
+        <div class="grow">
+          <b>${esc(p.name)}</b>
+          <div class="muted">${money(p.price)} / ${esc(unitStr)} · <span style="${stockClass};font-weight:700">${esc(p.stock)} ${esc(unitStr)} in stock</span></div>
+        </div>
+        <button class="secondary" data-add="${esc(p.id)}">+ Add</button>
       </div>
-      <button class="secondary" data-add="${esc(p.id)}">+ Add</button>
-    </div>
-  `).join('') || '<p class="empty">No matching products in stock</p>';
+    `;
+  }).join('') || '<p class="empty">No matching products in stock</p>';
 }
 
 $('billSearch').oninput = renderBillProducts;
+
+function addToCart(p, initialQty = 1, initialUnit = null) {
+  if (!p) return;
+  const allowNegative = Boolean(db.shop && db.shop.allowNegativeStock);
+  const sellUnit = initialUnit || p.unit || 'pcs';
+  const qty = typeof initialQty === 'number' && initialQty > 0 ? initialQty : 1;
+  const reqBaseQty = convertQuantity(qty, sellUnit, p.unit || 'pcs');
+
+  const currentBaseQtyInCart = cart
+    .filter(x => x.id === p.id)
+    .reduce((sum, x) => sum + getCartItemBaseQty(x), 0);
+
+  if (!allowNegative && (currentBaseQtyInCart + reqBaseQty > p.stock)) {
+    playBeep('error');
+    return alert(`Not enough stock available for "${p.name}".\nAvailable: ${p.stock} ${p.unit || 'pcs'}\nIn Cart: ${currentBaseQtyInCart} ${p.unit || 'pcs'}`);
+  }
+
+  let line = cart.find(x => x.id === p.id && (x.sellUnit || x.unit || 'pcs') === sellUnit);
+  if (line) {
+    line.qty = Number((line.qty + qty).toFixed(4));
+  } else {
+    cart.push({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      cost: p.cost,
+      unit: p.unit || 'pcs',
+      sellUnit: sellUnit,
+      qty: Number(qty.toFixed(4)),
+      category: p.category
+    });
+  }
+  playBeep('success');
+  renderCart();
+}
 
 $('billProducts').onclick = e => {
   const id = e.target.dataset.add;
   if (!id) return;
   const p = db.products.find(x => x.id === id);
   if (!p) return;
-  const line = cart.find(x => x.id === p.id);
-  if ((line?.qty || 0) >= p.stock) return alert('Not enough stock available');
-  if (line) {
-    line.qty++;
-  } else {
-    cart.push({ id: p.id, name: p.name, price: p.price, cost: p.cost, qty: 1, category: p.category });
-  }
-  playBeep('success');
-  renderCart();
+  addToCart(p);
 };
 
 function totals() {
-  const subtotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
-  const discount = Number($('discount').value || 0);
-  const total = Math.max(0, subtotal - discount);
+  const subtotal = Number(cart.reduce((s, x) => s + getCartItemLineTotal(x), 0).toFixed(2));
+  const discountInput = Number($('discount').value || 0);
+  const discount = Number(Math.max(0, discountInput).toFixed(2));
+  const total = Math.max(0, Number((subtotal - discount).toFixed(2)));
   return { subtotal, discount, total };
 }
 
@@ -883,42 +1114,205 @@ function renderCart() {
   $('creditSection').style.display = isCredit ? 'block' : 'none';
   $('cashFields').style.display = method === 'Cash' ? 'block' : 'none';
 
-  $('cartList').innerHTML = cart.map(x => `
-    <div class="item">
-      <div class="grow">
-        <b>${esc(x.name)}</b>
-        <div class="muted">${money(x.price)} × ${x.qty} = <b>${money(x.price * x.qty)}</b></div>
+  $('cartList').innerHTML = cart.map(x => {
+    const unitPrice = getCartItemUnitPrice(x);
+    const lineTotal = getCartItemLineTotal(x);
+    const baseUnit = x.unit || 'pcs';
+    const sellUnit = x.sellUnit || baseUnit;
+    const isConverted = sellUnit !== baseUnit;
+    const compatibleUnits = getCompatibleUnits(baseUnit);
+
+    let presetChipsHtml = '';
+    if (baseUnit === 'kg' || baseUnit === 'g') {
+      const presets = [
+        { label: '100g', qty: 100, unit: 'g' },
+        { label: '250g', qty: 250, unit: 'g' },
+        { label: '500g', qty: 500, unit: 'g' },
+        { label: '1kg', qty: 1, unit: 'kg' },
+        { label: '2kg', qty: 2, unit: 'kg' },
+        { label: '5kg', qty: 5, unit: 'kg' }
+      ];
+      presetChipsHtml = `
+        <div class="preset-chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+          ${presets.map(p => `
+            <button type="button" class="chip-weight secondary" data-set-qty="${p.qty}" data-set-unit="${p.unit}" data-cart-id="${esc(x.id)}" style="padding:2px 6px;font-size:11px;border-radius:4px;cursor:pointer">${p.label}</button>
+          `).join('')}
+        </div>
+      `;
+    } else if (baseUnit === 'L' || baseUnit === 'ml') {
+      const presets = [
+        { label: '250ml', qty: 250, unit: 'ml' },
+        { label: '500ml', qty: 500, unit: 'ml' },
+        { label: '750ml', qty: 750, unit: 'ml' },
+        { label: '1L', qty: 1, unit: 'L' },
+        { label: '2L', qty: 2, unit: 'L' }
+      ];
+      presetChipsHtml = `
+        <div class="preset-chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+          ${presets.map(p => `
+            <button type="button" class="chip-weight secondary" data-set-qty="${p.qty}" data-set-unit="${p.unit}" data-cart-id="${esc(x.id)}" style="padding:2px 6px;font-size:11px;border-radius:4px;cursor:pointer">${p.label}</button>
+          `).join('')}
+        </div>
+      `;
+    } else if (baseUnit === 'pcs') {
+      const presets = [
+        { label: '1', qty: 1, unit: 'pcs' },
+        { label: '2', qty: 2, unit: 'pcs' },
+        { label: '5', qty: 5, unit: 'pcs' },
+        { label: '10', qty: 10, unit: 'pcs' },
+        { label: '12 (doz)', qty: 12, unit: 'pcs' }
+      ];
+      presetChipsHtml = `
+        <div class="preset-chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+          ${presets.map(p => `
+            <button type="button" class="chip-weight secondary" data-set-qty="${p.qty}" data-set-unit="${p.unit}" data-cart-id="${esc(x.id)}" style="padding:2px 6px;font-size:11px;border-radius:4px;cursor:pointer">${p.label}</button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const unitSelectHtml = compatibleUnits.length > 1 ? `
+      <select class="cart-unit-select" data-unit-id="${esc(x.id)}" style="padding:4px 6px;border-radius:6px;border:1px solid var(--border);font-size:12px;background:white">
+        ${compatibleUnits.map(u => `<option value="${u}" ${u === sellUnit ? 'selected' : ''}>${u}</option>`).join('')}
+      </select>
+    ` : `<span style="font-size:12px;color:var(--muted);font-weight:600;padding:0 4px">${esc(sellUnit)}</span>`;
+
+    return `
+      <div class="item" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="grow" style="margin-right:8px">
+            <b>${esc(x.name)}</b>
+            <div class="muted" style="font-size:12px">
+              ${money(unitPrice)} / ${esc(sellUnit)}
+              ${isConverted ? ` <span style="color:var(--primary);font-size:11px">(${x.qty} ${esc(sellUnit)} = ${getCartItemBaseQty(x)} ${esc(baseUnit)})</span>` : ''}
+            </div>
+          </div>
+          <div style="text-align:right">
+            <b style="font-size:14px;color:var(--text)">${money(lineTotal)}</b>
+            <button type="button" class="secondary" data-remove="${esc(x.id)}" title="Remove item" style="padding:2px 6px;font-size:12px;margin-left:6px;color:var(--danger);border-color:transparent">×</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:2px">
+          <div class="flex" style="gap:4px;align-items:center">
+            <button type="button" class="secondary cart-btn" data-minus="${esc(x.id)}" style="width:32px;height:32px;padding:0;font-size:16px;line-height:1">−</button>
+            <input type="number" step="any" min="0.001" value="${x.qty}" class="cart-qty-input" data-qty-id="${esc(x.id)}" style="width:68px;height:32px;text-align:center;font-weight:700;padding:2px;border:1px solid var(--border);border-radius:6px;box-sizing:border-box">
+            ${unitSelectHtml}
+            <button type="button" class="secondary cart-btn" data-plus="${esc(x.id)}" style="width:32px;height:32px;padding:0;font-size:16px;line-height:1">+</button>
+          </div>
+        </div>
+
+        ${presetChipsHtml}
       </div>
-      <div class="flex">
-        <button class="secondary" data-minus="${esc(x.id)}">−</button>
-        <b style="min-width:24px;text-align:center">${x.qty}</b>
-        <button class="secondary" data-plus="${esc(x.id)}">+</button>
-      </div>
-    </div>
-  `).join('') || '<p class="empty">Cart is empty</p>';
+    `;
+  }).join('') || '<p class="empty">Cart is empty</p>';
 
   $('grandTotal').textContent = money(total);
   const received = Number($('received').value || 0);
-  $('balance').textContent = money(Math.max(0, received - total));
+  $('balance').textContent = money(Math.max(0, Number((received - total).toFixed(2))));
 }
 
 $('cartList').onclick = e => {
   const minus = e.target.dataset.minus;
   const plus = e.target.dataset.plus;
+  const remove = e.target.dataset.remove;
+  const setQty = e.target.dataset.setQty;
+  const setUnit = e.target.dataset.setUnit;
+  const cartId = e.target.dataset.cartId;
+
+  if (setQty && cartId) {
+    const line = cart.find(x => x.id === cartId);
+    if (!line) return;
+    const p = db.products.find(x => x.id === cartId);
+    const targetQty = parseFloat(setQty);
+    const targetUnit = setUnit || line.unit;
+    const reqBaseQty = convertQuantity(targetQty, targetUnit, p ? p.unit : 'pcs');
+    const otherCartBase = cart.filter(x => x.id === cartId && x !== line).reduce((sum, x) => sum + getCartItemBaseQty(x), 0);
+    if (!db.shop.allowNegativeStock && p && (otherCartBase + reqBaseQty > p.stock)) {
+      playBeep('error');
+      return alert(`Selected weight exceeds stock for "${p.name}". Available: ${p.stock} ${p.unit}`);
+    }
+    line.qty = Number(targetQty.toFixed(4));
+    line.sellUnit = targetUnit;
+    playBeep('success');
+    renderCart();
+    return;
+  }
+
+  if (remove) {
+    cart = cart.filter(x => x.id !== remove);
+    renderCart();
+    return;
+  }
+
   const id = minus || plus;
   if (!id) return;
   const line = cart.find(x => x.id === id);
   if (!line) return;
 
+  const unit = line.sellUnit || line.unit || 'pcs';
+  const step = (unit === 'g' || unit === 'ml') ? 50 : ((unit === 'kg' || unit === 'L') ? 0.25 : 1);
+
   if (minus) {
-    line.qty--;
-    if (line.qty <= 0) cart = cart.filter(x => x !== line);
+    const nextQty = Number((line.qty - step).toFixed(4));
+    if (nextQty <= 0) {
+      cart = cart.filter(x => x !== line);
+    } else {
+      line.qty = nextQty;
+    }
   } else {
     const p = db.products.find(x => x.id === id);
-    if (!p || line.qty >= p.stock) return alert('Not enough stock available');
-    line.qty++;
+    const nextQty = Number((line.qty + step).toFixed(4));
+    const reqBaseQty = convertQuantity(nextQty, unit, p ? p.unit : 'pcs');
+    const otherCartBase = cart.filter(x => x.id === id && x !== line).reduce((sum, x) => sum + getCartItemBaseQty(x), 0);
+    if (!db.shop.allowNegativeStock && p && (otherCartBase + reqBaseQty > p.stock)) {
+      playBeep('error');
+      return alert(`Not enough stock available for "${p.name}". Available: ${p.stock} ${p.unit}`);
+    }
+    line.qty = nextQty;
   }
   renderCart();
+};
+
+$('cartList').onchange = e => {
+  const qtyId = e.target.dataset.qtyId;
+  const unitId = e.target.dataset.unitId;
+  if (qtyId) {
+    const line = cart.find(x => x.id === qtyId);
+    if (!line) return;
+    const val = parseFloat(e.target.value);
+    if (!Number.isFinite(val) || val <= 0) {
+      cart = cart.filter(x => x !== line);
+      renderCart();
+      return;
+    }
+    const p = db.products.find(x => x.id === qtyId);
+    const reqBaseQty = convertQuantity(val, line.sellUnit || line.unit, p ? p.unit : 'pcs');
+    const otherCartBase = cart.filter(x => x.id === qtyId && x !== line).reduce((sum, x) => sum + getCartItemBaseQty(x), 0);
+    if (!db.shop.allowNegativeStock && p && (otherCartBase + reqBaseQty > p.stock)) {
+      playBeep('error');
+      alert(`Not enough stock for "${p.name}". Available: ${p.stock} ${p.unit}`);
+      e.target.value = line.qty;
+      return;
+    }
+    line.qty = Number(val.toFixed(4));
+    renderCart();
+  } else if (unitId) {
+    const line = cart.find(x => x.id === unitId);
+    if (!line) return;
+    const newUnit = e.target.value;
+    const p = db.products.find(x => x.id === unitId);
+    const reqBaseQty = convertQuantity(line.qty, newUnit, p ? p.unit : 'pcs');
+    const otherCartBase = cart.filter(x => x.id === unitId && x !== line).reduce((sum, x) => sum + getCartItemBaseQty(x), 0);
+    if (!db.shop.allowNegativeStock && p && (otherCartBase + reqBaseQty > p.stock)) {
+      playBeep('error');
+      alert(`Switching to ${newUnit} exceeds stock for "${p.name}". Available: ${p.stock} ${p.unit}`);
+      renderCart();
+      return;
+    }
+    line.sellUnit = newUnit;
+    renderCart();
+  }
 };
 
 $('clearCartBtn').onclick = () => {
@@ -955,12 +1349,20 @@ $('checkout').onclick = () => {
     if (!creditCustomer) return alert('Customer Name is required for Credit transactions (ණය).');
   }
 
-  // Stock check
+  // Stock check in base units aggregated across all lines
+  const deductions = {};
   for (const item of cart) {
-    const p = db.products.find(p => p.id === item.id);
-    if (!p || p.stock < item.qty) {
-      playBeep('error');
-      return alert(`Stock changed for "${item.name}". Available: ${p ? p.stock : 0}`);
+    const baseQty = getCartItemBaseQty(item);
+    deductions[item.id] = Number(((deductions[item.id] || 0) + baseQty).toFixed(4));
+  }
+
+  if (!db.shop.allowNegativeStock) {
+    for (const [id, reqBaseQty] of Object.entries(deductions)) {
+      const p = db.products.find(prod => prod.id === id);
+      if (!p || p.stock < reqBaseQty) {
+        playBeep('error');
+        return alert(`Insufficient stock for "${p ? p.name : 'Unknown'}".\nAvailable: ${p ? p.stock : 0} ${p ? p.unit : 'pcs'}\nRequired in cart: ${reqBaseQty} ${p ? p.unit : 'pcs'}`);
+      }
     }
   }
 
@@ -969,14 +1371,29 @@ $('checkout').onclick = () => {
     number: 'B' + Date.now().toString().slice(-8),
     at: new Date().toISOString(),
     date: today(),
-    items: cart.map(x => ({ ...x })),
+    items: cart.map(x => ({
+      id: x.id,
+      name: x.name,
+      price: x.price,
+      cost: x.cost,
+      qty: x.qty,
+      unit: x.unit || 'pcs',
+      sellUnit: x.sellUnit || x.unit || 'pcs',
+      unitPrice: getCartItemUnitPrice(x),
+      lineTotal: getCartItemLineTotal(x),
+      baseQty: getCartItemBaseQty(x),
+      category: x.category
+    })),
     subtotal,
     discount,
     total,
-    profit: isCredit ? 0 : cart.reduce((s, x) => s + (x.price - x.cost) * x.qty, 0) - discount,
+    profit: isCredit ? 0 : Number((cart.reduce((s, x) => {
+      const lineCost = (x.cost || 0) * getCartItemBaseQty(x);
+      return s + (getCartItemLineTotal(x) - lineCost);
+    }, 0) - discount).toFixed(2)),
     method,
     received: method === 'Cash' ? received : (isCredit ? 0 : total),
-    change: method === 'Cash' ? Math.max(0, received - total) : 0,
+    change: method === 'Cash' ? Math.max(0, Number((received - total).toFixed(2))) : 0,
     isCredit,
     creditCustomer,
     creditPhone,
@@ -985,11 +1402,13 @@ $('checkout').onclick = () => {
   };
 
   const backupDb = JSON.stringify(db);
-  // Deduct stocks
-  cart.forEach(x => {
-    const prod = db.products.find(p => p.id === x.id);
-    if (prod) prod.stock -= x.qty;
-  });
+  // Deduct stocks with precision
+  for (const [id, reqBaseQty] of Object.entries(deductions)) {
+    const prod = db.products.find(p => p.id === id);
+    if (prod) {
+      prod.stock = Number((prod.stock - reqBaseQty).toFixed(4));
+    }
+  }
 
   db.sales.push(sale);
 
@@ -1027,9 +1446,13 @@ $('checkout').onclick = () => {
 // 10. Thermal Receipt Formatting, PDF Invoice & Bluetooth Thermal
 // -------------------------------------------------------------
 function receiptHTML(s) {
-  const shop = db.shop;
+  const shop = db.shop || {};
+  const isCard = s.method === 'Card';
+  const isCash = s.method === 'Cash';
+  const hasDiscount = Number(s.discount || 0) > 0;
+
   return `
-    ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" style="max-height:48px;max-width:130px;object-fit:contain"></div>` : ''}
+    ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
     <h2>${esc(shop.name || 'Harsh Apex POS')}</h2>
     ${shop.address ? `<p class="center">${esc(shop.address)}</p>` : ''}
     ${shop.phone ? `<p class="center">Tel: ${esc(shop.phone)}</p>` : ''}
@@ -1038,7 +1461,7 @@ function receiptHTML(s) {
     <p>
       <b>Bill No: ${esc(s.number)}</b><br>
       Date: ${new Date(s.at).toLocaleDateString('en-LK')} ${new Date(s.at).toLocaleTimeString('en-LK')}<br>
-      Payment: <b>${esc(s.method)}</b>
+      Payment: <b>${esc(s.method)}${isCard ? ' (Approved)' : ''}</b>
       ${s.isCredit ? `<br><b style="color:#b45309">*** CREDIT BILL (${s.creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${esc(s.creditCustomer)} (${esc(s.creditPhone || 'No Phone')})` : ''}
       ${s.status === 'voided' ? '<br><b style="color:red">*** VOIDED / RETURNED BILL ***</b>' : ''}
     </p>
@@ -1048,25 +1471,31 @@ function receiptHTML(s) {
         <tr><th>Item</th><th style="text-align:right">Amount</th></tr>
       </thead>
       <tbody>
-        ${s.items.map(x => `
-          <tr>
-            <td><b>${esc(x.name)}</b><br>${x.qty} × ${money(x.price)}</td>
-            <td style="text-align:right">${money(x.qty * x.price)}</td>
-          </tr>
-        `).join('')}
+        ${s.items.map(x => {
+          const qtyStr = `${x.qty} ${x.sellUnit || x.unit || ''}`.trim();
+          const unitPrice = x.unitPrice || x.price;
+          const lineTotal = x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price);
+          return `
+            <tr>
+              <td><b>${esc(x.name)}</b><br>${qtyStr} × ${money(unitPrice)}</td>
+              <td style="text-align:right;vertical-align:bottom">${money(lineTotal)}</td>
+            </tr>
+          `;
+        }).join('')}
       </tbody>
     </table>
     <hr>
     <p>
       Subtotal: <span style="float:right">${money(s.subtotal)}</span><br>
-      Discount: <span style="float:right">${money(s.discount)}</span><br>
+      ${hasDiscount ? `Discount: <span style="float:right">-${money(s.discount)}</span><br>` : ''}
       <span class="bold" style="font-size:15px">Grand Total: <span style="float:right">${money(s.total)}</span></span><br>
-      Amount Received: <span style="float:right">${money(s.received)}</span><br>
-      Balance: <span style="float:right">${money(s.change)}</span>
+      ${isCash ? `Amount Received: <span style="float:right">${money(s.received)}</span><br>Balance: <span style="float:right">${money(s.change)}</span>` : ''}
+      ${isCard ? `Card Paid: <span style="float:right">${money(s.total)}</span>` : ''}
+      ${s.isCredit ? `Credit Balance Due: <span style="float:right">${money(s.total)}</span>` : ''}
     </p>
     <hr>
-    ${shop.receiptFooter ? `<p class="center" style="font-size:11px">${esc(shop.receiptFooter)}</p>` : ''}
-    <p class="center" style="font-size:10px;margin-top:6px">Powered by Harsh Apex Digital</p>
+    <p class="center" style="font-size:11px">${esc(shop.receiptFooter || 'Thank you for your business! Please come again.')}</p>
+    <p class="center" style="font-size:10px;margin-top:6px;color:#888">Powered by Harsh Apex Digital</p>
   `;
 }
 
@@ -1142,12 +1571,21 @@ async function printBluetoothThermal(s) {
   if (s.isCredit) text += `Credit To: ${s.creditCustomer}\n`;
   text += `--------------------------------\n`;
   s.items.forEach(x => {
-    text += `${x.name}\n  ${x.qty} x ${x.price} = ${(x.qty * x.price).toFixed(2)}\n`;
+    const qtyStr = `${x.qty} ${x.sellUnit || x.unit || ''}`.trim();
+    const unitPrice = (x.unitPrice || x.price).toFixed(2);
+    const lineTotal = (x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price)).toFixed(2);
+    text += `${x.name}\n  ${qtyStr} x ${unitPrice} = ${lineTotal}\n`;
   });
   text += `--------------------------------\n`;
-  text += `Total: Rs. ${s.total.toFixed(2)}\n`;
-  text += `Paid:  Rs. ${s.received.toFixed(2)}\n`;
-  text += `Bal:   Rs. ${s.change.toFixed(2)}\n`;
+  text += `Subtotal: Rs. ${s.subtotal.toFixed(2)}\n`;
+  if (s.discount > 0) text += `Discount: -Rs. ${s.discount.toFixed(2)}\n`;
+  text += `Total:    Rs. ${s.total.toFixed(2)}\n`;
+  if (s.method === 'Cash') {
+    text += `Paid:     Rs. ${s.received.toFixed(2)}\n`;
+    text += `Bal:      Rs. ${s.change.toFixed(2)}\n`;
+  } else if (s.method === 'Card') {
+    text += `Payment:  Card (Approved)\n`;
+  }
   text += `--------------------------------\n`;
   text += `${ESC}a\x01`; // Center
   if (db.shop.receiptFooter) text += `${db.shop.receiptFooter}\n`;
@@ -1245,19 +1683,26 @@ async function printBluetoothThermal(s) {
 
 function formatBillWhatsAppText(s) {
   if (!s) return '';
+  const items = s.items.map(x => {
+    const qtyStr = `${x.qty} ${x.sellUnit || x.unit || ''}`.trim();
+    const lineTotal = money(x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price));
+    return `${x.name} (${qtyStr}) = ${lineTotal}`;
+  });
   return [
-    `*${db.shop.name}*`,
+    `*${db.shop.name || 'Harsh Apex POS'}*`,
     db.shop.address,
-    `Tel: ${db.shop.phone}`,
+    db.shop.phone ? `Tel: ${db.shop.phone}` : '',
     `--------------------------------`,
     `Receipt: ${s.number} (${new Date(s.at).toLocaleString()})`,
     `Payment: ${s.method}`,
     s.isCredit ? `Customer: ${s.creditCustomer} (CREDIT)` : '',
     `--------------------------------`,
-    ...s.items.map(x => `${x.name} x${x.qty} = ${money(x.qty * x.price)}`),
+    ...items,
     `--------------------------------`,
+    s.discount > 0 ? `Subtotal: ${money(s.subtotal)}\nDiscount: -${money(s.discount)}` : '',
     `*Total Amount: ${money(s.total)}*`,
-    `Paid: ${money(s.received)} | Change: ${money(s.change)}`,
+    s.method === 'Cash' ? `Paid: ${money(s.received)} | Change: ${money(s.change)}` : '',
+    s.method === 'Card' ? `Card Paid: ${money(s.total)}` : '',
     db.shop.receiptFooter || 'Thank you for shopping with us!'
   ].filter(Boolean).join('\n');
 }
@@ -1403,9 +1848,12 @@ function renderTopSellingProducts(validSales) {
   const itemMap = {};
   validSales.forEach(s => {
     s.items.forEach(it => {
-      if (!itemMap[it.name]) itemMap[it.name] = { qty: 0, revenue: 0, category: it.category || 'General' };
-      itemMap[it.name].qty += it.qty;
-      itemMap[it.name].revenue += it.qty * it.price;
+      const unit = it.unit || 'pcs';
+      if (!itemMap[it.name]) itemMap[it.name] = { qty: 0, revenue: 0, unit, category: it.category || 'General' };
+      const baseQty = it.baseQty !== undefined ? it.baseQty : (it.qty || 0);
+      const lineTotal = it.lineTotal !== undefined ? it.lineTotal : (it.qty * it.price);
+      itemMap[it.name].qty = Number((itemMap[it.name].qty + baseQty).toFixed(4));
+      itemMap[it.name].revenue += lineTotal;
     });
   });
 
@@ -1418,7 +1866,7 @@ function renderTopSellingProducts(validSales) {
     <div class="item">
       <div class="grow">
         <b>#${idx + 1} ${esc(it.name)}</b>
-        <div class="muted">${esc(it.category)} · <b>${it.qty} sold</b></div>
+        <div class="muted">${esc(it.category)} · <b>${it.qty} ${esc(it.unit)} sold</b></div>
       </div>
       <b style="color:var(--primary)">${money(it.revenue)}</b>
     </div>
@@ -1540,17 +1988,34 @@ function openBillModal(sale) {
       ${isVoided ? `<p style="margin:2px 0;color:var(--danger)"><b>Void Reason:</b> ${esc(sale.voidReason || 'Not specified')}</p>` : ''}
     </div>
     <h4>Items (${sale.items.length})</h4>
-    <div style="max-height:180px;overflow-y:auto;border-bottom:1px solid var(--border)">
-      ${sale.items.map(x => `
-        <div class="item">
-          <div><b>${esc(x.name)}</b><div class="muted">${x.qty} × ${money(x.price)}</div></div>
-          <b>${money(x.qty * x.price)}</b>
-        </div>
-      `).join('')}
+    <div style="max-height:200px;overflow-y:auto;border-bottom:1px solid var(--border)">
+      ${sale.items.map(x => {
+        const qtyStr = `${x.qty} ${x.sellUnit || x.unit || ''}`.trim();
+        const unitPrice = x.unitPrice || x.price;
+        const lineTotal = x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price);
+        return `
+          <div class="item">
+            <div><b>${esc(x.name)}</b><div class="muted">${qtyStr} × ${money(unitPrice)}</div></div>
+            <b>${money(lineTotal)}</b>
+          </div>
+        `;
+      }).join('')}
     </div>
-    <div class="item" style="border:0;padding-top:10px">
-      <b>Grand Total</b>
-      <span class="total" style="font-size:20px">${money(sale.total)}</span>
+    <div style="padding-top:10px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span>Subtotal</span>
+        <span>${money(sale.subtotal)}</span>
+      </div>
+      ${sale.discount > 0 ? `
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--danger)">
+          <span>Discount</span>
+          <span>-${money(sale.discount)}</span>
+        </div>
+      ` : ''}
+      <div class="item" style="border:0;padding:6px 0 0 0">
+        <b>Grand Total</b>
+        <span class="total" style="font-size:20px">${money(sale.total)}</span>
+      </div>
     </div>
   `;
 
@@ -1607,11 +2072,12 @@ $('billModalVoid').onclick = () => {
   const reason = prompt('Reason for void / return (e.g. Customer returned items, wrong bill entered):', 'Customer Return');
   if (reason === null) return;
 
-  // Restore inventory stocks
+  // Restore inventory stocks in base units
   s.items.forEach(it => {
     const p = db.products.find(prod => prod.id === it.id);
     if (p) {
-      p.stock += it.qty;
+      const restoreQty = it.baseQty !== undefined ? it.baseQty : convertQuantity(it.qty, it.sellUnit || it.unit || p.unit, p.unit);
+      p.stock = Number((p.stock + restoreQty).toFixed(4));
     }
   });
 
@@ -1668,6 +2134,7 @@ $('saveShop').onclick = () => {
     currency: $('shopCurrency').value.trim() || 'Rs.',
     receiptWidth: $('receiptWidth').value || '58mm',
     receiptFooter: $('shopFooter').value.trim(),
+    allowNegativeStock: $('allowNegativeStockCheckbox') ? $('allowNegativeStockCheckbox').checked : false,
     logo: db.shop.logo || 'harsh-apex-logo.png'
   };
 
@@ -1687,6 +2154,9 @@ function updateShopDisplay() {
   $('shopCurrency').value = db.shop.currency || 'Rs.';
   $('receiptWidth').value = db.shop.receiptWidth || '58mm';
   $('shopFooter').value = db.shop.receiptFooter || '';
+  if ($('allowNegativeStockCheckbox')) {
+    $('allowNegativeStockCheckbox').checked = Boolean(db.shop.allowNegativeStock);
+  }
   const currentLogo = db.shop.logo || 'harsh-apex-logo.png';
   if ($('headerShopLogo')) $('headerShopLogo').src = currentLogo;
   if ($('shopLogoPreview')) $('shopLogoPreview').src = currentLogo;
