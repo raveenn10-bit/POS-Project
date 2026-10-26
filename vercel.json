@@ -1,16 +1,48 @@
 {
   "rewrites": [
     {
-      "source": "/api/firebase-token",
-      "destination": "/api/firebase-token.js"
-    },
-    {
       "source": "/pos",
       "destination": "/app.html"
     },
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/api/auth",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/dashboard",
+      "destination": "/api/dashboard.js"
+    },
+    {
+      "source": "/api/customers",
+      "destination": "/api/customers.js"
+    },
+    {
+      "source": "/api/licenses",
+      "destination": "/api/licenses.js"
+    },
+    {
+      "source": "/api/devices",
+      "destination": "/api/devices.js"
+    },
+    {
+      "source": "/api/payments",
+      "destination": "/api/payments.js"
+    },
+    {
+      "source": "/api/subscriptions",
+      "destination": "/api/subscriptions.js"
+    },
+    {
+      "source": "/api/device-checkin",
+      "destination": "/api/device-checkin.js"
+    },
+    {
+      "source": "/api/firebase-token",
+      "destination": "/api/firebase-token.js"
     }
   ],
   "headers": [
