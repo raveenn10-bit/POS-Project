@@ -1,0 +1,81 @@
+{
+  "name": "harsh-apex-pos-desktop",
+  "version": "2.0.0",
+  "description": "Harsh Apex Retail POS Windows Desktop Application with Offline SQLite and Hardware ESC/POS Printing",
+  "main": "main.js",
+  "author": "Harsh Apex Technologies <contact@harshapex.com.lk>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis portable",
+    "dist:nsis": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "lk.harshapex.pos",
+    "productName": "Harsh Apex POS",
+    "copyright": "Copyright © 2026 Harsh Apex Technologies",
+    "directories": {
+      "output": "../dist/desktop",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "sqlite-db.js",
+      "assets/**/*",
+      "../pos.html",
+      "../app.js",
+      "../print-system.js",
+      "../pdf-invoice.js",
+      "../sliding-clock.js",
+      "../sliding-clock.css",
+      "../*.png",
+      "../*.jpg",
+      "../lib/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "publisherName": "Harsh Apex Technologies",
+      "legalTrademarks": "Harsh Apex POS",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Harsh Apex POS",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "uninstallDisplayName": "Harsh Apex POS",
+      "runAfterFinish": true
+    },
+    "portable": {
+      "artifactName": "HarshApexPOS-Portable-${version}.exe"
+    }
+  }
+}

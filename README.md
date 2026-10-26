@@ -35,3 +35,14 @@ Keep `apex-pos-private-key.json` only on the owner's trusted phone/computer. Nev
 - A new Device ID requires a new activation code.
 - The signed-code model blocks forged or edited licenses, but no client-only web app can completely prevent a technically skilled person from modifying their own downloaded application code. Serve the official app only from a domain controlled by Harsh Apex.
 - Test installation, offline use, backup/restore and receipt printing on each target phone before commercial rollout.
+
+## Comprehensive Documentation Suite
+
+For complete setup instructions, hardware guides, and administrative manuals, refer to the documentation suite in `docs/`:
+
+1. **[Customer Handover Guide](docs/CUSTOMER_HANDOVER_GUIDE.md)**: Full retail guide for shop owners in Sri Lanka, setup on Windows/Android/iOS, 7-day trial and Rs. 2,500 monthly plans, 2-device linking flow, and device replacement without losing subscription days.
+2. **[Receipt Printer Setup Guide](docs/RECEIPT_PRINTER_SETUP_GUIDE.md)**: Universal hardware integration manual for 58mm and 80mm thermal printers over USB, Web Bluetooth BLE, Bluetooth Classic SPP, Ethernet/Wi-Fi Port 9100, and Apple AirPrint with troubleshooting.
+3. **[Backup & Data Recovery Guide](docs/BACKUP_AND_DATA_RECOVERY_GUIDE.md)**: Data protection manual detailing 1-click JSON exports, automated rolling snapshots, CSV audit spreadsheets, disaster recovery playbooks, and Firebase Cloud Sync.
+4. **[Super Admin Operations Manual](docs/SUPER_ADMIN_OPERATIONS_MANUAL.md)**: Executive control center guide for administrator (`chamilka.ch@gmail.com`), custom Colombo timezone expiries, 2-device slot enforcement, broken hardware swaps, and payment logging.
+5. **[Customer Handover Guide (සිංහල)](docs/CUSTOMER_HANDOVER_SINHALA.md)**: A dedicated, friendly Sinhala customer guide (පාරිභෝගික අත්පොත) covering setup, billing, printing, backups, device replacement, and WhatsApp support (+94 77 066 3154).
+

@@ -25,6 +25,8 @@
     root.PrinterSettings = exports.PrinterSettings;
     root.ReceiptTemplateEngine = exports.ReceiptTemplateEngine;
     root.EscPosEncoder = exports.EscPosEncoder;
+    root.AirPrintTransport = exports.AirPrintTransport;
+    root.PrintSystem = exports;
     root.ApexPrintSystem = exports;
   }
 })(typeof self !== 'undefined' ? self : this, function () {
@@ -51,6 +53,35 @@
 
     static hasWebBluetooth() {
       return typeof navigator !== 'undefined' && Boolean(navigator.bluetooth && navigator.bluetooth.requestDevice);
+    }
+
+    static detect() {
+      const platform = this.getPlatform();
+      const supportsBle = this.hasWebBluetooth();
+      const isIos = platform === 'ios';
+      const isAndroid = platform === 'android';
+      const isDesktop = platform === 'desktop';
+      const isStandalone = typeof navigator !== 'undefined' && Boolean(
+        navigator.standalone ||
+        (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      );
+      const supportsAirPrint = typeof window !== 'undefined' && typeof window.print === 'function';
+      const supportsWebShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+      const supportsFileShare = supportsWebShare && typeof navigator.canShare === 'function';
+
+      return {
+        platform,
+        isIos,
+        isAndroid,
+        isDesktop,
+        supportsBle: isIos ? false : supportsBle,
+        supportsAirPrint,
+        supportsWebShare,
+        supportsFileShare,
+        isStandalone,
+        availableTransports: this.getAvailableTransports(),
+        notes: this.getCompatibilityNotes()
+      };
     }
 
     static getAvailableTransports() {
@@ -292,7 +323,23 @@
       return {
         id: sale.number || sale.id || `RCP-${Date.now()}`,
         date: sale.at ? new Date(sale.at).toISOString() : new Date().toISOString(),
-        dateFormatted: sale.at ? new Date(sale.at).toLocaleString('en-LK') : new Date().toLocaleString('en-LK'),
+        dateFormatted: (function() {
+          const d = sale.at ? new Date(sale.at) : new Date();
+          try {
+            return d.toLocaleString('en-GB', {
+              timeZone: 'Asia/Colombo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true
+            });
+          } catch (e) {
+            return d.toLocaleString('en-LK');
+          }
+        })(),
         isReprint: Boolean(options.isReprint),
         store: {
           name: shop.name || 'Harsh Apex Retail POS',
@@ -316,8 +363,9 @@
         items: (sale.items || []).map(item => ({
           name: item.name || 'Item',
           qty: Number(item.qty || 1),
+          unit: item.sellUnit || item.unit || '',
           price: Number(item.price || 0),
-          total: Number((item.qty || 1) * (item.price || 0))
+          total: Number(item.total !== undefined ? item.total : (Number(item.qty || 1) * Number(item.price || 0)))
         })),
         subtotal: Number(sale.subtotal || sale.total || 0),
         discount: Number(sale.discount || 0),
@@ -387,7 +435,8 @@
 
       canonical.items.forEach(item => {
         const itemLine = `${item.name}`;
-        const subDetail = `  ${item.qty} x ${item.price.toFixed(2)}`;
+        const unitSuffix = item.unit ? ` ${item.unit}` : '';
+        const subDetail = `  ${item.qty}${unitSuffix} x ${item.price.toFixed(2)}`;
         const totalStr = item.total.toFixed(2);
 
         enc.line(itemLine);
@@ -412,6 +461,12 @@
       if (canonical.payment.method === 'Cash') {
         enc.row('Cash Tendered:', `${curr} ${canonical.payment.received.toFixed(2)}`);
         enc.row('Change Due:', `${curr} ${canonical.payment.change.toFixed(2)}`);
+      } else if (canonical.payment.method === 'Card') {
+        enc.row('Payment Method:', 'Card');
+        enc.row('Payment Status:', 'Paid / Approved');
+      } else {
+        enc.row('Payment Method:', canonical.payment.method);
+        enc.row('Payment Status:', canonical.payment.isCredit ? (canonical.payment.creditSettled ? 'Settled' : 'Unpaid') : 'Completed');
       }
 
       enc.rule('=');
@@ -426,6 +481,7 @@
       // Footer
       enc.alignCenter();
       if (canonical.store.footer) enc.line(canonical.store.footer);
+      else enc.line('Thank you for shopping with us! Please come again.');
       enc.line('Powered by Harsh Apex Retail POS');
 
       enc.feed(settings.feedLines || 3);
@@ -435,24 +491,28 @@
     }
 
     /**
-     * Generates Clean HTML for AirPrint and Browser Printing
+     * Generates Clean HTML for AirPrint and Browser Printing with Anti-Blank-Page CSS
      */
     static generateHtml(canonical, settings) {
+      if (typeof IosPrintEngine !== 'undefined' && typeof IosPrintEngine.generateReceiptHtml === 'function') {
+        return IosPrintEngine.generateReceiptHtml(canonical, settings);
+      }
+
       const is80 = settings.paperWidth === '80mm';
       const maxWidth = is80 ? '80mm' : '58mm';
       const fontSize = is80 ? '13px' : '11px';
       const curr = canonical.store.currency;
 
       return `
-        <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="max-width:${maxWidth};margin:0 auto;font-family:'Courier New',Courier,monospace;font-size:${fontSize};color:#000;padding:6px;background:#fff">
-          ${canonical.store.logo ? `<div style="text-align:center;margin-bottom:8px"><img src="${canonical.store.logo}" style="max-height:48px;max-width:130px;object-fit:contain"></div>` : ''}
-          <div style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:4px">${canonical.store.name}</div>
-          ${canonical.store.address ? `<div style="text-align:center">${canonical.store.address}</div>` : ''}
-          ${canonical.store.phone ? `<div style="text-align:center">Tel: ${canonical.store.phone}</div>` : ''}
-          ${canonical.store.regNo ? `<div style="text-align:center">BRN/Tax: ${canonical.store.regNo}</div>` : ''}
-          <div style="border-top:1px dashed #000;margin:6px 0"></div>
+        <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="width:${maxWidth};max-width:${maxWidth};margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans Sinhala','Iskoola Pota','SF Pro Text','Segoe UI',Roboto,'Courier New',monospace;font-size:${fontSize};color:#000;background:#fff;padding:4px 6px;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid;height:auto;min-height:0">
+          ${canonical.store.logo ? `<div style="text-align:center;margin-bottom:6px"><img src="${canonical.store.logo}" style="max-height:44px;max-width:130px;object-fit:contain;image-rendering:crisp-edges"></div>` : ''}
+          <div style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:3px;text-transform:uppercase">${canonical.store.name}</div>
+          ${canonical.store.address ? `<div style="text-align:center;font-size:0.92em">${canonical.store.address}</div>` : ''}
+          ${canonical.store.phone ? `<div style="text-align:center;font-size:0.92em">Tel: ${canonical.store.phone}</div>` : ''}
+          ${canonical.store.regNo ? `<div style="text-align:center;font-size:0.92em">BRN/Tax: ${canonical.store.regNo}</div>` : ''}
+          <div style="border-top:1px dashed #000;margin:5px 0"></div>
           
-          ${canonical.isReprint ? '<div style="text-align:center;font-weight:bold;margin-bottom:4px">*** REPRINT / DUPLICATE RECEIPT ***</div>' : ''}
+          ${canonical.isReprint ? '<div style="text-align:center;font-weight:bold;border:1.5px solid #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
           <div style="display:flex;justify-content:space-between">
             <span>Bill: <b>${canonical.id}</b></span>
             <span>Pay: <b>${canonical.payment.method}</b></span>
@@ -461,15 +521,17 @@
           <div>Cashier: ${canonical.cashier}</div>
 
           ${canonical.payment.isCredit ? `
-            <div style="margin-top:4px;font-weight:bold">Credit To: ${canonical.payment.creditCustomer} (${canonical.payment.creditPhone || 'No Phone'})</div>
-            <div>Status: ${canonical.payment.creditSettled ? 'SETTLED' : 'UNPAID'}</div>
+            <div style="margin-top:4px;padding:3px;border:1px solid #000;background:#f9f9f9;font-size:0.92em">
+              <b>Credit To:</b> ${canonical.payment.creditCustomer} (${canonical.payment.creditPhone || 'No Phone'})<br>
+              <b>Status:</b> ${canonical.payment.creditSettled ? 'SETTLED' : 'UNPAID'}
+            </div>
           ` : ''}
 
-          ${canonical.status === 'voided' ? '<div style="text-align:center;color:red;font-weight:bold;margin:4px 0">*** VOIDED TRANSACTION ***</div>' : ''}
+          ${canonical.status === 'voided' ? '<div style="text-align:center;color:red;font-weight:bold;margin:4px 0;border:1px solid red;padding:2px">*** VOIDED TRANSACTION ***</div>' : ''}
 
-          <div style="border-top:1px dashed #000;margin:6px 0"></div>
+          <div style="border-top:1px dashed #000;margin:5px 0"></div>
 
-          <table style="width:100%;border-collapse:collapse;font-size:inherit">
+          <table style="width:100%;border-collapse:collapse;font-size:inherit;page-break-inside:avoid;break-inside:avoid">
             <thead>
               <tr style="border-bottom:1px solid #000">
                 <th style="text-align:left;padding:2px 0">Item</th>
@@ -478,15 +540,15 @@
             </thead>
             <tbody>
               ${canonical.items.map(it => `
-                <tr>
-                  <td style="padding:2px 0"><b>${it.name}</b><br><span style="font-size:0.9em">${it.qty} × ${this.formatMoney(it.price, curr)}</span></td>
+                <tr style="page-break-inside:avoid;break-inside:avoid">
+                  <td style="padding:2px 0"><b>${it.name}</b><br><span style="font-size:0.9em">${it.qty}${it.unit ? ' ' + it.unit : ''} × ${this.formatMoney(it.price, curr)}</span></td>
                   <td style="text-align:right;vertical-align:bottom;padding:2px 0">${this.formatMoney(it.total, curr)}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
 
-          <div style="border-top:1px dashed #000;margin:6px 0"></div>
+          <div style="border-top:1px dashed #000;margin:5px 0"></div>
 
           <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><span>${this.formatMoney(canonical.subtotal, curr)}</span></div>
           ${canonical.discount > 0 ? `<div style="display:flex;justify-content:space-between"><span>Discount:</span><span>-${this.formatMoney(canonical.discount, curr)}</span></div>` : ''}
@@ -496,11 +558,17 @@
           ${canonical.payment.method === 'Cash' ? `
             <div style="display:flex;justify-content:space-between"><span>Cash Paid:</span><span>${this.formatMoney(canonical.payment.received, curr)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>Change:</span><span>${this.formatMoney(canonical.payment.change, curr)}</span></div>
-          ` : ''}
+          ` : canonical.payment.method === 'Card' ? `
+            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>Card</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>Paid / Approved</span></div>
+          ` : `
+            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>${canonical.payment.method}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>${canonical.payment.isCredit ? (canonical.payment.creditSettled ? 'Settled' : 'Unpaid') : 'Completed'}</span></div>
+          `}
 
-          <div style="border-top:1px dashed #000;margin:6px 0"></div>
-          <div style="text-align:center;font-size:0.9em;margin-top:4px">${canonical.store.footer}</div>
-          <div style="text-align:center;font-size:0.8em;color:#555;margin-top:4px">Powered by Harsh Apex Retail POS</div>
+          <div style="border-top:1px dashed #000;margin:5px 0"></div>
+          <div style="text-align:center;font-size:0.9em;margin-top:5px">${canonical.store.footer || 'Thank you for shopping with us! Please come again.'}</div>
+          <div style="text-align:center;font-size:0.8em;color:#555;margin-top:3px">Powered by Harsh Apex Retail POS</div>
         </div>
       `;
     }
@@ -522,32 +590,79 @@
       return typeof window !== 'undefined';
     }
 
-    async print(job, canonical, settings) {
+    async print(job, canonical, settings = {}) {
+      if (typeof IosPrintEngine !== 'undefined' && typeof IosPrintEngine.printAirPrint === 'function') {
+        const res = await IosPrintEngine.printAirPrint(canonical, settings);
+        return {
+          success: res.success !== false,
+          transportAck: true,
+          method: res.method,
+          message: res.message || 'AirPrint triggered via iOS Print Engine'
+        };
+      }
+
       const html = ReceiptTemplateEngine.generateHtml(canonical, settings);
-      
+      const is80 = settings.paperWidth === '80mm';
+      const maxW = is80 ? '80mm' : '58mm';
+
       return new Promise((resolve) => {
-        let printWin = window.open('', '_blank', 'width=450,height=650');
-        if (printWin) {
+        let printWin = null;
+        try {
+          printWin = window.open('', '_blank', 'width=450,height=650');
+        } catch (e) {}
+
+        if (printWin && printWin.document) {
           printWin.document.open();
           printWin.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
               <title>Print Receipt ${canonical.id}</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
               <style>
-                @page { margin: 4mm; size: auto; }
-                body { margin: 0; padding: 4px; background: #fff; }
+                @page { margin: 0; size: auto; }
+                html, body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                  overflow: visible !important;
+                  background: #fff !important;
+                  color: #000 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, 'Courier New', monospace !important;
+                }
+                .thermal-print-wrapper {
+                  width: ${maxW} !important;
+                  max-width: ${maxW} !important;
+                  margin: 0 auto !important;
+                  padding: 2mm 3mm 0 3mm !important;
+                  box-sizing: border-box !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                  page-break-after: avoid !important;
+                  break-after: avoid !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                }
+                .thermal-print-wrapper > *:last-child {
+                  margin-bottom: 0 !important;
+                  padding-bottom: 0 !important;
+                }
               </style>
             </head>
             <body>
-              ${html}
+              <div class="thermal-print-wrapper">
+                ${html}
+              </div>
               <script>
                 window.onload = function() {
                   setTimeout(function() {
                     window.print();
-                    setTimeout(function() { window.close(); }, 500);
-                  }, 250);
+                    setTimeout(function() { try { window.close(); } catch(e){} }, 1000);
+                  }, 150);
                 };
               </script>
             </body>
@@ -561,15 +676,56 @@
           iframe.style.position = 'fixed';
           iframe.style.right = '0';
           iframe.style.bottom = '0';
-          iframe.style.width = '0';
-          iframe.style.height = '0';
-          iframe.style.border = '0';
+          iframe.style.width = '1px';
+          iframe.style.height = '1px';
+          iframe.style.border = 'none';
+          iframe.style.opacity = '0.01';
+          iframe.style.pointerEvents = 'none';
           document.body.appendChild(iframe);
 
           iframe.contentWindow.document.open();
           iframe.contentWindow.document.write(`
-            <style>@page { margin: 4mm; size: auto; } body { margin:0; }</style>
-            ${html}
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>
+                @page { margin: 0; size: auto; }
+                html, body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                  background: #fff !important;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, 'Courier New', monospace !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                .thermal-print-wrapper {
+                  width: ${maxW} !important;
+                  max-width: ${maxW} !important;
+                  margin: 0 auto !important;
+                  padding: 2mm 3mm 0 3mm !important;
+                  box-sizing: border-box !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                  page-break-after: avoid !important;
+                  break-after: avoid !important;
+                  height: auto !important;
+                  min-height: 0 !important;
+                }
+                .thermal-print-wrapper > *:last-child {
+                  margin-bottom: 0 !important;
+                  padding-bottom: 0 !important;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="thermal-print-wrapper">
+                ${html}
+              </div>
+            </body>
+            </html>
           `);
           iframe.contentWindow.document.close();
           iframe.contentWindow.focus();
@@ -578,9 +734,9 @@
             try {
               iframe.contentWindow.print();
             } catch (e) {}
-            setTimeout(() => iframe.remove(), 2000);
+            setTimeout(() => { try { iframe.remove(); } catch (e) {} }, 2500);
             resolve({ success: true, transportAck: true, message: 'Iframe print triggered' });
-          }, 400);
+          }, 300);
         }
       });
     }
@@ -923,6 +1079,23 @@
       return this.transports.pdf;
     }
 
+    saveSettings() {
+      return PrinterSettings.save(this.settings);
+    }
+
+    async shareReceipt(sale, shop = {}, options = {}) {
+      const canonical = ReceiptTemplateEngine.toCanonical(sale, shop, options);
+      if (typeof IosPrintEngine !== 'undefined' && typeof IosPrintEngine.shareReceipt === 'function') {
+        return IosPrintEngine.shareReceipt(canonical, options);
+      }
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        const text = `${canonical.store.name}\nBill: ${canonical.id}\nDate: ${canonical.dateFormatted}\nTotal: ${canonical.store.currency} ${canonical.total.toFixed(2)}`;
+        await navigator.share({ title: `Receipt ${canonical.id}`, text });
+        return { success: true, method: 'share-text' };
+      }
+      return { success: false, message: 'Web Share not supported' };
+    }
+
     async printReceipt(sale, shop = {}, options = {}) {
       const canonical = ReceiptTemplateEngine.toCanonical(sale, shop, options);
       const transport = this.selectOptimalTransport();
@@ -952,10 +1125,10 @@
           console.warn('Primary transport failed, offering PDF fallback:', err);
           try {
             await this.transports.pdf.print(job, canonical, this.settings);
-            return { success: true, fallback: 'pdf', error: err.message };
+            return { success: true, fallback: 'pdf', error: err.message, job };
           } catch (pdfErr) {}
         }
-        throw err;
+        return { success: false, error: err.message, nonBlocking: true, job };
       }
     }
 
@@ -982,6 +1155,8 @@
     }
   }
 
+  const defaultPrintManager = new PrintManager();
+
   return {
     PrinterCapabilityDetector,
     PrinterSettings,
@@ -993,6 +1168,7 @@
     BrowserPrintTransport,
     PdfTransport,
     PrintQueue,
-    PrintManager
+    PrintManager,
+    printManager: defaultPrintManager
   };
 });
