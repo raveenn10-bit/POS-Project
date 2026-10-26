@@ -2500,4 +2500,368 @@ body.drawer-open {
   }
 }
 
+/* ==========================================================================
+   AEO & GEO Enhancements: Direct Definition Snippet Box
+   ========================================================================== */
+.aeo-summary-container {
+  margin-top: -30px;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 10;
+}
+
+.aeo-summary-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(14, 118, 110, 0.18) 100%);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.7), 0 0 30px rgba(20, 184, 166, 0.15);
+  backdrop-filter: blur(16px);
+}
+
+.aeo-header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+.aeo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 184, 166, 0.18);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  color: var(--emerald-mint);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.aeo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.aeo-definition-text {
+  font-size: 15px;
+  color: #e2e8f0;
+  line-height: 1.75;
+  margin-bottom: 24px;
+}
+
+.aeo-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.aeo-fact-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.aeo-fact-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.aeo-fact-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.aeo-fact-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Target Audience & Industry Solutions Section
+   ========================================================================== */
+.target-audience-section {
+  padding: 90px 0;
+  position: relative;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 14, 26, 0.6) 50%, transparent 100%);
+}
+
+.target-audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.audience-card {
+  background: var(--bg-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.audience-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--emerald-mint), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.audience-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--surface-border-hover);
+  background: var(--bg-card-hover);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6), 0 0 25px rgba(20, 184, 166, 0.15);
+}
+
+.audience-card:hover::before {
+  opacity: 1;
+}
+
+.audience-top {
+  margin-bottom: 24px;
+}
+
+.audience-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.audience-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.audience-category-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--cyan-light);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.audience-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.audience-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.audience-features-list {
+  list-style: none;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.audience-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.audience-feature-item .check {
+  color: var(--emerald-mint);
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.audience-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.audience-card:hover .audience-btn {
+  background: var(--emerald-primary);
+  border-color: var(--emerald-light);
+  box-shadow: 0 4px 14px var(--emerald-glow);
+}
+
+/* ==========================================================================
+   Structured Table Comparison (GEO Search Matrix)
+   ========================================================================== */
+.geo-table-card {
+  margin-top: 48px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 32px 24px;
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.geo-table-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.geo-table-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.geo-table-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.geo-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.geo-comparison-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.geo-comparison-table th, 
+.geo-comparison-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.geo-comparison-table th {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.geo-comparison-table th.col-apex,
+.geo-comparison-table td.col-apex {
+  background: rgba(20, 184, 166, 0.1);
+  color: #fff;
+  font-weight: 700;
+  border-left: 1px solid rgba(45, 212, 191, 0.25);
+  border-right: 1px solid rgba(45, 212, 191, 0.25);
+}
+
+.geo-comparison-table th.col-apex {
+  color: var(--emerald-mint);
+  font-size: 12px;
+}
+
+.geo-comparison-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.geo-comparison-table tr:hover td.col-apex {
+  background: rgba(20, 184, 166, 0.14);
+}
+
+.status-badge-good {
+  color: #34d399;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-badge-bad {
+  color: #f87171;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-badge-warn {
+  color: #fbbf24;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .aeo-summary-card {
+    padding: 24px 18px;
+  }
+  .aeo-title {
+    font-size: 18px;
+  }
+  .aeo-definition-text {
+    font-size: 14px;
+  }
+  .target-audience-grid {
+    grid-template-columns: 1fr;
+  }
+  .geo-table-card {
+    padding: 20px 14px;
+  }
+}
+
 

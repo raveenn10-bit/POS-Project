@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('--- Starting SEO & Retail Conversion Verification ---');
+console.log('--- Starting SEO, AEO & GEO Verification for "POS System Sri Lanka" ---');
 
 // 1. Verify sitemap.xml
 const sitemapContent = fs.readFileSync(path.join(__dirname, 'sitemap.xml'), 'utf8');
@@ -37,6 +37,9 @@ if (!sitemapContent.includes('https://pos.harshapex.com.lk/harsh-apex-logo.png')
 if (!sitemapContent.includes('<lastmod>2026-10-26</lastmod>')) {
   throw new Error('sitemap.xml: Missing lastmod date 2026-10-26');
 }
+if (!sitemapContent.includes('POS System Sri Lanka')) {
+  throw new Error('sitemap.xml: Missing image captions targeting "POS System Sri Lanka"');
+}
 console.log('✅ 1. sitemap.xml passed all syntax and semantic checks');
 
 // 2. Verify robots.txt
@@ -66,7 +69,7 @@ if (!gscContent.includes('google-site-verification: google0uxwDDpcZhFwDVDBOP4Ibu
 }
 console.log(`✅ 3. ${gscFile} verified with correct token`);
 
-// 4. Verify Schema.org JSON-LD in index.html & landing.html
+// 4. Verify Schema.org JSON-LD and HTML semantics in index.html & landing.html
 function verifyHtml(filename) {
   const html = fs.readFileSync(path.join(__dirname, filename), 'utf8');
   
@@ -85,9 +88,18 @@ function verifyHtml(filename) {
   const types = schema['@graph'].map(item => Array.isArray(item['@type']) ? item['@type'].join(',') : item['@type']);
   console.log(`[${filename}] Found Schema types:`, types);
 
+  // Check WebSite Schema
+  const website = schema['@graph'].find(item => item['@type'] === 'WebSite');
+  if (!website || !website.potentialAction) {
+    throw new Error(`${filename}: WebSite Schema with SearchAction missing`);
+  }
+
   // Check SoftwareApplication
   const softApp = schema['@graph'].find(item => item['@type'] === 'SoftwareApplication');
   if (!softApp) throw new Error(`${filename}: SoftwareApplication missing in Schema`);
+  if (!softApp.name.includes('POS System Sri Lanka')) {
+    throw new Error(`${filename}: SoftwareApplication name missing "POS System Sri Lanka" keyword`);
+  }
   if (!softApp.offers || softApp.offers.length < 2) throw new Error(`${filename}: Offers missing in SoftwareApplication`);
   const monthlyOffer = softApp.offers.find(o => o.price === '2500');
   if (!monthlyOffer || monthlyOffer.priceCurrency !== 'LKR') {
@@ -104,8 +116,14 @@ function verifyHtml(filename) {
 
   // Check FAQPage
   const faq = schema['@graph'].find(item => item['@type'] === 'FAQPage');
-  if (!faq || !faq.mainEntity || faq.mainEntity.length < 6) {
-    throw new Error(`${filename}: FAQPage missing or has fewer than 6 questions`);
+  if (!faq || !faq.mainEntity || faq.mainEntity.length < 8) {
+    throw new Error(`${filename}: FAQPage missing or has fewer than 8 questions (found ${faq ? faq.mainEntity.length : 0})`);
+  }
+
+  // Check HowTo
+  const howto = schema['@graph'].find(item => item['@type'] === 'HowTo');
+  if (!howto || !howto.step || howto.step.length < 3) {
+    throw new Error(`${filename}: HowTo Schema missing or has fewer than 3 steps`);
   }
 
   // Check BreadcrumbList
@@ -115,13 +133,14 @@ function verifyHtml(filename) {
   }
 
   // Check Head Metadata
-  if (!html.includes('<title>Harsh Apex Retail POS — #1 Offline POS Software in Sri Lanka for Small Businesses &amp; Retail Shops</title>')) {
+  const expectedTitle = '<title>POS System Sri Lanka — Harsh Apex Retail POS | #1 Offline POS Software in Sri Lanka for Small Businesses &amp; Retail Shops</title>';
+  if (!html.includes(expectedTitle)) {
     throw new Error(`${filename}: Title tag does not match requirement`);
   }
-  if (!html.includes('name="description"') || !html.includes('Rs. 2,500/mo')) {
+  if (!html.includes('name="description"') || !html.includes('POS System Sri Lanka') || !html.includes('Rs. 2,500/mo')) {
     throw new Error(`${filename}: Description meta tag does not contain expected Sri Lanka retail keywords`);
   }
-  if (!html.includes('name="keywords"') || !html.includes('POS software Sri Lanka')) {
+  if (!html.includes('name="keywords"') || !html.includes('POS System Sri Lanka') || !html.includes('POS software Sri Lanka')) {
     throw new Error(`${filename}: Keywords meta tag does not contain expected Sri Lanka keywords`);
   }
   if (!html.includes('link rel="canonical" href="https://pos.harshapex.com.lk/"')) {
@@ -137,9 +156,22 @@ function verifyHtml(filename) {
     throw new Error(`${filename}: OpenGraph and Twitter card tags missing`);
   }
 
-  // Check Comparison Section
+  // Check AEO direct definition snippet
+  if (!html.includes('aeo-summary-container') || !html.includes('aeo-title')) {
+    throw new Error(`${filename}: AEO Direct Definition Snippet missing`);
+  }
+
+  // Check Target Audience Section
+  if (!html.includes('id="target-audience"') || !html.includes('target-audience-grid')) {
+    throw new Error(`${filename}: Target Audience Section missing`);
+  }
+
+  // Check Comparison Section & Structured GEO Table
   if (!html.includes('id="comparison"') || !html.includes('කුඩා හා නව ව්‍යාපාර සඳහා විශේෂ වාසි')) {
     throw new Error(`${filename}: Comparison / Small Business Benefits section missing`);
+  }
+  if (!html.includes('geo-table-card') || !html.includes('geo-comparison-table')) {
+    throw new Error(`${filename}: Structured GEO Comparison Table missing`);
   }
 }
 
@@ -156,4 +188,4 @@ if (!manifest.name.includes('#1 Offline POS Sri Lanka') || !manifest.description
 }
 console.log('✅ 5. manifest.webmanifest verified with rich retail keywords');
 
-console.log('🎉 All Static SEO Assets and Code Integrity Validations Passed!');
+console.log('🎉 All SEO, AEO & GEO Verification Tests Passed with 100% Integrity!');
