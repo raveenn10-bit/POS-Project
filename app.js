@@ -172,6 +172,311 @@ window.initExpiryClock = function(payload) {
     window.addEventListener('focus', check);
   }
 
+  const escHtml = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  let licenseEventSource = null;
+
+  function showLicenseRevokedModal(data) {
+    let modal = document.getElementById('posLicenseRevokedModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'posLicenseRevokedModal';
+      document.body.appendChild(modal);
+    }
+    hideLicenseSuspendedModal();
+
+    modal.style = 'position:fixed;inset:0;z-index:999999;background:rgba(15,23,42,0.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;font-family:system-ui,-apple-system,sans-serif;';
+    const reasonText = data.reason || data.error || 'Subscription revoked by administrator';
+    const wa = `https://wa.me/94770663154?text=${encodeURIComponent('Hello Harsh Apex POS Support, my POS license was revoked.\nDevice ID: ' + deviceId + '\nReason: ' + reasonText)}`;
+
+    modal.innerHTML = `
+      <div style="width:min(500px,100%);background:#ffffff;border-radius:24px;padding:30px;box-shadow:0 25px 60px rgba(0,0,0,0.4);border:2px solid #ef4444;text-align:center;">
+        <div style="width:68px;height:68px;background:#fee2e2;color:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">
+          ⛔
+        </div>
+        <h2 style="margin:0 0 8px;color:#991b1b;font-size:22px;font-weight:800;">බලපත්‍රය අවලංගු කර ඇත</h2>
+        <p style="margin:0 0 14px;color:#64748b;font-size:13px;font-weight:600;">License Revoked by Administrator</p>
+        
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px 14px;margin-bottom:18px;text-align:left;font-size:13px;line-height:1.5;color:#991b1b;">
+          <b>හේතුව (Reason):</b> ${escHtml(reasonText)}<br>
+          <span style="font-size:11px;color:#7f1d1d;">පරිපාලක විසින් මෙම POS පර්යන්තයේ බලපත්‍රය අවලංගු කර ඇත. නැවත සක්‍රීය කිරීමට WhatsApp මඟින් සහය ලබා ගන්න.</span>
+        </div>
+
+        <div style="text-align:left;margin-bottom:16px;">
+          <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">Your Device ID</label>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input id="revokedDevIdInput" type="text" readonly value="${escHtml(deviceId)}" style="width:100%;padding:10px 12px;font-family:monospace;font-size:13px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#1e293b;">
+            <button id="btnCopyRevokedDevId" type="button" style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;color:#334155;cursor:pointer;white-space:nowrap;">📋 Copy</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a href="${wa}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+            <span>💬 WhatsApp හරහා සහය ලබා ගන්න (Contact Support)</span>
+          </a>
+          <button id="btnEnterNewRevCode" type="button" style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:11px;font-size:13px;font-weight:700;color:#475569;cursor:pointer;">
+            🔑 නව Activation Code එකක් ඇතුළත් කරන්න (Enter New Code)
+          </button>
+        </div>
+
+        <div id="newRevCodeArea" style="display:none;margin-top:16px;text-align:left;">
+          <label style="font-size:12px;font-weight:700;color:#334155;">New Activation Code:</label>
+          <textarea id="inputNewRevokedCode" rows="3" style="width:100%;margin-top:4px;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:12px;box-sizing:border-box;" placeholder="Paste new activation code here"></textarea>
+          <button id="btnActivateNewRevokedCode" type="button" style="width:100%;margin-top:8px;background:#0e766e;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;">
+            Activate &amp; Unlock POS
+          </button>
+          <div id="newRevCodeError" style="display:none;color:#dc2626;font-size:12px;margin-top:6px;"></div>
+        </div>
+      </div>
+    `;
+
+    document.body.style.overflow = 'hidden';
+
+    const copyBtn = modal.querySelector('#btnCopyRevokedDevId');
+    if (copyBtn) {
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(deviceId);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
+        } catch (e) {
+          modal.querySelector('#revokedDevIdInput')?.select();
+        }
+      };
+    }
+
+    const btnToggleNew = modal.querySelector('#btnEnterNewRevCode');
+    const newArea = modal.querySelector('#newRevCodeArea');
+    if (btnToggleNew && newArea) {
+      btnToggleNew.onclick = () => {
+        newArea.style.display = newArea.style.display === 'none' ? 'block' : 'none';
+      };
+    }
+
+    const btnActNew = modal.querySelector('#btnActivateNewRevokedCode');
+    const txtNew = modal.querySelector('#inputNewRevokedCode');
+    const errNew = modal.querySelector('#newRevCodeError');
+    if (btnActNew && txtNew && errNew) {
+      btnActNew.onclick = async () => {
+        const newCode = txtNew.value.trim();
+        if (!newCode) return;
+        btnActNew.disabled = true;
+        btnActNew.textContent = 'Verifying...';
+        const pl = await verify(newCode);
+        if (!pl) {
+          errNew.textContent = 'Invalid or expired activation code for this device.';
+          errNew.style.display = 'block';
+          btnActNew.disabled = false;
+          btnActNew.textContent = 'Activate & Unlock POS';
+          return;
+        }
+        localStorage.setItem(LICENSE_KEY, newCode);
+        window.apexActiveLicense = pl;
+        modal.remove();
+        document.body.style.overflow = '';
+        if (typeof window.initExpiryClock === 'function') window.initExpiryClock(pl);
+        connectRealtimeLicenseStream();
+        location.reload();
+      };
+    }
+  }
+
+  function showLicenseSuspendedModal(data) {
+    let modal = document.getElementById('posLicenseSuspendedModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'posLicenseSuspendedModal';
+      document.body.appendChild(modal);
+    }
+
+    modal.style = 'position:fixed;inset:0;z-index:999998;background:rgba(15,23,42,0.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;font-family:system-ui,-apple-system,sans-serif;';
+    const reasonText = data.reason || data.error || 'Subscription is temporarily suspended by administrator';
+    const wa = `https://wa.me/94770663154?text=${encodeURIComponent('Hello Harsh Apex POS Support, my license is temporarily suspended.\nDevice ID: ' + deviceId + '\nReason: ' + reasonText)}`;
+
+    modal.innerHTML = `
+      <div style="width:min(490px,100%);background:#ffffff;border-radius:24px;padding:30px;box-shadow:0 25px 60px rgba(0,0,0,0.4);border:2px solid #f59e0b;text-align:center;">
+        <div style="width:68px;height:68px;background:#fef3c7;color:#d97706;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">
+          ⏸️
+        </div>
+        <h2 style="margin:0 0 8px;color:#92400e;font-size:22px;font-weight:800;">බලපත්‍රය තාවකාලිකව අත්හිටුවා ඇත</h2>
+        <p style="margin:0 0 14px;color:#64748b;font-size:13px;font-weight:600;">POS Subscription Temporarily Suspended</p>
+        
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;margin-bottom:18px;text-align:left;font-size:13px;line-height:1.5;color:#92400e;">
+          <b>විස්තරය (Details):</b> ${escHtml(reasonText)}<br>
+          <span style="font-size:11px;color:#78350f;">පරිපාලක විසින් මෙම ගිණුම නැවත සක්‍රීය (Unsuspend) කළ වහාම මෙම තිරය ස්වයංක්‍රීයව ඉවත් වේ.</span>
+        </div>
+
+        <div style="text-align:left;margin-bottom:18px;">
+          <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">Device ID</label>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input id="suspendedDevIdInput" type="text" readonly value="${escHtml(deviceId)}" style="width:100%;padding:10px 12px;font-family:monospace;font-size:13px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#1e293b;">
+            <button id="btnCopySuspendedDevId" type="button" style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;color:#334155;cursor:pointer;white-space:nowrap;">📋 Copy</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="btnCheckSuspensionStatus" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#d97706;color:#ffffff;border:0;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,0.3);">
+            <span>🔄 තත්ත්වය නැවත පරීක්ෂා කරන්න (Check Status Now)</span>
+          </button>
+          <a href="${wa}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+            <span>💬 WhatsApp සහය ලබා ගන්න (Contact Support)</span>
+          </a>
+        </div>
+      </div>
+    `;
+
+    document.body.style.overflow = 'hidden';
+
+    const copyBtn = modal.querySelector('#btnCopySuspendedDevId');
+    if (copyBtn) {
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(deviceId);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
+        } catch (e) {
+          modal.querySelector('#suspendedDevIdInput')?.select();
+        }
+      };
+    }
+
+    const checkBtn = modal.querySelector('#btnCheckSuspensionStatus');
+    if (checkBtn) {
+      checkBtn.onclick = async () => {
+        checkBtn.disabled = true;
+        checkBtn.textContent = 'Checking...';
+        try {
+          await performOnlineCheckin();
+        } finally {
+          checkBtn.disabled = false;
+          checkBtn.textContent = '🔄 තත්ත්වය නැවත පරීක්ෂා කරන්න (Check Status Now)';
+        }
+      };
+    }
+  }
+
+  function hideLicenseSuspendedModal() {
+    const modal = document.getElementById('posLicenseSuspendedModal');
+    if (modal) {
+      modal.remove();
+      document.body.style.overflow = '';
+    }
+  }
+
+  function showLicenseReplacedModal(data) {
+    let modal = document.getElementById('posLicenseReplacedModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'posLicenseReplacedModal';
+      document.body.appendChild(modal);
+    }
+    hideLicenseSuspendedModal();
+
+    modal.style = 'position:fixed;inset:0;z-index:999999;background:rgba(15,23,42,0.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;font-family:system-ui,-apple-system,sans-serif;';
+    modal.innerHTML = `
+      <div style="width:min(480px,100%);background:#ffffff;border-radius:24px;padding:30px;box-shadow:0 25px 60px rgba(0,0,0,0.4);border:2px solid #6366f1;text-align:center;">
+        <div style="width:68px;height:68px;background:#e0e7ff;color:#4f46e5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">
+          🔄
+        </div>
+        <h2 style="margin:0 0 8px;color:#3730a3;font-size:22px;font-weight:800;">උපාංගය මාරු කර ඇත</h2>
+        <p style="margin:0 0 14px;color:#64748b;font-size:13px;font-weight:600;">Device Replaced by Administrator</p>
+        
+        <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:12px 14px;margin-bottom:18px;text-align:left;font-size:13px;line-height:1.5;color:#3730a3;">
+          මෙම POS පර්යන්තය වෙනුවට වෙනත් පරිගණකයක් පරිපාලක විසින් සම්බන්ධ කර ඇත.<br>
+          <span style="font-size:11px;color:#4338ca;">මෙම පරිගණකයේ නැවත POS භාවිතා කිරීමට නව බලපත්‍රයක් අවශ්‍ය වේ.</span>
+        </div>
+
+        <button onclick="location.reload()" type="button" style="width:100%;background:#4f46e5;color:#ffffff;border:0;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;cursor:pointer;">
+          නව Activation එකක් ලබා ගන්න (New Activation)
+        </button>
+      </div>
+    `;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function handleLicenseStatusResponse(data) {
+    if (!data) return;
+
+    // 1. Revoked
+    if (data.status === 'revoked' || data.revoked || data.bindingStatus === 'revoked') {
+      localStorage.removeItem(LICENSE_KEY);
+      showLicenseRevokedModal(data);
+      return;
+    }
+
+    // 2. Replaced
+    if (data.status === 'replaced' || data.bindingStatus === 'replaced') {
+      localStorage.removeItem(LICENSE_KEY);
+      showLicenseReplacedModal(data);
+      return;
+    }
+
+    // 3. Suspended
+    if (data.status === 'suspended' || data.suspended || data.bindingStatus === 'suspended') {
+      showLicenseSuspendedModal(data);
+      return;
+    }
+
+    // 4. Active / Reactivated
+    if (data.valid === true || data.status === 'active') {
+      hideLicenseSuspendedModal();
+
+      if (data.updatedCode && typeof data.updatedCode === 'string') {
+        try {
+          const [body] = data.updatedCode.trim().split('.');
+          const newPayload = JSON.parse(new TextDecoder().decode(bytes(body)));
+          localStorage.setItem(LICENSE_KEY, data.updatedCode);
+          window.apexActiveLicense = newPayload;
+          if (typeof window.initExpiryClock === 'function') {
+            window.initExpiryClock(newPayload);
+          }
+          if (typeof toast === 'function') {
+            toast('✓ License Extended / බලපත්‍ර කාලය දීර්ඝ කරන ලදී!');
+          }
+        } catch (e) {
+          console.warn('Error applying updatedCode:', e);
+        }
+      }
+    }
+  }
+
+  function connectRealtimeLicenseStream() {
+    if (!navigator.onLine) return;
+    const token = localStorage.getItem(LICENSE_KEY);
+    if (!token) return;
+
+    if (licenseEventSource) {
+      try { licenseEventSource.close(); } catch (e) {}
+    }
+
+    try {
+      const sseUrl = `/api/device-checkin?stream=1&deviceId=${encodeURIComponent(deviceId)}&code=${encodeURIComponent(token)}`;
+      licenseEventSource = new EventSource(sseUrl);
+
+      licenseEventSource.onmessage = (evt) => {
+        try {
+          if (!evt.data || evt.data.trim() === ': keep-alive') return;
+          const data = JSON.parse(evt.data);
+          handleLicenseStatusResponse(data);
+        } catch (err) {
+          console.warn('Error handling SSE message:', err);
+        }
+      };
+
+      licenseEventSource.onerror = () => {
+        try { licenseEventSource.close(); } catch (e) {}
+        licenseEventSource = null;
+        setTimeout(() => {
+          if (navigator.onLine && localStorage.getItem(LICENSE_KEY)) {
+            connectRealtimeLicenseStream();
+          }
+        }, 8000);
+      };
+    } catch (e) {
+      console.warn('SSE stream error:', e);
+    }
+  }
+
   // Online Device Check-in: gently updates last_seen_at and verifies binding without blocking offline POS
   async function performOnlineCheckin() {
     if (!navigator.onLine) return;
@@ -186,6 +491,8 @@ window.initExpiryClock = function(payload) {
         body: JSON.stringify({
           deviceId,
           deviceName: devName,
+          code: token,
+          activationCode: token,
           licenseToken: token,
           customer: activeLic ? activeLic.customer : undefined,
           plan: activeLic ? activeLic.plan : undefined,
@@ -195,12 +502,7 @@ window.initExpiryClock = function(payload) {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data && (data.revoked || data.status === 'revoked' || data.bindingStatus === 'revoked' || data.bindingStatus === 'replaced')) {
-          console.warn('POS Device binding has been revoked or replaced remotely.');
-          alert('This device activation has been transferred or revoked by the administrator.');
-          localStorage.removeItem(LICENSE_KEY);
-          location.reload();
-        }
+        handleLicenseStatusResponse(data);
       }
     } catch (e) {
       // Offline fallback: 100% offline cryptographic signature verification remains active!
@@ -215,10 +517,13 @@ window.initExpiryClock = function(payload) {
     if (typeof window.initExpiryClock === 'function') {
       window.initExpiryClock(valid);
     }
-    // Gentle online checkin
+    // Real-time SSE stream & immediate online checkin
     performOnlineCheckin();
-    window.addEventListener('online', performOnlineCheckin);
-    setInterval(performOnlineCheckin, 30 * 60 * 1000);
+    connectRealtimeLicenseStream();
+    window.addEventListener('online', () => { performOnlineCheckin(); connectRealtimeLicenseStream(); });
+    window.addEventListener('focus', performOnlineCheckin);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) performOnlineCheckin(); });
+    setInterval(performOnlineCheckin, 15000);
     return;
   }
 
@@ -298,11 +603,14 @@ window.initExpiryClock = function(payload) {
       btn.style.background = '#16a34a';
       btn.textContent = '✓ Activated! Opening POS...';
 
-      // Start watcher and online sync heartbeat
+      // Start watcher, real-time SSE stream, and high-frequency online sync heartbeat
       watch(payload);
-      window.addEventListener('online', performOnlineCheckin);
-      setInterval(performOnlineCheckin, 30 * 60 * 1000);
-      try { performOnlineCheckin(); } catch (e) {}
+      performOnlineCheckin();
+      connectRealtimeLicenseStream();
+      window.addEventListener('online', () => { performOnlineCheckin(); connectRealtimeLicenseStream(); });
+      window.addEventListener('focus', performOnlineCheckin);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) performOnlineCheckin(); });
+      setInterval(performOnlineCheckin, 15000);
 
       // Smooth fade-out of the activation gate overlay
       gate.style.transition = 'opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1)';

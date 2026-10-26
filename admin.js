@@ -1163,6 +1163,21 @@ function renderLicensesTable() {
             <span>${escapeHtml(lic.customer_name || 'Client')}</span>
             ${waLink}
           </div>
+          ${lic.devices && lic.devices.length > 0 ? `
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+              ${lic.devices.map(d => `
+                <span class="font-mono" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);display:inline-flex;align-items:center;gap:5px;" title="Hardware Device ID: ${escapeHtml(d.device_id)}">
+                  <span style="color:var(--accent);font-size:12px;">💻</span>
+                  <span>${escapeHtml(d.device_id.length > 16 ? d.device_id.slice(0, 8) + '...' + d.device_id.slice(-6) : d.device_id)}</span>
+                  ${d.latest_activation_code ? `
+                    <button type="button" class="action-btn btn-sm" style="padding:2px 4px;margin-left:2px;" onclick="copyText('${escapeJs(d.latest_activation_code)}', this)" title="Copy Signed Activation Code">
+                      <i data-lucide="key" style="width:11px;height:11px;"></i>
+                    </button>
+                  ` : ''}
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
         </td>
         <td>${planBadge}</td>
         <td>${slotPill}</td>

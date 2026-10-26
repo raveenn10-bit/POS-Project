@@ -123,6 +123,7 @@ module.exports = async function handler(req, res) {
           return sendJson(res, 200, { success: true, license: updatedSub, subscription: updatedSub });
         }
 
+        case 'reactivate':
         case 'unsuspend': {
           const licenseId = body.licenseId || body.subscriptionId;
           if (!licenseId) return sendJson(res, 400, { error: 'licenseId is required' });

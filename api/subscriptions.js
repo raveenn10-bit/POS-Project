@@ -161,6 +161,30 @@ module.exports = async function handler(req, res) {
           return sendJson(res, 200, { success: true, subscription: updatedSub });
         }
 
+        case 'suspend': {
+          if (!body.subscriptionId) {
+            return sendJson(res, 400, { error: 'subscriptionId is required' });
+          }
+          const updatedSub = await db.suspendSubscription({
+            subscriptionId: body.subscriptionId,
+            reason: body.reason,
+            adminEmail
+          });
+          return sendJson(res, 200, { success: true, subscription: updatedSub });
+        }
+
+        case 'reactivate':
+        case 'unsuspend': {
+          if (!body.subscriptionId) {
+            return sendJson(res, 400, { error: 'subscriptionId is required' });
+          }
+          const updatedSub = await db.unsuspendSubscription({
+            subscriptionId: body.subscriptionId,
+            adminEmail
+          });
+          return sendJson(res, 200, { success: true, subscription: updatedSub });
+        }
+
         case 'revoke': {
           if (!body.subscriptionId) {
             return sendJson(res, 400, { error: 'subscriptionId is required' });
