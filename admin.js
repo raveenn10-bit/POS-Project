@@ -1925,11 +1925,16 @@ function initOfflineSignerEvents() {
       if (!file) return;
       try {
         const text = await file.text();
-        const jwk = JSON.parse(text);
+        const parsed = JSON.parse(text);
+        // Robust JWK extraction: handles both raw JWK and envelope formats like { private_jwk: { ... } } or { key: { ... } }
+        const jwk = (parsed && (parsed.private_jwk || parsed.jwk || parsed.key || parsed)) || {};
+        if (!jwk.kty || !jwk.crv || !jwk.d) {
+          throw new Error("Invalid ECDSA P-256 private key file. The JSON must contain 'kty': 'EC', 'crv': 'P-256', and 'd' (found in apex-pos-private-key.json).");
+        }
         signingKey = await crypto.subtle.importKey(
           'jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
         );
-        $('keyStatus').innerHTML = '<span style="color:var(--success);font-weight:700;">✓ Private key verified. Offline generator ready.</span>';
+        $('keyStatus').innerHTML = '<span style="color:var(--success);font-weight:700;">✓ Private key verified (' + escapeHtml(jwk.crv || 'P-256') + '). Offline generator ready.</span>';
         $('offlineGenForm').style.display = 'block';
         refreshLucideIcons();
       } catch (err) {

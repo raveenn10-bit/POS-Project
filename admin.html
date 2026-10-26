@@ -2411,12 +2411,18 @@
                 <i data-lucide="alert-octagon" style="width:20px;height:20px;flex-shrink:0;"></i>
                 <div>
                   <strong>Emergency Disaster Tool:</strong> Use this offline utility only if the cloud backend is completely unreachable and a client urgently needs an offline activation code. This tool signs locally in the browser memory using the private key file.
+                  <div style="margin-top:6px;font-size:12px;opacity:0.95;color:var(--text-secondary);">
+                    💡 <strong>සාමාන්‍යයෙන් License සෑදීමට මෙය අවශ්‍ය නොවේ:</strong> ඔබට පාරිභෝගිකයෙකුට License එකක් සෑදීමට අවශ්‍ය නම්, ඉහත <strong>Licenses</strong> tab එකට ගොස් <strong>"+ New Subscription / License"</strong> බොත්තම ක්ලික් කරන්න. එවිට Cloud Server එක මඟින් ස්වයංක්‍රීයව Cryptographic Code එකක් සෑදී ලබා දේ.
+                  </div>
                 </div>
               </div>
 
               <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
                 <div class="form-group">
                   <label for="keyFile">Select Private Key JSON File (apex-pos-private-key.json)</label>
+                  <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+                    📂 මෙම file එක ව්‍යාපෘතියේ ප්‍රධාන ෆෝල්ඩරයේ (Root directory) ඇති <code>apex-pos-private-key.json</code> ගොනුවයි.
+                  </div>
                   <input id="keyFile" type="file" accept=".json,application/json" class="no-icon-input" style="padding:8px 12px;">
                   <div id="keyStatus" style="font-size:12.5px;color:var(--text-muted);margin-top:6px;">Locked. Select your private key to continue.</div>
                 </div>
