@@ -178,7 +178,8 @@ function isoToColomboInput(iso) {
 
 function startLiveColomboClock() {
   const clockEl = $('topColomboClock');
-  if (!clockEl) return;
+  const sidebarClockEl = $('sidebarColomboClock');
+  if (!clockEl && !sidebarClockEl) return;
   
   function update() {
     try {
@@ -194,9 +195,13 @@ function startLiveColomboClock() {
         second: '2-digit',
         hour12: true
       }).format(now);
-      clockEl.textContent = `${timeStr} (SLST +05:30)`;
+      const formatted = `${timeStr} (SLST +05:30)`;
+      if (clockEl) clockEl.textContent = formatted;
+      if (sidebarClockEl) sidebarClockEl.textContent = formatted;
     } catch {
-      clockEl.textContent = new Date().toLocaleTimeString();
+      const fallback = new Date().toLocaleTimeString();
+      if (clockEl) clockEl.textContent = fallback;
+      if (sidebarClockEl) sidebarClockEl.textContent = fallback;
     }
   }
   
@@ -812,13 +817,15 @@ function switchTab(tabName) {
 function toggleMobileMenu() {
   const sidebar = $('adminSidebar');
   const backdrop = $('sidebarBackdrop');
-  sidebar.classList.toggle('open');
-  backdrop.classList.toggle('open');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (backdrop) backdrop.classList.toggle('open');
 }
 
 function closeMobileMenu() {
-  $('adminSidebar').classList.remove('open');
-  $('sidebarBackdrop').classList.remove('open');
+  const sidebar = $('adminSidebar');
+  const backdrop = $('sidebarBackdrop');
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
 }
 
 // ---------------------------------------------------------------------------
@@ -2254,6 +2261,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mobile menu buttons
   const btnToggleMobile = $('btnToggleMobileMenu');
   if (btnToggleMobile) btnToggleMobile.onclick = toggleMobileMenu;
+
+  const btnCloseMobile = $('btnMobileCloseSidebar');
+  if (btnCloseMobile) btnCloseMobile.onclick = closeMobileMenu;
   
   const backdrop = $('sidebarBackdrop');
   if (backdrop) backdrop.onclick = closeMobileMenu;

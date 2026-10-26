@@ -32,6 +32,11 @@ window.initExpiryClock = function(payload) {
       badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
       badge.className = 'pill settled';
     }
+    const drawerBadge = document.getElementById('drawerPlanBadge');
+    if (drawerBadge) {
+      drawerBadge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
+      drawerBadge.className = 'pill settled';
+    }
 
     // Populate Detailed Subscription Metadata in Settings
     const subCustomer = document.getElementById('subInfoCustomer');
@@ -522,20 +527,106 @@ $('btnRestoreSnapshot').onclick = () => {
 };
 
 // -------------------------------------------------------------
-// 5. Navigation & UI Switching
+// 5. Navigation & UI Switching (Desktop, Tablet & Mobile Drawer)
 // -------------------------------------------------------------
+function openPosDrawer() {
+  const drawer = $('posMobileDrawer');
+  const backdrop = $('posDrawerBackdrop');
+  if (drawer) drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('open');
+}
+
+function closePosDrawer() {
+  const drawer = $('posMobileDrawer');
+  const backdrop = $('posDrawerBackdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+window.openPosDrawer = openPosDrawer;
+window.closePosDrawer = closePosDrawer;
+
+let mobileBillingMode = 'catalog';
+
+function setMobileBillingMode(mode) {
+  mobileBillingMode = mode;
+  const billingSec = $('billing');
+  const btnCatalog = $('btnViewCatalog');
+  const btnCart = $('btnViewCart');
+  const mobBar = $('mobileCartBar');
+
+  if (!billingSec) return;
+
+  if (mode === 'cart') {
+    billingSec.classList.add('mode-cart');
+    billingSec.classList.remove('mode-catalog');
+    if (btnCatalog) btnCatalog.classList.remove('active');
+    if (btnCart) btnCart.classList.add('active');
+    if (mobBar) mobBar.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    billingSec.classList.remove('mode-cart');
+    billingSec.classList.add('mode-catalog');
+    if (btnCatalog) btnCatalog.classList.add('active');
+    if (btnCart) btnCart.classList.remove('active');
+    const { total } = totals();
+    const isMobile = window.innerWidth < 768;
+    if (mobBar && cart.length > 0 && isMobile && billingSec.classList.contains('active')) {
+      mobBar.style.display = 'flex';
+    }
+  }
+}
+window.setMobileBillingMode = setMobileBillingMode;
+
 function show(tab) {
+  closePosDrawer();
+  if (tab === 'customers') {
+    tab = 'reports';
+    setTimeout(() => {
+      const ledger = $('creditLedgerCard');
+      if (ledger) ledger.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+
   document.querySelectorAll('.panel').forEach(e => e.classList.toggle('active', e.id === tab));
   document.querySelectorAll('[data-tab]').forEach(e => e.classList.toggle('active', e.dataset.tab === tab));
+
+  if (tab === 'billing') {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setMobileBillingMode(mobileBillingMode || 'catalog');
+    }
+  }
+
   const mobBar = $('mobileCartBar');
   if (mobBar) {
-    mobBar.style.display = (tab === 'billing' && Array.isArray(cart) && cart.length > 0) ? 'flex' : 'none';
+    const isMobile = window.innerWidth < 768;
+    const isCatalog = !($('billing') && $('billing').classList.contains('mode-cart'));
+    mobBar.style.display = (tab === 'billing' && isMobile && isCatalog && Array.isArray(cart) && cart.length > 0) ? 'flex' : 'none';
   }
   window.scrollTo(0, 0);
   render();
 }
 window.show = show;
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => show(b.dataset.tab));
+
+if ($('btnPosMobileMenu')) $('btnPosMobileMenu').onclick = openPosDrawer;
+if ($('btnClosePosDrawer')) $('btnClosePosDrawer').onclick = closePosDrawer;
+if ($('posDrawerBackdrop')) $('posDrawerBackdrop').onclick = closePosDrawer;
+if ($('btnViewCatalog')) $('btnViewCatalog').onclick = () => setMobileBillingMode('catalog');
+if ($('btnViewCart')) $('btnViewCart').onclick = () => setMobileBillingMode('cart');
+if ($('btnHeaderCart')) {
+  $('btnHeaderCart').onclick = () => {
+    show('billing');
+    setMobileBillingMode('cart');
+  };
+}
+if ($('lockPosBtnMobile')) {
+  $('lockPosBtnMobile').onclick = () => {
+    closePosDrawer();
+    if ($('lockPosBtn')) $('lockPosBtn').click();
+  };
+}
 
 // -------------------------------------------------------------
 // 6. Camera Barcode Scanner (Universal iOS & Android Support)
@@ -1045,22 +1136,28 @@ function renderBillProducts() {
     return hasStock && matchCat && matchQuery;
   });
 
-  if (!q && activeBillCategory === 'All') {
-    $('billProducts').innerHTML = '<p class="muted" style="text-align:center;padding:12px">Search or pick a category above to browse items.</p>';
+  if ($('mobileCatalogCount')) {
+    $('mobileCatalogCount').textContent = available.length;
+  }
+
+  if (!q && activeBillCategory === 'All' && available.length === 0) {
+    $('billProducts').innerHTML = '<p class="muted" style="text-align:center;padding:16px">No products available. Add items in Products & Stock.</p>';
     return;
   }
 
-  $('billProducts').innerHTML = available.slice(0, 40).map(p => {
+  $('billProducts').innerHTML = available.slice(0, 50).map(p => {
     const unitStr = p.unit || 'pcs';
     const isOut = p.stock <= 0;
     const stockClass = isOut ? 'color:var(--danger)' : (p.stock <= p.low ? 'color:var(--warning)' : 'color:var(--primary)');
     return `
-      <div class="item">
-        <div class="grow">
-          <b>${esc(p.name)}</b>
-          <div class="muted">${money(p.price)} / ${esc(unitStr)} · <span style="${stockClass};font-weight:700">${esc(p.stock)} ${esc(unitStr)} in stock</span></div>
+      <div class="item" style="padding:10px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="grow" style="min-width:0">
+          <b style="font-size:14px;display:block;line-height:1.3;word-break:break-word">${esc(p.name)}</b>
+          <div class="muted" style="margin-top:2px;font-size:12px">
+            <b style="color:var(--text);font-size:13px">${money(p.price)}</b> / ${esc(unitStr)} · <span style="${stockClass};font-weight:700">${esc(p.stock)} ${esc(unitStr)}</span>
+          </div>
         </div>
-        <button class="secondary" data-add="${esc(p.id)}">+ Add</button>
+        <button class="secondary" data-add="${esc(p.id)}" style="min-width:68px;min-height:38px;font-size:14px;font-weight:700;border-radius:8px;flex-shrink:0;padding:6px 12px;touch-action:manipulation">+ Add</button>
       </div>
     `;
   }).join('') || '<p class="empty">No matching products in stock</p>';
@@ -1229,16 +1326,22 @@ function renderCart() {
   const mobBar = $('mobileCartBar');
   if (mobBar) {
     const isBillingActive = $('billing') && $('billing').classList.contains('active');
-    if (cart.length > 0 && isBillingActive) {
+    const isMobile = window.innerWidth < 768;
+    const isCatalogMode = !($('billing') && $('billing').classList.contains('mode-cart'));
+    if (cart.length > 0 && isBillingActive && isMobile && isCatalogMode) {
       const totalUnits = cart.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
       const unitsLabel = Number.isInteger(totalUnits) ? totalUnits : totalUnits.toFixed(2);
-      if ($('mobCartCount')) $('mobCartCount').textContent = `${cart.length} Item${cart.length === 1 ? '' : 's'} (${unitsLabel})`;
+      if ($('mobCartCount')) $('mobCartCount').textContent = `${cart.length} item${cart.length === 1 ? '' : 's'} (${unitsLabel})`;
       if ($('mobCartTotal')) $('mobCartTotal').textContent = money(total);
       mobBar.style.display = 'flex';
     } else {
       mobBar.style.display = 'none';
     }
   }
+
+  // Update Top Switcher & Header Cart Badge
+  if ($('mobileCartTotal')) $('mobileCartTotal').textContent = money(total);
+  if ($('headerCartBadge')) $('headerCartBadge').textContent = cart.length;
 }
 
 $('cartList').onclick = e => {
@@ -1454,6 +1557,8 @@ $('checkout').onclick = () => {
   $('creditCustomer').value = '';
   $('creditPhone').value = '';
   $('billSearch').value = '';
+
+  setMobileBillingMode('catalog');
 
   $('lastReceipt').hidden = false;
   $('lastReceiptSummary').innerHTML = `Sale <b>${sale.number}</b> · Total: <b>${money(sale.total)}</b> · Method: <b>${esc(sale.method)}</b>`;
@@ -2320,6 +2425,7 @@ $('saveShop').onclick = () => {
 function updateShopDisplay() {
   if (!db || !db.shop) return;
   if ($('headerShopTitle')) $('headerShopTitle').textContent = db.shop.name || 'Harsh Apex Retail POS';
+  if ($('drawerShopTitle')) $('drawerShopTitle').textContent = db.shop.name || 'Harsh Apex Retail POS';
   if ($('headerShopSubtitle')) $('headerShopSubtitle').textContent = `${db.shop.phone ? db.shop.phone + ' • ' : ''}Offline • Smart Retail POS`;
   if ($('shopName')) $('shopName').value = db.shop.name || '';
   if ($('shopPhone')) $('shopPhone').value = db.shop.phone || '';
@@ -2333,6 +2439,7 @@ function updateShopDisplay() {
   }
   const currentLogo = db.shop.logo || 'harsh-apex-logo.png';
   if ($('headerShopLogo')) $('headerShopLogo').src = currentLogo;
+  if ($('drawerShopLogo')) $('drawerShopLogo').src = currentLogo;
   if ($('shopLogoPreview')) $('shopLogoPreview').src = currentLogo;
 
   // Sync A4 Invoice Customization controls

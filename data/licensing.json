@@ -1,18 +1,7 @@
 {
   "subscriptions": [],
   "device_bindings": [],
-  "audit_logs": [
-    {
-      "id": "AUD-INITIAL-0001",
-      "timestamp": "2026-10-26T00:00:00.000Z",
-      "action": "SYSTEM_INITIALIZED",
-      "details": {
-        "event": "Database initialized for production",
-        "system": "Harsh Apex POS Licensing System"
-      },
-      "performed_by": "system"
-    }
-  ],
+  "audit_logs": [],
   "admin_sessions": [],
   "customers": [],
   "payments": []

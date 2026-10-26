@@ -37,18 +37,55 @@
       -webkit-text-size-adjust: 100%;
     }
     body { margin: 0; padding-bottom: 84px; -webkit-tap-highlight-color: transparent; }
-    header { background: linear-gradient(135deg, #0e766e, #115e59); color: white; padding: 20px 18px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
-    header small { opacity: 0.9; font-size: 13px; }
-    .wrap { max-width: 760px; margin: auto; padding: 14px; }
-    .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.03); }
-    .tabs button { border: 0; background: none; color: #64748b; font-size: 11px; font-weight: 600; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; }
+    header {
+      background: linear-gradient(135deg, #0e766e, #115e59);
+      color: white;
+      padding-top: max(14px, env(safe-area-inset-top, 14px)) !important;
+      padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+      padding-left: max(12px, env(safe-area-inset-left, 12px)) !important;
+      padding-right: max(12px, env(safe-area-inset-right, 12px)) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 60;
+    }
+    header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+    header small { opacity: 0.9; font-size: 12px; }
+    .wrap {
+      max-width: 760px;
+      margin: auto;
+      padding: 14px max(12px, env(safe-area-inset-right, 12px)) 14px max(12px, env(safe-area-inset-left, 12px));
+    }
+    .tabs {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid var(--border);
+      padding: 8px max(8px, env(safe-area-inset-left, 8px)) max(10px, env(safe-area-inset-bottom, 12px)) max(8px, env(safe-area-inset-right, 8px));
+      z-index: 50;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+    }
+    .tabs button { border: 0; background: none; color: #64748b; font-size: 11px; font-weight: 600; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; min-height: 44px; touch-action: manipulation; }
     .tabs button svg { width: 20px; height: 20px; fill: currentColor; }
     .tabs button.active { color: var(--primary); font-weight: 800; }
     .panel { display: none; }
     .panel.active { display: block; animation: fadeIn 0.15s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
     h2 { font-size: 20px; font-weight: 800; margin: 4px 0 14px; letter-spacing: -0.3px; }
     h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -66,7 +103,7 @@
     button.primary:active, label.primary:active { background: var(--primary-dark); }
     button.secondary, label.secondary { background: var(--primary-light); color: var(--primary); border: 0; border-radius: 10px; padding: 9px 13px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     button.danger { background: var(--danger-light); color: var(--danger); border: 0; border-radius: 9px; padding: 8px 11px; font-weight: 700; font-size: 13px; }
-    button.scan-btn { background: #0f172a; color: white; border: 0; border-radius: 10px; padding: 11px 14px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    button.scan-btn { background: #0f172a; color: white; border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .flex { display: flex; gap: 8px; align-items: center; }
     .flex>*{ min-width: 0; }
     .grow { flex: 1; }
@@ -83,10 +120,42 @@
     .total { font-size: 24px; font-weight: 800; color: var(--primary); }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .actions button { flex: 1; min-width: 120px; }
-    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    
+    /* Smooth Horizontal Category Chips */
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 2px 10px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
     .chips::-webkit-scrollbar { display: none; }
-    .chip { border: 1px solid var(--border); background: white; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; user-select: none; }
-    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .chip {
+      border: 1px solid var(--border);
+      background: white;
+      color: #475569;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+    }
+    .chip:active { transform: scale(0.96); }
+    .chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(14, 118, 110, 0.3);
+    }
     .btn-group { display: flex; background: #e2e8f0; border-radius: 10px; padding: 3px; gap: 3px; overflow-x: auto; margin-bottom: 12px; }
     .btn-group button { flex: 1; border: 0; background: transparent; padding: 8px 10px; font-size: 13px; font-weight: 700; color: #475569; border-radius: 8px; cursor: pointer; white-space: nowrap; }
     .btn-group button.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -105,6 +174,314 @@
     @keyframes scanLine { 0%, 100% { top: 10%; } 50% { top: 90%; } }
     .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 18px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 200; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: toastPop 0.2s ease-out; }
     @keyframes toastPop { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* ========================================================================= */
+    /* MOBILE SLIDE-OUT DRAWER & HAMBURGER NAVIGATION                            */
+    /* ========================================================================= */
+    .pos-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 140;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pos-drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .pos-mobile-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 82vw;
+      background: #0f172a;
+      color: #fff;
+      z-index: 150;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
+      padding-top: max(14px, env(safe-area-inset-top, 14px));
+      padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+      padding-left: max(12px, env(safe-area-inset-left, 12px));
+      box-sizing: border-box;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pos-mobile-drawer.open {
+      transform: translateX(0);
+    }
+    .pos-drawer-header {
+      padding: 12px 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pos-drawer-close {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 0;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.15s ease;
+      flex-shrink: 0;
+    }
+    .pos-drawer-close:active {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .pos-drawer-nav {
+      flex: 1;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+    .drawer-nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 0;
+      background: transparent;
+      color: #cbd5e1;
+      text-align: left;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+      min-height: 48px;
+      box-sizing: border-box;
+    }
+    .drawer-nav-item:hover, .drawer-nav-item:active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .drawer-nav-item.active {
+      background: var(--primary) !important;
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    .drawer-nav-icon {
+      font-size: 18px;
+      width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .drawer-nav-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .drawer-nav-text b {
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    .drawer-nav-text small {
+      font-size: 11px;
+      opacity: 0.75;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pos-drawer-footer {
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .drawer-quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .drawer-action-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 0;
+      border-radius: 9px;
+      padding: 9px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      min-height: 40px;
+      transition: background 0.15s;
+    }
+    .drawer-action-btn:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .pos-drawer-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      padding: 4px 2px;
+    }
+    .status-indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    /* Top Bar Elements */
+    .header-main-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .pos-hamburger-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.15);
+      border: 0;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+    .pos-hamburger-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .mobile-header-cart-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.18);
+      border: 0;
+      border-radius: 10px;
+      color: white;
+      padding: 6px 12px;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      touch-action: manipulation;
+      font-weight: 700;
+      font-size: 13px;
+      min-height: 38px;
+      transition: background 0.15s ease;
+    }
+    .mobile-header-cart-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .header-cart-badge {
+      background: #ef4444;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 800;
+      min-width: 18px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Mobile Billing Mode Switcher (< 768px) */
+    #mobileBillingToggle {
+      display: none;
+      background: #e2e8f0;
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    #mobileBillingToggle button {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      padding: 10px 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      border-radius: 9px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      min-height: 42px;
+      touch-action: manipulation;
+    }
+    #mobileBillingToggle button.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-weight: 800;
+    }
+
+    /* Complete Sale Full-Width Touch Button */
+    #checkout {
+      width: 100% !important;
+      min-height: 48px !important;
+      font-size: 16px !important;
+      font-weight: 800 !important;
+      background: var(--primary) !important;
+      color: #fff !important;
+      border: 0 !important;
+      border-radius: 12px !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      box-sizing: border-box !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      touch-action: manipulation !important;
+      box-shadow: 0 4px 14px rgba(14, 118, 110, 0.3) !important;
+      transition: transform 0.1s ease, background 0.15s ease !important;
+    }
+    #checkout:active {
+      background: var(--primary-dark) !important;
+      transform: scale(0.98);
+    }
 
     /* ========================================================================= */
     /* MULTI-DEVICE RESPONSIVE ARCHITECTURE (Desktop, Tablet, iPhone, Android)   */
@@ -128,11 +505,38 @@
       body {
         padding-bottom: calc(88px + env(safe-area-inset-bottom, 16px)) !important;
       }
+      header {
+        padding-top: max(14px, env(safe-area-inset-top, 14px)) !important;
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+        padding-left: max(12px, env(safe-area-inset-left, 12px)) !important;
+        padding-right: max(12px, env(safe-area-inset-right, 12px)) !important;
+      }
+      .pos-hamburger-btn {
+        display: flex !important;
+      }
+      .mobile-header-cart-btn {
+        display: inline-flex !important;
+      }
+      .desktop-only-action {
+        display: none !important;
+      }
+      .header-subtitle {
+        display: none !important;
+      }
+      header h1 {
+        font-size: 16px !important;
+        max-width: 170px;
+      }
       .tabs {
-        padding-bottom: max(8px, env(safe-area-inset-bottom, 12px)) !important;
+        padding-bottom: max(10px, env(safe-area-inset-bottom, 12px)) !important;
+        padding-left: max(8px, env(safe-area-inset-left, 8px)) !important;
+        padding-right: max(8px, env(safe-area-inset-right, 8px)) !important;
       }
       .wrap {
-        padding: 10px 12px;
+        padding-top: 10px;
+        padding-bottom: 12px;
+        padding-left: max(12px, env(safe-area-inset-left, 12px)) !important;
+        padding-right: max(12px, env(safe-area-inset-right, 12px)) !important;
       }
       .card {
         padding: 14px 12px;
@@ -142,15 +546,17 @@
         min-height: 44px;
       }
       #billProducts {
-        max-height: 320px;
+        max-height: calc(100vh - 290px);
+        min-height: 250px;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       /* Mobile Floating Cart Summary Bar */
       #mobileCartBar {
         position: fixed;
         bottom: calc(64px + env(safe-area-inset-bottom, 10px));
-        left: 12px;
-        right: 12px;
+        left: max(12px, env(safe-area-inset-left, 12px));
+        right: max(12px, env(safe-area-inset-right, 12px));
         background: #0f172a;
         color: #fff;
         border-radius: 14px;
@@ -162,6 +568,25 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.35);
         cursor: pointer;
         animation: toastPop 0.2s ease-out;
+      }
+      #mobileBillingToggle {
+        display: flex !important;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+      }
+      /* On mobile in billing panel: toggle between catalog and cart */
+      #billing:not(.mode-cart) #billingCartCard {
+        display: none !important;
+      }
+      #billing:not(.mode-cart) #billingProductsCard {
+        display: block !important;
+      }
+      #billing.mode-cart #billingProductsCard {
+        display: none !important;
+      }
+      #billing.mode-cart #billingCartCard {
+        display: block !important;
       }
     }
 
@@ -190,10 +615,25 @@
         width: 22px;
         height: 22px;
       }
+      #mobileBillingToggle {
+        display: none !important;
+      }
+      #billingProductsCard, #billingCartCard {
+        display: block !important;
+      }
+      .pos-hamburger-btn, .mobile-header-cart-btn {
+        display: none !important;
+      }
+      .desktop-only-action {
+        display: inline-flex !important;
+      }
     }
 
     /* 3. Desktop Workstation Layout (>= 1024px: Laptops, Desktops, Point-of-Sale Terminals) */
     @media (min-width: 1024px) {
+      header {
+        padding: 18px 24px 16px !important;
+      }
       body {
         padding-bottom: 24px !important;
       }
@@ -213,7 +653,7 @@
         align-items: start !important;
       }
       /* Sticky Cart Sidebar: Always visible as cashier scrolls products */
-      .billing-grid > .card:nth-child(2) {
+      .billing-grid > .card:nth-child(2), #billingCartCard {
         position: sticky !important;
         top: 16px !important;
         max-height: calc(100vh - 32px) !important;
@@ -256,6 +696,18 @@
       }
       .stats-4 {
         grid-template-columns: repeat(4, 1fr) !important;
+      }
+      #mobileBillingToggle {
+        display: none !important;
+      }
+      #billingProductsCard, #billingCartCard {
+        display: block !important;
+      }
+      .pos-hamburger-btn, .mobile-header-cart-btn {
+        display: none !important;
+      }
+      .desktop-only-action {
+        display: inline-flex !important;
       }
     }
     .chip-weight {
@@ -448,20 +900,126 @@
     </div>
   </div>
 
-  <header>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <img id="headerShopLogo" src="harsh-apex-logo.png" alt="Harsh Apex Logo" class="crisp-img" style="width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);object-fit:contain;background:#fff;padding:2px">
-        <div>
-          <h1 id="headerShopTitle">Harsh Apex Retail POS</h1>
-          <small id="headerShopSubtitle">Offline • Simple • Smart Retail Billing</small>
+  <!-- MOBILE DRAWER BACKDROP -->
+  <div id="posDrawerBackdrop" class="pos-drawer-backdrop"></div>
+
+  <!-- MOBILE SLIDE-OUT DRAWER -->
+  <aside id="posMobileDrawer" class="pos-mobile-drawer" aria-label="Mobile Navigation Drawer">
+    <div class="pos-drawer-header">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+        <img id="drawerShopLogo" src="harsh-apex-logo.png" alt="Shop Logo" class="crisp-img" style="width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,0.25);object-fit:contain;background:#fff;padding:2px;flex-shrink:0">
+        <div style="min-width:0;flex:1">
+          <div id="drawerShopTitle" style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Harsh Apex POS</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+            <span class="pill settled" style="font-size:10px;padding:2px 6px">Cashier Mode</span>
+            <span style="font-size:10px;color:#94a3b8">v2.4</span>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <div id="headerExpiryClock"></div>
-        <button id="lockPosBtn" type="button" style="background:rgba(255,255,255,0.18);color:#fff;border:0;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;cursor:pointer" title="Sign Out / Lock POS">🔒 Sign Out</button>
-        <a href="landing.html" style="background:rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:7px 10px;text-decoration:none;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;">🌐 Web</a>
-        <button id="quickScannerBtn" class="scan-btn" type="button" style="padding:8px 12px;font-size:12px">📷 Scan</button>
+      <button id="btnClosePosDrawer" type="button" class="pos-drawer-close" aria-label="Close menu">✕</button>
+    </div>
+
+    <!-- Drawer Navigation Links -->
+    <nav class="pos-drawer-nav">
+      <button type="button" class="drawer-nav-item" data-tab="billing">
+        <span class="drawer-nav-icon">➕</span>
+        <div class="drawer-nav-text">
+          <b>New Bill / Cashier</b>
+          <small>Fast billing &amp; customer checkout</small>
+        </div>
+      </button>
+      <button type="button" class="drawer-nav-item active" data-tab="dashboard">
+        <span class="drawer-nav-icon">📊</span>
+        <div class="drawer-nav-text">
+          <b>Dashboard &amp; Sales</b>
+          <small>Today's revenue, profit &amp; alerts</small>
+        </div>
+      </button>
+      <button type="button" class="drawer-nav-item" data-tab="products">
+        <span class="drawer-nav-icon">📦</span>
+        <div class="drawer-nav-text">
+          <b>Products &amp; Inventory</b>
+          <small>Stock management, barcodes &amp; pricing</small>
+        </div>
+      </button>
+      <button type="button" class="drawer-nav-item" data-tab="reports">
+        <span class="drawer-nav-icon">🧾</span>
+        <div class="drawer-nav-text">
+          <b>Bills History &amp; Reports</b>
+          <small>Past invoices, summaries &amp; exports</small>
+        </div>
+      </button>
+      <button type="button" class="drawer-nav-item" data-tab="customers">
+        <span class="drawer-nav-icon">👥</span>
+        <div class="drawer-nav-text">
+          <b>Customer Credit Ledger</b>
+          <small>ණය පොත / dues &amp; repayments</small>
+        </div>
+      </button>
+      <button type="button" class="drawer-nav-item" data-tab="settings">
+        <span class="drawer-nav-icon">⚙️</span>
+        <div class="drawer-nav-text">
+          <b>Store Settings &amp; Setup</b>
+          <small>Printer thermal setup, PIN &amp; backups</small>
+        </div>
+      </button>
+    </nav>
+
+    <!-- Drawer Footer & Shortcuts -->
+    <div class="pos-drawer-footer">
+      <div class="drawer-quick-actions">
+        <button id="lockPosBtnMobile" type="button" class="drawer-action-btn">
+          <span>🔒</span> Lock / Sign Out
+        </button>
+        <a href="landing.html" class="drawer-action-btn">
+          <span>🌐</span> Landing Page
+        </a>
+      </div>
+      <div class="pos-drawer-status">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="status-indicator-dot"></span>
+          <span style="color:#10b981;font-weight:700">100% Offline Ready</span>
+        </div>
+        <span id="drawerPlanBadge" class="pill settled" style="font-size:10px">Pro Active</span>
+      </div>
+    </div>
+  </aside>
+
+  <header>
+    <div class="header-main-bar">
+      <!-- Left side: Hamburger button (mobile) + Branding -->
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+        <!-- Touch-Friendly Hamburger Button (Mobile < 768px, 44x44px) -->
+        <button id="btnPosMobileMenu" type="button" class="pos-hamburger-btn" aria-label="Open navigation menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <img id="headerShopLogo" src="harsh-apex-logo.png" alt="Harsh Apex Logo" class="crisp-img" style="width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);object-fit:contain;background:#fff;padding:2px;flex-shrink:0">
+        <div style="min-width:0;overflow:hidden">
+          <h1 id="headerShopTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Harsh Apex Retail POS</h1>
+          <small id="headerShopSubtitle" class="header-subtitle">Offline • Simple • Smart Retail Billing</small>
+        </div>
+      </div>
+
+      <!-- Right side controls -->
+      <div class="header-actions">
+        <!-- Desktop controls -->
+        <div id="headerExpiryClock" class="desktop-only-action"></div>
+        <button id="lockPosBtn" type="button" class="desktop-only-action" style="background:rgba(255,255,255,0.18);color:#fff;border:0;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;cursor:pointer" title="Sign Out / Lock POS">🔒 Sign Out</button>
+        <a href="landing.html" class="desktop-only-action" style="background:rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:7px 10px;text-decoration:none;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px">🌐 Web</a>
+
+        <!-- Quick Scanner Button (Universal mobile + desktop) -->
+        <button id="quickScannerBtn" class="scan-btn" type="button" style="padding:8px 12px;font-size:12px;min-height:38px">📷 Scan</button>
+
+        <!-- Quick Cart Indicator Pill / Button (Mobile < 768px) -->
+        <button id="btnHeaderCart" type="button" class="mobile-header-cart-btn" aria-label="View Cart">
+          <span style="font-size:16px">🛒</span>
+          <span id="headerCartBadge" class="header-cart-badge">0</span>
+        </button>
       </div>
     </div>
     <!-- Desktop Top Navigation Bar (>= 1024px) -->
@@ -603,8 +1161,14 @@
     <section id="billing" class="panel">
       <h2>New Bill</h2>
       
+      <!-- Mobile Billing Mode Switcher (< 768px) -->
+      <div id="mobileBillingToggle" class="btn-group" style="display:none;margin-bottom:12px;">
+        <button id="btnViewCatalog" type="button" class="active">🛍️ Add Products (<span id="mobileCatalogCount">0</span>)</button>
+        <button id="btnViewCart" type="button">🛒 Cart &amp; Checkout (<span id="mobileCartTotal">Rs. 0.00</span>)</button>
+      </div>
+
       <div class="billing-grid">
-        <div class="card">
+        <div class="card" id="billingProductsCard">
           <label>Find & Add Product</label>
           <div class="flex">
             <input id="billSearch" placeholder="Search name or barcode" class="grow">
@@ -614,7 +1178,7 @@
           <div id="billProducts" style="max-height:280px;overflow-y:auto"></div>
         </div>
 
-        <div class="card">
+        <div class="card" id="billingCartCard">
           <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
             <h3>Cart</h3>
             <button id="clearCartBtn" class="secondary" style="padding:4px 8px;font-size:12px" type="button">Empty Cart</button>
@@ -654,7 +1218,7 @@
             </div>
           </div>
 
-          <button class="primary" id="checkout" style="width:100%;margin-top:14px;padding:14px;font-size:16px">Complete Sale</button>
+          <button class="primary" id="checkout">✓ Complete Sale (මුදල් ගෙවීම)</button>
         </div>
       </div>
 
@@ -1146,7 +1710,7 @@
   </main>
 
   <!-- MOBILE FLOATING CART CHECKOUT BAR (iPhone / Android) -->
-  <div id="mobileCartBar" onclick="document.querySelector('#cartList').scrollIntoView({ behavior: 'smooth' })">
+  <div id="mobileCartBar" onclick="if(window.setMobileBillingMode){window.setMobileBillingMode('cart');}else{document.querySelector('#cartList').scrollIntoView({ behavior: 'smooth' });}">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:20px">🛒</span>
       <div>
@@ -1154,7 +1718,7 @@
         <div id="mobCartTotal" style="font-size:12px;color:#94a3b8">Rs. 0.00</div>
       </div>
     </div>
-    <span style="font-weight:700;font-size:13px;color:#2dd4bf;display:inline-flex;align-items:center;gap:4px">View Cart ➔</span>
+    <span style="font-weight:700;font-size:13px;color:#2dd4bf;display:inline-flex;align-items:center;gap:4px">Pay Now →</span>
   </div>
 
   <!-- NAVIGATION TABS -->
