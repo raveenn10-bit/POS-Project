@@ -106,13 +106,18 @@
    */
   class ExpiryCountdownClock {
     constructor(config = {}) {
-      this.targetHeaderId = config.headerTargetId || 'headerExpiryClock';
-      this.targetSettingsId = config.settingsTargetId || 'settingsExpiryClock';
+      this.targetHeaderId = config.headerTargetId || config.mountHeaderId || 'headerExpiryClock';
+      this.targetSettingsId = config.settingsTargetId || config.mountCardId || 'settingsExpiryClock';
       this.license = config.license || null; // { plan, issued, expires, customer, device }
       this.timer = null;
       this.instances = {};
 
       this.mount();
+    }
+
+    start() {
+      this.startTimer();
+      return this;
     }
 
     setLicense(license) {
@@ -204,6 +209,7 @@
         this.instances.settingsSecs = new SlidingNumber('settingsSecs', { padLength: 2, initialValue: 0 });
       }
 
+      this.renderStaticDetails();
       this.startTimer();
     }
 
@@ -211,7 +217,8 @@
       if (!this.license) return;
 
       const planName = this.license.plan === 'trial' ? '7-Day Free Trial' :
-                       this.license.plan === 'yearly' ? '365-Day Enterprise' : '30-Day Pro';
+                       this.license.plan === 'custom' ? 'Custom Plan Active' :
+                       this.license.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
 
       const planBadge = document.getElementById('headerPlanBadge');
       if (planBadge) planBadge.textContent = planName;
@@ -221,18 +228,25 @@
 
       const custInfo = document.getElementById('settingsCustomerInfo');
       if (custInfo) {
-        custInfo.textContent = `Licensed to: ${this.license.customer || 'Harsh Apex Merchant'} • Device: ${this.license.device || 'Active Device'}`;
+        custInfo.textContent = `Licensed to: ${this.license.customer || 'Harsh Apex Customer'} • Device: ${this.license.device || 'Active Device'}`;
       }
 
       const expiryDateEl = document.getElementById('settingsExpiryDate');
       if (expiryDateEl && this.license.expires) {
-        expiryDateEl.textContent = new Date(this.license.expires).toLocaleString('en-LK', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        try {
+          expiryDateEl.textContent = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Colombo',
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).format(new Date(this.license.expires)) + ' (Asia/Colombo)';
+        } catch (_) {
+          expiryDateEl.textContent = new Date(this.license.expires).toLocaleString('en-LK') + ' (Asia/Colombo)';
+        }
       }
 
       const renewBtn = document.getElementById('renewLicenseWaBtn');

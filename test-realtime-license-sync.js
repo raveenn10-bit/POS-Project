@@ -20,7 +20,7 @@ const http = require('http');
 const db = require('./lib/licensing-db');
 const cryptoSigner = require('./lib/crypto-signer');
 
-const TEST_PORT = 3777;
+const TEST_PORT = Number(process.env.TEST_PORT) || (3800 + Math.floor(Math.random() * 500));
 let serverInstance = null;
 
 function runServer() {
@@ -187,6 +187,35 @@ async function run() {
     assert(renewEvent.expiry > expiry, 'SSE push should reflect updated expiry');
     assert(renewEvent.updatedCode, 'SSE push should include re-signed updatedCode');
     pass('SSE pushed realtime RENEWED event with updated activation code');
+
+    // 6b. Shorten Expiry to an earlier date/time (e.g., today + 2 hours)
+    console.log('\n⏳ Testing License Expiry Shortening / Custom Early Date...');
+    const shortenedExpiryMs = now + (2 * 3600000); // 2 hours from now
+    const shortenedExpiryIso = new Date(shortenedExpiryMs).toISOString();
+    await db.changeExpiry({
+      subscriptionId: sub.id,
+      newExpiryTimestamp: shortenedExpiryIso,
+      reason: 'Admin adjusted plan duration downwards'
+    });
+
+    await new Promise(r => setTimeout(r, 400));
+    const shortenEvent = sseEvents[sseEvents.length - 1];
+    assert.strictEqual(shortenEvent.valid, true);
+    assert.strictEqual(shortenEvent.expiry, shortenedExpiryMs, 'SSE push must reflect exact shortened expiry');
+    assert(shortenEvent.updatedCode, 'SSE push must include re-signed code for shortened expiry');
+    
+    // Check-in with the extended token: checkInDevice must detect expiry difference and return shortened code!
+    const checkShortened = await db.checkInDevice({ deviceId: testDeviceId, code: renewEvent.updatedCode });
+    assert.strictEqual(checkShortened.valid, true);
+    assert.strictEqual(checkShortened.status, 'active');
+    assert.strictEqual(checkShortened.expiry, shortenedExpiryMs);
+    assert(checkShortened.updatedCode, 'checkInDevice must return updatedCode for shortened expiry');
+    
+    // Verify the returned token signature and payload
+    const verifiedShort = await cryptoSigner.verifyActivationCode(checkShortened.updatedCode);
+    assert.strictEqual(verifiedShort.valid, true);
+    assert.strictEqual(verifiedShort.payload.expires, shortenedExpiryMs);
+    pass('Shortening expiry date generates valid signed code and syncs via SSE and check-in');
 
     // 7. Revoke License -> Check Realtime Push & Check-in status
     console.log('\n⛔ Testing License Permanent Revocation...');

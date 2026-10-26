@@ -16,108 +16,128 @@ window.addEventListener('touchstart', function(e) {
 window.initExpiryClock = function(payload) {
   if (!payload || !payload.expires) return;
   const start = () => {
-    if (window.SlidingClock && window.SlidingClock.ExpiryCountdownClock) {
-      if (window.apexExpiryClock) {
-        try { window.apexExpiryClock.destroy(); } catch (e) {}
-      }
-      window.apexExpiryClock = new window.SlidingClock.ExpiryCountdownClock({
-        license: payload,
-        mountHeaderId: 'headerExpiryClock',
-        mountCardId: 'settingsExpiryClock'
-      });
-      window.apexExpiryClock.start();
-    }
-    const badge = document.getElementById('planStatusBadge');
-    if (badge) {
-      badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
-      badge.className = 'pill settled';
-    }
-    const drawerBadge = document.getElementById('drawerPlanBadge');
-    if (drawerBadge) {
-      drawerBadge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
-      drawerBadge.className = 'pill settled';
-    }
-
-    // Populate Detailed Subscription Metadata in Settings
-    const subCustomer = document.getElementById('subInfoCustomer');
-    if (subCustomer) subCustomer.textContent = payload.customer || 'Harsh Apex Customer';
-
-    const subPlan = document.getElementById('subInfoPlan');
-    if (subPlan) {
-      subPlan.textContent = payload.plan === 'trial' ? 'Free Trial (7 Days)' : payload.plan === 'custom' ? 'Custom Plan' : payload.plan === 'yearly' ? 'Yearly Pro' : 'Monthly Pro (30 Days)';
-    }
-
-    const subExpiry = document.getElementById('subInfoExpiry');
-    if (subExpiry) {
-      try {
-        subExpiry.textContent = new Intl.DateTimeFormat('en-GB', {
-          timeZone: 'Asia/Colombo',
-          year: 'numeric',
-          month: 'short',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        }).format(new Date(payload.expires)) + ' (Asia/Colombo)';
-      } catch (err) {
-        subExpiry.textContent = new Date(payload.expires).toLocaleString();
-      }
-    }
-
-    const subRemaining = document.getElementById('subInfoRemaining');
-    if (subRemaining) {
-      const diffMs = payload.expires - Date.now();
-      if (diffMs > 0) {
-        const d = Math.floor(diffMs / 86400000);
-        const h = Math.floor((diffMs % 86400000) / 3600000);
-        const m = Math.floor((diffMs % 3600000) / 60000);
-        subRemaining.textContent = `${d}d ${h}h ${m}m remaining`;
-      } else {
-        subRemaining.textContent = 'Expired';
-      }
-    }
-
-    const currentDeviceId = localStorage.getItem('apex_pos_device_id_v2') || '';
-    const posCurrentDeviceId = document.getElementById('posCurrentDeviceId');
-    if (posCurrentDeviceId) posCurrentDeviceId.value = currentDeviceId;
-
-    const btnCopyPosDeviceId = document.getElementById('btnCopyPosDeviceId');
-    if (btnCopyPosDeviceId) {
-      btnCopyPosDeviceId.onclick = async () => {
-        try {
-          await navigator.clipboard.writeText(currentDeviceId);
-          btnCopyPosDeviceId.textContent = 'Copied!';
-        } catch {
-          if (posCurrentDeviceId) {
-            posCurrentDeviceId.select();
-            document.execCommand('copy');
-            btnCopyPosDeviceId.textContent = 'Copied!';
+    try {
+      if (window.SlidingClock && window.SlidingClock.ExpiryCountdownClock) {
+        if (window.apexExpiryClock) {
+          try {
+            window.apexExpiryClock.setLicense(payload);
+          } catch (e) {
+            try { window.apexExpiryClock.destroy(); } catch (_) {}
+            window.apexExpiryClock = null;
           }
         }
-        setTimeout(() => { btnCopyPosDeviceId.textContent = '📋 Copy'; }, 2000);
-      };
+        if (!window.apexExpiryClock) {
+          window.apexExpiryClock = new window.SlidingClock.ExpiryCountdownClock({
+            license: payload,
+            mountHeaderId: 'headerExpiryClock',
+            mountCardId: 'settingsExpiryClock'
+          });
+          if (typeof window.apexExpiryClock.start === 'function') {
+            window.apexExpiryClock.start();
+          } else if (typeof window.apexExpiryClock.startTimer === 'function') {
+            window.apexExpiryClock.startTimer();
+          }
+        }
+      }
+    } catch (clockErr) {
+      console.warn('Clock init error:', clockErr);
     }
 
-    const posDeviceNameInput = document.getElementById('posDeviceNameInput');
-    const savedDeviceName = localStorage.getItem('apex_pos_device_name_v1') || 'Main POS Counter';
-    if (posDeviceNameInput) {
-      posDeviceNameInput.value = savedDeviceName;
-    }
-    const btnSavePosDeviceName = document.getElementById('btnSavePosDeviceName');
-    if (btnSavePosDeviceName && posDeviceNameInput) {
-      btnSavePosDeviceName.onclick = () => {
-        const val = posDeviceNameInput.value.trim() || 'Main POS Counter';
-        localStorage.setItem('apex_pos_device_name_v1', val);
-        btnSavePosDeviceName.textContent = 'Saved!';
-        setTimeout(() => { btnSavePosDeviceName.textContent = '💾 Save'; }, 2000);
-      };
-    }
+    try {
+      const badge = document.getElementById('planStatusBadge');
+      if (badge) {
+        badge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
+        badge.className = 'pill settled';
+      }
+      const drawerBadge = document.getElementById('drawerPlanBadge');
+      if (drawerBadge) {
+        drawerBadge.textContent = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan Active' : payload.plan === 'yearly' ? 'Yearly Pro Active' : 'Monthly Pro Active';
+        drawerBadge.className = 'pill settled';
+      }
 
-    const btnRequestSecondDeviceWa = document.getElementById('btnRequestSecondDeviceWa');
-    if (btnRequestSecondDeviceWa) {
-      const waText = `Hello Harsh Apex POS Support, I would like to link a second device under my active subscription.\nCustomer: ${payload.customer || ''}\nMain Device ID: ${currentDeviceId}\nPlan: ${payload.plan || ''}`;
-      btnRequestSecondDeviceWa.href = `https://wa.me/94770663154?text=${encodeURIComponent(waText)}`;
+      // Populate Detailed Subscription Metadata in Settings
+      const subCustomer = document.getElementById('subInfoCustomer');
+      if (subCustomer) subCustomer.textContent = payload.customer || 'Harsh Apex Customer';
+
+      const subPlan = document.getElementById('subInfoPlan');
+      if (subPlan) {
+        subPlan.textContent = payload.plan === 'trial' ? 'Free Trial (7 Days)' : payload.plan === 'custom' ? 'Custom Plan' : payload.plan === 'yearly' ? 'Yearly Pro' : 'Monthly Pro (30 Days)';
+      }
+
+      const subExpiry = document.getElementById('subInfoExpiry');
+      if (subExpiry) {
+        try {
+          subExpiry.textContent = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Colombo',
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).format(new Date(payload.expires)) + ' (Asia/Colombo)';
+        } catch (err) {
+          subExpiry.textContent = new Date(payload.expires).toLocaleString();
+        }
+      }
+
+      const subRemaining = document.getElementById('subInfoRemaining');
+      if (subRemaining) {
+        const diffMs = payload.expires - Date.now();
+        if (diffMs > 0) {
+          const d = Math.floor(diffMs / 86400000);
+          const h = Math.floor((diffMs % 86400000) / 3600000);
+          const m = Math.floor((diffMs % 3600000) / 60000);
+          subRemaining.textContent = `${d}d ${h}h ${m}m remaining`;
+        } else {
+          subRemaining.textContent = 'Expired';
+        }
+      }
+
+      const currentDeviceId = localStorage.getItem('apex_pos_device_id_v2') || '';
+      const posCurrentDeviceId = document.getElementById('posCurrentDeviceId');
+      if (posCurrentDeviceId) posCurrentDeviceId.value = currentDeviceId;
+
+      const btnCopyPosDeviceId = document.getElementById('btnCopyPosDeviceId');
+      if (btnCopyPosDeviceId) {
+        btnCopyPosDeviceId.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(currentDeviceId);
+            btnCopyPosDeviceId.textContent = 'Copied!';
+          } catch {
+            if (posCurrentDeviceId) {
+              posCurrentDeviceId.select();
+              document.execCommand('copy');
+              btnCopyPosDeviceId.textContent = 'Copied!';
+            }
+          }
+          setTimeout(() => { btnCopyPosDeviceId.textContent = '📋 Copy'; }, 2000);
+        };
+      }
+
+      const posDeviceNameInput = document.getElementById('posDeviceNameInput');
+      const savedDeviceName = localStorage.getItem('apex_pos_device_name_v1') || 'Main POS Counter';
+      if (posDeviceNameInput) {
+        posDeviceNameInput.value = savedDeviceName;
+      }
+      const btnSavePosDeviceName = document.getElementById('btnSavePosDeviceName');
+      if (btnSavePosDeviceName && posDeviceNameInput) {
+        btnSavePosDeviceName.onclick = () => {
+          const val = posDeviceNameInput.value.trim() || 'Main POS Counter';
+          localStorage.setItem('apex_pos_device_name_v1', val);
+          btnSavePosDeviceName.textContent = 'Saved!';
+          setTimeout(() => { btnSavePosDeviceName.textContent = '💾 Save'; }, 2000);
+        };
+      }
+
+      const btnRequestSecondDeviceWa = document.getElementById('btnRequestSecondDeviceWa');
+      if (btnRequestSecondDeviceWa) {
+        const waText = `Hello Harsh Apex POS Support, I would like to link a second device under my active subscription.\nCustomer: ${payload.customer || ''}\nMain Device ID: ${currentDeviceId}\nPlan: ${payload.plan || ''}`;
+        btnRequestSecondDeviceWa.href = `https://wa.me/94770663154?text=${encodeURIComponent(waText)}`;
+      }
+    } catch (domErr) {
+      console.warn('Metadata DOM populate error:', domErr);
     }
   };
   if (document.readyState === 'loading') {
@@ -394,6 +414,118 @@ window.initExpiryClock = function(payload) {
     document.body.style.overflow = 'hidden';
   }
 
+  function showLicenseExpiredModal(data) {
+    let modal = document.getElementById('posLicenseExpiredModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'posLicenseExpiredModal';
+      document.body.appendChild(modal);
+    }
+    hideLicenseSuspendedModal();
+
+    modal.style = 'position:fixed;inset:0;z-index:999999;background:rgba(15,23,42,0.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;font-family:system-ui,-apple-system,sans-serif;';
+    const wa = `https://wa.me/94770663154?text=${encodeURIComponent('Hello Harsh Apex POS Support, my license has expired. Please renew my subscription.\nDevice ID: ' + deviceId)}`;
+
+    modal.innerHTML = `
+      <div style="width:min(500px,100%);background:#ffffff;border-radius:24px;padding:30px;box-shadow:0 25px 60px rgba(0,0,0,0.4);border:2px solid #ef4444;text-align:center;">
+        <div style="width:68px;height:68px;background:#fee2e2;color:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">
+          ⌛
+        </div>
+        <h2 style="margin:0 0 8px;color:#991b1b;font-size:22px;font-weight:800;">බලපත්‍රයේ කාලය අවසන් වී ඇත</h2>
+        <p style="margin:0 0 14px;color:#64748b;font-size:13px;font-weight:600;">POS License Expired — Please Renew</p>
+        
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px 14px;margin-bottom:18px;text-align:left;font-size:13px;line-height:1.5;color:#991b1b;">
+          මෙම POS පර්යන්තයේ බලපත්‍ර කාල සීමාව අවසන් වී ඇත. සේවාව අඛණ්ඩව පවත්වා ගැනීමට පරිපාලක අමතා බලපත්‍රය අලුත් කරගන්න.<br>
+          <span style="font-size:11px;color:#7f1d1d;">පරිපාලක විසින් කාලය දීර්ඝ කළ වහාම මෙම තිරය ස්වයංක්‍රීයව ඉවත් වේ.</span>
+        </div>
+
+        <div style="text-align:left;margin-bottom:16px;">
+          <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">Your Device ID</label>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input id="expiredDevIdInput" type="text" readonly value="${escHtml(deviceId)}" style="width:100%;padding:10px 12px;font-family:monospace;font-size:13px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#1e293b;">
+            <button id="btnCopyExpiredDevId" type="button" style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;color:#334155;cursor:pointer;white-space:nowrap;">📋 Copy</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a href="${wa}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+            <span>💬 WhatsApp හරහා සහය ලබා ගන්න (Renew on WhatsApp)</span>
+          </a>
+          <button id="btnEnterNewExpCode" type="button" style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:11px;font-size:13px;font-weight:700;color:#475569;cursor:pointer;">
+            🔑 නව Activation Code එකක් ඇතුළත් කරන්න (Enter New Code)
+          </button>
+        </div>
+
+        <div id="newExpCodeArea" style="display:none;margin-top:16px;text-align:left;">
+          <label style="font-size:12px;font-weight:700;color:#334155;">New Activation Code:</label>
+          <textarea id="inputNewExpiredCode" rows="3" style="width:100%;margin-top:4px;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:12px;box-sizing:border-box;" placeholder="Paste new activation code here"></textarea>
+          <button id="btnActivateNewExpiredCode" type="button" style="width:100%;margin-top:8px;background:#0e766e;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;">
+            Activate &amp; Unlock POS
+          </button>
+          <div id="newExpCodeError" style="display:none;color:#dc2626;font-size:12px;margin-top:6px;"></div>
+        </div>
+      </div>
+    `;
+
+    document.body.style.overflow = 'hidden';
+
+    const copyBtn = modal.querySelector('#btnCopyExpiredDevId');
+    if (copyBtn) {
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(deviceId);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
+        } catch (e) {
+          modal.querySelector('#expiredDevIdInput')?.select();
+        }
+      };
+    }
+
+    const btnToggleNew = modal.querySelector('#btnEnterNewExpCode');
+    const newArea = modal.querySelector('#newExpCodeArea');
+    if (btnToggleNew && newArea) {
+      btnToggleNew.onclick = () => {
+        newArea.style.display = newArea.style.display === 'none' ? 'block' : 'none';
+      };
+    }
+
+    const btnActNew = modal.querySelector('#btnActivateNewExpiredCode');
+    const txtNew = modal.querySelector('#inputNewExpiredCode');
+    const errNew = modal.querySelector('#newExpCodeError');
+    if (btnActNew && txtNew && errNew) {
+      btnActNew.onclick = async () => {
+        const newCode = txtNew.value.trim();
+        if (!newCode) return;
+        btnActNew.disabled = true;
+        btnActNew.textContent = 'Verifying...';
+        const pl = await verify(newCode);
+        if (!pl) {
+          errNew.textContent = 'Invalid or expired activation code for this device.';
+          errNew.style.display = 'block';
+          btnActNew.disabled = false;
+          btnActNew.textContent = 'Activate & Unlock POS';
+          return;
+        }
+        localStorage.setItem(LICENSE_KEY, newCode);
+        window.apexActiveLicense = pl;
+        modal.remove();
+        document.body.style.overflow = '';
+        if (typeof window.initExpiryClock === 'function') window.initExpiryClock(pl);
+        connectRealtimeLicenseStream();
+        location.reload();
+      };
+    }
+  }
+
+  function hideLicenseExpiredModal() {
+    const modal = document.getElementById('posLicenseExpiredModal');
+    if (modal) {
+      modal.remove();
+      document.body.style.overflow = '';
+    }
+  }
+
   function handleLicenseStatusResponse(data) {
     if (!data) return;
 
@@ -417,9 +549,18 @@ window.initExpiryClock = function(payload) {
       return;
     }
 
-    // 4. Active / Reactivated
+    // 4. Expired
+    if (data.status === 'expired' || (data.expiry && data.expiry <= Date.now())) {
+      showLicenseExpiredModal(data);
+      return;
+    }
+
+    // 5. Active / Reactivated / Expiry changed
     if (data.valid === true || data.status === 'active') {
       hideLicenseSuspendedModal();
+      hideLicenseExpiredModal();
+
+      let licenseUpdated = false;
 
       if (data.updatedCode && typeof data.updatedCode === 'string') {
         try {
@@ -427,14 +568,25 @@ window.initExpiryClock = function(payload) {
           const newPayload = JSON.parse(new TextDecoder().decode(bytes(body)));
           localStorage.setItem(LICENSE_KEY, data.updatedCode);
           window.apexActiveLicense = newPayload;
+          licenseUpdated = true;
           if (typeof window.initExpiryClock === 'function') {
             window.initExpiryClock(newPayload);
           }
           if (typeof toast === 'function') {
-            toast('✓ License Extended / බලපත්‍ර කාලය දීර්ඝ කරන ලදී!');
+            toast('✓ Expiry Date Synced / බලපත්‍ර කාලය යාවත්කාලීන විය!');
           }
         } catch (e) {
           console.warn('Error applying updatedCode:', e);
+        }
+      }
+
+      if (!licenseUpdated && data.expiry && window.apexActiveLicense && Math.abs(data.expiry - window.apexActiveLicense.expires) > 1000) {
+        window.apexActiveLicense.expires = data.expiry;
+        if (typeof window.initExpiryClock === 'function') {
+          window.initExpiryClock(window.apexActiveLicense);
+        }
+        if (typeof toast === 'function') {
+          toast('✓ Expiry Date Synced / බලපත්‍ර කාලය යාවත්කාලීන විය!');
         }
       }
     }
@@ -953,6 +1105,12 @@ function show(tab) {
 
   if (tab === 'customers') {
     renderCustomers();
+  }
+
+  if (tab === 'settings') {
+    if (window.apexActiveLicense && typeof window.initExpiryClock === 'function') {
+      window.initExpiryClock(window.apexActiveLicense);
+    }
   }
 
   document.querySelectorAll('.panel').forEach(e => e.classList.toggle('active', e.id === tab));

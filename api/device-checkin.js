@@ -91,13 +91,21 @@ module.exports = async function handler(req, res) {
         const isReplaced = event.oldDeviceId === deviceId || event.newDeviceId === deviceId;
 
         if (isTargetDevice || isTargetSub || isReplaced) {
+          let deviceCode = event.updatedCode;
+          if (Array.isArray(event.bindings)) {
+            const matched = event.bindings.find(b => b.deviceId === deviceId);
+            if (matched && matched.code) {
+              deviceCode = matched.code;
+            }
+          }
+          const isExpired = event.status === 'expired' || (event.newExpiryMs && event.newExpiryMs <= Date.now());
           const payloadToSend = {
-            valid: event.status === 'active',
-            status: event.status,
+            valid: (event.status === 'active') && !isExpired,
+            status: isExpired ? 'expired' : event.status,
             subscriptionId: event.subscriptionId,
             reason: event.reason,
             expiry: event.newExpiryMs || undefined,
-            updatedCode: event.updatedCode || undefined,
+            updatedCode: deviceCode || undefined,
             eventType: event.type,
             timestamp: Date.now()
           };
