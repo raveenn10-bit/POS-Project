@@ -19,7 +19,7 @@ function sendJson(res, statusCode, data) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -161,9 +161,24 @@ module.exports = async function handler(req, res) {
           return sendJson(res, 201, { success: true, license: importedSub, subscription: importedSub });
         }
 
+        case 'delete': {
+          const licenseId = body.licenseId || body.subscriptionId || body.id;
+          if (!licenseId) return sendJson(res, 400, { error: 'licenseId is required' });
+          const result = await db.deleteSubscription({ subscriptionId: licenseId, adminEmail });
+          return sendJson(res, 200, { success: true, ...result });
+        }
+
         default:
           return sendJson(res, 400, { error: `Unsupported license action: '${action}'` });
       }
+    }
+
+    if (req.method === 'DELETE') {
+      const licenseId = (req.query && (req.query.id || req.query.licenseId || req.query.subscriptionId)) || 
+                        (req.body && (req.body.id || req.body.licenseId || req.body.subscriptionId));
+      if (!licenseId) return sendJson(res, 400, { error: 'licenseId is required' });
+      const result = await db.deleteSubscription({ subscriptionId: licenseId, adminEmail });
+      return sendJson(res, 200, { success: true, ...result });
     }
 
     return sendJson(res, 405, { error: `Method ${req.method} not allowed` });

@@ -1669,6 +1669,8 @@ async function printReceipt(sale, options = {}) {
   }
 
   // Authentic Standard Browser Thermal Printing
+  const invoiceContainer = $('invoicePrintContainer');
+  if (invoiceContainer) invoiceContainer.innerHTML = '';
   const receiptEl = $('receipt');
   if (receiptEl) {
     receiptEl.className = (db.shop && db.shop.receiptWidth === '80mm') ? 'receipt-80' : 'receipt-58';

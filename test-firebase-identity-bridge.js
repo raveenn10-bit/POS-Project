@@ -162,6 +162,7 @@ async function runTestSuite() {
   // Test 5: HTTP Endpoint POST /api/firebase-token on Server
   const TEST_PORT = 3399;
   let testServer = null;
+  let testSub = null;
 
   try {
     await new Promise(resolve => {
@@ -184,7 +185,7 @@ async function runTestSuite() {
 
     // Sub-test 5c: Valid registered device
     // Create a guaranteed active test subscription and device
-    const testSub = await db.createSubscription({
+    testSub = await db.createSubscription({
       customerName: 'Firebase Test Store',
       shopName: 'Firebase Super Mart',
       whatsappNumber: '0770001122',
@@ -244,6 +245,11 @@ async function runTestSuite() {
   } finally {
     if (testServer) {
       testServer.close();
+    }
+    if (testSub && testSub.id) {
+      try {
+        await db.deleteSubscription({ subscriptionId: testSub.id, adminEmail: 'tester@apexpos.lk' });
+      } catch {}
     }
   }
 

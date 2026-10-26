@@ -75,6 +75,7 @@ async function runTest() {
   cloudRow.value.customers = cloudCustomers.filter(c => c.id !== newCust.id);
   cloudRow.value.subscriptions = cloudSubs.filter(s => s.id !== newSub.id);
   cloudRow.value.device_bindings = (cloudRow.value.device_bindings || []).filter(b => b.subscription_id !== newSub.id);
+  cloudRow.value.payments = (cloudRow.value.payments || []).filter(p => p.license_id !== newSub.id);
   cloudRow.value.audit_logs = (cloudRow.value.audit_logs || []).filter(a => a.subscription_id !== newSub.id && (!a.details || a.details.customerId !== newCust.id));
 
   await sb.from('pos_system_data').upsert({
@@ -82,6 +83,7 @@ async function runTest() {
     value: cloudRow.value,
     updated_at: new Date().toISOString()
   });
+  await db.ensureCloudSynced(true);
   console.log('  ✓ Cloud snapshot cleaned up');
 
   console.log('\n======================================================');

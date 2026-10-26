@@ -60,6 +60,10 @@ async function run() {
   console.log('🧪 Starting Admin Dashboard Verification Suite...\n');
   await new Promise(r => server.listen(TEST_PORT, r));
 
+  let token = null;
+  let custId = null;
+  let licId = null;
+
   try {
     // 1. Static file check
     const adminPage = await request('/admin');
@@ -75,7 +79,7 @@ async function run() {
       password: 'supersecretadminpass'
     });
     it('Auth login succeeds for chamilka.ch@gmail.com', loginRes.statusCode === 200 && !!loginRes.json.token);
-    const token = loginRes.json.token;
+    token = loginRes.json.token;
 
     // 3. Dashboard KPI metrics
     const dashRes = await request('/api/dashboard', 'GET', null, token);
@@ -92,7 +96,7 @@ async function run() {
       notes: 'Main Street Galle'
     }, token);
     it('Customer created via /api/customers', custCreate.statusCode === 201 && custCreate.json.customer.id);
-    const custId = custCreate.json.customer.id;
+    custId = custCreate.json.customer.id;
 
     const custList = await request('/api/customers?search=Galle', 'GET', null, token);
     it('Customer search finds newly created customer', 
@@ -112,7 +116,7 @@ async function run() {
     }, token);
     it('License created with Device 1 bound', 
       licCreate.statusCode === 201 && licCreate.json.license.active_device_count === 1);
-    const licId = licCreate.json.license.id;
+    licId = licCreate.json.license.id;
     const initialExpiry = licCreate.json.license.expiry_timestamp;
 
     // 6. Link Second Device (enforces max 2)
@@ -197,6 +201,12 @@ async function run() {
     console.log(`Admin Verification Suite: ${passed} passed, ${failed} failed`);
     console.log(`======================================================\n`);
   } finally {
+    if (licId) {
+      await request('/api/licenses', 'POST', { action: 'delete', licenseId: licId }, token).catch(() => {});
+    }
+    if (custId) {
+      await request('/api/customers', 'POST', { action: 'delete', id: custId }, token).catch(() => {});
+    }
     server.close();
   }
 

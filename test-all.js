@@ -97,6 +97,7 @@ async function runTestSuite() {
   console.log('======================================================\n');
 
   let originalDbContent = null;
+  let sub = null;
   try {
     const dbPath = path.join(__dirname, 'data', 'licensing.json');
     if (fs.existsSync(dbPath)) originalDbContent = fs.readFileSync(dbPath, 'utf8');
@@ -185,7 +186,7 @@ async function runTestSuite() {
 
   // --- Group 4: Subscriptions, Multi-Device & Replacement ---
   console.log('\n📱 4. Testing Multi-Device Lifecycle & Atomic Replacement...');
-  let sub = null;
+  sub = null;
   const dev1 = 'DEV-PHONE-' + Math.random().toString(36).substring(2, 8);
   const dev2 = 'DEV-TABLET-' + Math.random().toString(36).substring(2, 8);
   const dev3 = 'DEV-LAPTOP-' + Math.random().toString(36).substring(2, 8);
@@ -288,6 +289,11 @@ async function runTestSuite() {
   });
 
   } finally {
+    if (sub && sub.id) {
+      try {
+        await DB.deleteSubscription({ subscriptionId: sub.id, adminEmail: 'admin@apexpos.lk' });
+      } catch {}
+    }
     if (originalDbContent) {
       try {
         fs.writeFileSync(path.join(__dirname, 'data', 'licensing.json'), originalDbContent, 'utf8');

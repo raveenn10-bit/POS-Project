@@ -241,11 +241,13 @@
         padding: 0;
       }
 
-      /* A4 Page Container */
+      /* A4 Page Container - Strictly 1 Page (210mm x 297mm) */
       .harsh-apex-invoice .invoice-page {
         width: 210mm;
-        min-height: 297mm;
-        padding: 13mm 15mm;
+        max-width: 210mm;
+        height: 297mm;
+        max-height: 297mm;
+        padding: 10mm 12mm;
         margin: 0 auto;
         background: #ffffff;
         display: flex;
@@ -253,6 +255,11 @@
         justify-content: space-between;
         box-sizing: border-box;
         position: relative;
+        overflow: hidden !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-after: avoid !important;
+        break-inside: avoid !important;
       }
 
       @media screen {
@@ -273,25 +280,40 @@
         }
         html, body {
           width: 210mm !important;
-          height: auto !important;
-          min-height: 297mm !important;
+          height: 297mm !important;
+          max-height: 297mm !important;
           margin: 0 !important;
           padding: 0 !important;
           background: #ffffff !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
           color-adjust: exact !important;
+          overflow: hidden !important;
+        }
+        #invoicePrintContainer {
+          width: 210mm !important;
+          max-width: 210mm !important;
+          height: 296mm !important;
+          max-height: 296mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
         }
         .harsh-apex-invoice {
           width: 210mm !important;
+          max-width: 210mm !important;
+          height: 296mm !important;
+          max-height: 296mm !important;
           margin: 0 !important;
           padding: 0 !important;
+          overflow: hidden !important;
         }
         .harsh-apex-invoice .invoice-page {
           width: 210mm !important;
-          min-height: 297mm !important;
-          max-height: 297mm !important;
-          padding: 13mm 15mm !important;
+          max-width: 210mm !important;
+          height: 296mm !important;
+          max-height: 296mm !important;
+          padding: 10mm 12mm !important;
           margin: 0 !important;
           box-shadow: none !important;
           border-radius: 0 !important;
@@ -301,6 +323,7 @@
           break-after: avoid !important;
           break-inside: avoid !important;
           overflow: hidden !important;
+          box-sizing: border-box !important;
         }
         .harsh-apex-no-print {
           display: none !important;
@@ -314,18 +337,18 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        padding-bottom: 12px;
+        gap: 14px;
+        padding-bottom: 8px;
       }
       .harsh-apex-invoice .ha-header-left {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 12px;
         flex: 1.15;
       }
       .harsh-apex-invoice .ha-logo-box {
-        width: 50px;
-        height: 56px;
+        width: 46px;
+        height: 52px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -341,22 +364,22 @@
         flex-direction: column;
       }
       .harsh-apex-invoice .ha-brand-title {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 800;
         color: #0c1e3c;
         letter-spacing: -0.5px;
         line-height: 1.1;
       }
       .harsh-apex-invoice .ha-brand-pos {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 800;
         color: var(--ha-primary);
-        letter-spacing: 1.6px;
+        letter-spacing: 1.5px;
         margin-top: 1px;
         text-transform: uppercase;
       }
       .harsh-apex-invoice .ha-brand-sub {
-        font-size: 11px;
+        font-size: 10.5px;
         color: var(--ha-muted);
         font-weight: 500;
         margin-top: 2px;
@@ -364,7 +387,7 @@
 
       .harsh-apex-invoice .ha-header-vsep {
         width: 1px;
-        height: 58px;
+        height: 52px;
         background-color: var(--ha-border);
         flex-shrink: 0;
       }
@@ -373,10 +396,10 @@
         flex: 1.25;
         display: flex;
         flex-direction: column;
-        gap: 2.5px;
+        gap: 2px;
       }
       .harsh-apex-invoice .ha-shop-title {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 800;
         color: var(--ha-text);
         margin-bottom: 2px;
@@ -385,22 +408,26 @@
       .harsh-apex-invoice .ha-contact-row {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 11px;
+        gap: 5px;
+        font-size: 10.5px;
         color: #334155;
-        line-height: 1.35;
+        line-height: 1.3;
       }
       .harsh-apex-invoice .ha-contact-icon {
-        width: 12px;
-        height: 12px;
+        width: 13px;
+        height: 13px;
+        max-width: 13px;
+        max-height: 13px;
         flex-shrink: 0;
+        display: inline-block;
+        vertical-align: middle;
         color: var(--ha-primary);
       }
 
       .harsh-apex-invoice .ha-header-line {
         border: none;
         border-top: 1px solid var(--ha-border);
-        margin: 10px 0 14px 0;
+        margin: 8px 0 10px 0;
       }
 
       /* ========================================================
@@ -410,15 +437,15 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 20px;
-        margin-bottom: 14px;
+        gap: 16px;
+        margin-bottom: 10px;
       }
       .harsh-apex-invoice .ha-title-box {
         display: flex;
         flex-direction: column;
       }
       .harsh-apex-invoice .ha-invoice-heading {
-        font-size: 36px;
+        font-size: 30px;
         font-weight: 900;
         color: #0b1a30;
         letter-spacing: 1px;
@@ -426,19 +453,19 @@
         margin: 0;
       }
       .harsh-apex-invoice .ha-title-bar {
-        width: 52px;
-        height: 4px;
+        width: 48px;
+        height: 3px;
         background-color: var(--ha-primary);
         border-radius: 2px;
-        margin-top: 5px;
+        margin-top: 4px;
       }
 
       .harsh-apex-invoice .ha-meta-card {
         background-color: var(--ha-bg-card);
         border: 1px solid var(--ha-border);
-        border-radius: 8px;
-        padding: 8px 14px;
-        min-width: 320px;
+        border-radius: 7px;
+        padding: 6px 12px;
+        min-width: 300px;
       }
       .harsh-apex-invoice .ha-meta-top {
         display: flex;
@@ -451,23 +478,23 @@
         flex: 1;
       }
       .harsh-apex-invoice .ha-meta-cell:not(:first-child) {
-        padding-left: 10px;
+        padding-left: 8px;
       }
       .harsh-apex-invoice .ha-meta-vdiv {
         width: 1px;
-        height: 24px;
+        height: 20px;
         background-color: var(--ha-border);
         margin: 0 4px;
         flex-shrink: 0;
       }
       .harsh-apex-invoice .ha-meta-label {
-        font-size: 9.5px;
+        font-size: 9px;
         font-weight: 600;
         color: var(--ha-muted);
-        margin-bottom: 2px;
+        margin-bottom: 1px;
       }
       .harsh-apex-invoice .ha-meta-val {
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
         color: var(--ha-text);
         white-space: nowrap;
@@ -479,7 +506,7 @@
       .harsh-apex-invoice .ha-meta-hdiv {
         border: none;
         border-top: 1px solid var(--ha-border);
-        margin: 6px 0;
+        margin: 5px 0;
       }
       .harsh-apex-invoice .ha-meta-bottom {
         display: flex;
@@ -492,27 +519,27 @@
          ======================================================== */
       .harsh-apex-invoice .ha-cards-row {
         display: flex;
-        gap: 14px;
-        margin-bottom: 14px;
+        gap: 10px;
+        margin-bottom: 10px;
       }
       .harsh-apex-invoice .ha-details-card {
         flex: 1;
         background-color: var(--ha-bg-card);
         border: 1px solid var(--ha-border);
-        border-radius: 9px;
-        padding: 10px 14px;
+        border-radius: 7px;
+        padding: 7px 11px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 5px;
       }
       .harsh-apex-invoice .ha-card-pill-header {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
       }
       .harsh-apex-invoice .ha-card-icon-pill {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         background-color: var(--ha-primary);
         color: #ffffff;
@@ -521,8 +548,16 @@
         justify-content: center;
         flex-shrink: 0;
       }
+      .harsh-apex-invoice .ha-card-icon-pill svg {
+        width: 14px;
+        height: 14px;
+        max-width: 14px;
+        max-height: 14px;
+        display: inline-block;
+        vertical-align: middle;
+      }
       .harsh-apex-invoice .ha-card-title {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 800;
         color: var(--ha-text);
       }
@@ -530,21 +565,21 @@
       .harsh-apex-invoice .ha-card-list {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
       }
       .harsh-apex-invoice .ha-kv-row {
         display: flex;
-        font-size: 11px;
-        line-height: 1.35;
+        font-size: 10.5px;
+        line-height: 1.3;
       }
       .harsh-apex-invoice .ha-k-col {
-        width: 76px;
+        width: 74px;
         flex-shrink: 0;
         color: #475569;
         font-weight: 600;
         display: flex;
         justify-content: space-between;
-        padding-right: 6px;
+        padding-right: 5px;
       }
       .harsh-apex-invoice .ha-v-col {
         flex: 1;
@@ -557,12 +592,12 @@
          4. Product Table
          ======================================================== */
       .harsh-apex-invoice .ha-table-container {
-        margin-bottom: 14px;
+        margin-bottom: 10px;
       }
       .harsh-apex-invoice .ha-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 11px;
+        font-size: 10.5px;
         table-layout: fixed;
       }
       .harsh-apex-invoice .ha-table thead tr {
@@ -570,8 +605,8 @@
         color: #ffffff;
       }
       .harsh-apex-invoice .ha-table th {
-        padding: 8px 8px;
-        font-size: 10.5px;
+        padding: 6px 7px;
+        font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.2px;
         text-align: left;
@@ -586,12 +621,12 @@
         text-align: right;
       }
       .harsh-apex-invoice .ha-table th:first-child {
-        border-top-left-radius: 6px;
-        padding-left: 10px;
+        border-top-left-radius: 5px;
+        padding-left: 8px;
       }
       .harsh-apex-invoice .ha-table th:last-child {
-        border-top-right-radius: 6px;
-        padding-right: 10px;
+        border-top-right-radius: 5px;
+        padding-right: 8px;
       }
 
       .harsh-apex-invoice .ha-table tbody tr {
@@ -604,16 +639,16 @@
         background-color: #ffffff;
       }
       .harsh-apex-invoice .ha-table td {
-        padding: 7px 8px;
+        padding: 5px 7px;
         vertical-align: middle;
         color: #1e293b;
-        line-height: 1.3;
+        line-height: 1.25;
       }
       .harsh-apex-invoice .ha-table td:first-child {
-        padding-left: 10px;
+        padding-left: 8px;
       }
       .harsh-apex-invoice .ha-table td:last-child {
-        padding-right: 10px;
+        padding-right: 8px;
       }
       .harsh-apex-invoice .ha-item-name {
         font-weight: 600;
@@ -621,7 +656,7 @@
       }
       .harsh-apex-invoice .ha-item-sku {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 10px;
+        font-size: 9.5px;
         color: var(--ha-muted);
       }
       .harsh-apex-invoice .ha-item-qty {
@@ -646,32 +681,32 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 16px;
-        margin-bottom: 12px;
+        gap: 12px;
+        margin-bottom: 8px;
       }
       .harsh-apex-invoice .ha-bottom-left {
         flex: 1.05;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
       }
       .harsh-apex-invoice .ha-payment-card {
         background-color: var(--ha-bg-card);
         border: 1px solid var(--ha-border);
-        border-radius: 9px;
-        padding: 10px 14px;
+        border-radius: 7px;
+        padding: 7px 11px;
         display: flex;
         flex-direction: column;
-        gap: 7px;
+        gap: 5px;
       }
       .harsh-apex-invoice .ha-pay-k {
-        width: 105px;
+        width: 100px;
         flex-shrink: 0;
         color: #475569;
         font-weight: 600;
         display: flex;
         justify-content: space-between;
-        padding-right: 6px;
+        padding-right: 5px;
       }
       .harsh-apex-invoice .ha-pay-v {
         flex: 1;
@@ -685,24 +720,32 @@
       .harsh-apex-invoice .ha-qr-section {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         padding-left: 2px;
       }
       .harsh-apex-invoice .ha-qr-box {
-        width: 66px;
-        height: 66px;
+        width: 72px;
+        height: 72px;
+        min-width: 72px;
+        min-height: 72px;
+        max-width: 72px;
+        max-height: 72px;
         border: 1px solid var(--ha-border);
         border-radius: 4px;
-        padding: 3px;
+        padding: 2px;
         background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        box-sizing: border-box;
       }
       .harsh-apex-invoice .ha-qr-svg {
-        width: 100%;
-        height: 100%;
+        width: 68px;
+        height: 68px;
+        max-width: 68px;
+        max-height: 68px;
+        display: block;
       }
       .harsh-apex-invoice .ha-qr-text {
         display: flex;
@@ -710,15 +753,15 @@
         gap: 2px;
       }
       .harsh-apex-invoice .ha-qr-link {
-        font-size: 12.5px;
+        font-size: 11.5px;
         font-weight: 700;
         color: var(--ha-primary);
         text-decoration: none;
       }
       .harsh-apex-invoice .ha-qr-sub {
-        font-size: 10px;
+        font-size: 9.5px;
         color: var(--ha-muted);
-        line-height: 1.35;
+        line-height: 1.3;
       }
 
       /* ========================================================
@@ -732,17 +775,17 @@
       .harsh-apex-invoice .ha-summary-card {
         background-color: var(--ha-bg-card);
         border: 1px solid var(--ha-border);
-        border-radius: 9px;
-        padding: 10px 14px;
+        border-radius: 7px;
+        padding: 7px 11px;
         display: flex;
         flex-direction: column;
-        gap: 7px;
+        gap: 5px;
       }
       .harsh-apex-invoice .ha-sum-line {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 11.5px;
+        font-size: 10.5px;
       }
       .harsh-apex-invoice .ha-sum-label {
         font-weight: 600;
@@ -757,19 +800,19 @@
         background-color: var(--ha-primary);
         color: #ffffff;
         border-radius: 6px;
-        padding: 9px 14px;
-        margin-top: 8px;
+        padding: 7px 12px;
+        margin-top: 6px;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
       .harsh-apex-invoice .ha-gt-label {
-        font-size: 13.5px;
+        font-size: 12.5px;
         font-weight: 700;
         letter-spacing: 0.2px;
       }
       .harsh-apex-invoice .ha-gt-value {
-        font-size: 17.5px;
+        font-size: 16px;
         font-weight: 800;
       }
 
@@ -778,27 +821,27 @@
          ======================================================== */
       .harsh-apex-invoice .ha-footer {
         margin-top: auto;
-        padding-top: 10px;
+        padding-top: 8px;
         border-top: 1px solid var(--ha-border);
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
       .harsh-apex-invoice .ha-footer-top-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: 12px;
       }
       .harsh-apex-invoice .ha-thankyou-box {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        min-width: 140px;
+        min-width: 130px;
       }
       .harsh-apex-invoice .ha-thankyou-script {
         font-family: 'Dancing Script', 'Brush Script MT', 'Great Vibes', cursive, sans-serif;
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 700;
         color: #0b1a30;
         line-height: 1;
@@ -806,13 +849,16 @@
         margin-bottom: 2px;
       }
       .harsh-apex-invoice .ha-thankyou-swoop {
-        width: 120px;
-        height: 10px;
+        width: 130px;
+        height: 12px;
+        max-width: 130px;
+        max-height: 12px;
+        display: block;
       }
 
       .harsh-apex-invoice .ha-footer-vdiv {
         width: 1px;
-        height: 38px;
+        height: 32px;
         background-color: var(--ha-border);
         flex-shrink: 0;
       }
@@ -827,11 +873,11 @@
       .harsh-apex-invoice .ha-badge-item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
       }
       .harsh-apex-invoice .ha-badge-icon-box {
-        width: 26px;
-        height: 26px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         background-color: #eff6ff;
         display: flex;
@@ -840,18 +886,26 @@
         color: var(--ha-primary);
         flex-shrink: 0;
       }
+      .harsh-apex-invoice .ha-badge-icon-box svg {
+        width: 15px;
+        height: 15px;
+        max-width: 15px;
+        max-height: 15px;
+        display: inline-block;
+        vertical-align: middle;
+      }
       .harsh-apex-invoice .ha-badge-text {
         display: flex;
         flex-direction: column;
       }
       .harsh-apex-invoice .ha-badge-title {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         color: var(--ha-text);
         line-height: 1.2;
       }
       .harsh-apex-invoice .ha-badge-sub {
-        font-size: 9px;
+        font-size: 8.5px;
         color: var(--ha-muted);
         line-height: 1.2;
       }
@@ -859,11 +913,11 @@
       .harsh-apex-invoice .ha-footer-bar {
         background-color: #f1f5f9;
         border-radius: 5px;
-        padding: 6px 12px;
+        padding: 4px 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 9.5px;
+        font-size: 9px;
       }
       .harsh-apex-invoice .ha-bar-left {
         color: #475569;
@@ -1176,7 +1230,7 @@
 
     // Modern 3D Faceted Logo SVG matching media_1793000369506.jpg
     var defaultLogoSvg = `
-      <svg width="44" height="52" viewBox="0 0 46 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="44" height="52" viewBox="0 0 46 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:52px;display:block;">
         <defs>
           <linearGradient id="ha-h-grad1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#1e40af"/>
@@ -1201,7 +1255,7 @@
 
     // Vector Crisp QR Code SVG
     var qrCodeSvg = `
-      <svg class="ha-qr-svg" viewBox="0 0 33 33" shape-rendering="crispEdges">
+      <svg class="ha-qr-svg" width="68" height="68" style="width:68px;height:68px;display:block;" viewBox="0 0 33 33" shape-rendering="crispEdges">
         <rect width="33" height="33" fill="#ffffff" />
         <path fill="#0f172a" d="M0,0 h7 v7 h-7 z M1,1 v5 h5 v-5 z M2,2 h3 v3 h-3 z M26,0 h7 v7 h-7 z M27,1 v5 h5 v-5 z M28,2 h3 v3 h-3 z M0,26 h7 v7 h-7 z M1,27 v5 h5 v-5 z M2,28 h3 v3 h-3 z M8,2 h2 v2 h-2 z M12,1 h3 v1 h-3 z M16,2 h1 v3 h-1 z M18,1 h4 v1 h-4 z M23,2 h2 v2 h-2 z M9,5 h1 v2 h-1 z M11,4 h2 v1 h-2 z M14,4 h3 v2 h-3 z M19,4 h2 v3 h-2 z M22,4 h3 v1 h-3 z M8,8 h17 v1 h-17 z M1,9 h2 v2 h-2 z M5,9 h2 v2 h-2 z M9,10 h3 v2 h-3 z M14,9 h2 v2 h-2 z M17,11 h3 v1 h-3 z M21,9 h3 v2 h-3 z M26,9 h2 v2 h-2 z M30,9 h2 v2 h-2 z M8,13 h2 v3 h-2 z M11,13 h4 v2 h-4 z M16,14 h2 v2 h-2 z M19,13 h3 v2 h-3 z M23,14 h2 v2 h-2 z M26,13 h3 v2 h-3 z M9,17 h3 v2 h-3 z M13,16 h2 v2 h-2 z M17,17 h2 v2 h-2 z M20,16 h4 v1 h-4 z M25,17 h3 v2 h-3 z M30,17 h2 v2 h-2 z M8,20 h3 v1 h-3 z M12,20 h2 v3 h-2 z M15,21 h4 v1 h-4 z M20,19 h2 v2 h-2 z M23,21 h3 v1 h-3 z M27,20 h2 v2 h-2 z M30,21 h2 v2 h-2 z M8,24 h17 v1 h-17 z M8,26 h2 v2 h-2 z M11,27 h3 v2 h-3 z M15,26 h2 v2 h-2 z M18,27 h4 v2 h-4 z M23,26 h3 v2 h-3 z M27,27 h2 v2 h-2 z M30,26 h2 v2 h-2 z M9,30 h3 v2 h-3 z M13,31 h2 v1 h-2 z M16,29 h3 v3 h-3 z M20,31 h3 v1 h-3 z M24,29 h2 v3 h-2 z M27,31 h2 v1 h-2 z M30,30 h2 v2 h-2 z"/>
       </svg>
@@ -1260,19 +1314,19 @@
               <div class="ha-header-right">
                 <div class="ha-shop-title">${escapeHtml(storeName)}</div>
                 <div class="ha-contact-row">
-                  <svg class="ha-contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <svg class="ha-contact-icon" width="13" height="13" style="width:13px;height:13px;flex-shrink:0;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span>${escapeHtml(storeAddress)}</span>
                 </div>
                 <div class="ha-contact-row">
-                  <svg class="ha-contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg class="ha-contact-icon" width="13" height="13" style="width:13px;height:13px;flex-shrink:0;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   <span>${escapeHtml(storePhone)}</span>
                 </div>
                 <div class="ha-contact-row">
-                  <svg class="ha-contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <svg class="ha-contact-icon" width="13" height="13" style="width:13px;height:13px;flex-shrink:0;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   <span>${escapeHtml(storeEmail)}</span>
                 </div>
                 <div class="ha-contact-row">
-                  <svg class="ha-contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <svg class="ha-contact-icon" width="13" height="13" style="width:13px;height:13px;flex-shrink:0;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                   <span>${escapeHtml(storeWebsite)}</span>
                 </div>
               </div>
@@ -1325,7 +1379,7 @@
               <div class="ha-details-card">
                 <div class="ha-card-pill-header">
                   <span class="ha-card-icon-pill">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <svg width="14" height="14" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                   </span>
                   <span class="ha-card-title">Customer Details</span>
                 </div>
@@ -1341,7 +1395,7 @@
               <div class="ha-details-card">
                 <div class="ha-card-pill-header">
                   <span class="ha-card-icon-pill">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <svg width="14" height="14" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                   </span>
                   <span class="ha-card-title">Shop Details</span>
                 </div>
@@ -1383,7 +1437,7 @@
                 <div class="ha-payment-card">
                   <div class="ha-card-pill-header">
                     <span class="ha-card-icon-pill">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                      <svg width="14" height="14" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     </span>
                     <span class="ha-card-title">Payment Details</span>
                   </div>
@@ -1413,7 +1467,7 @@
                 <div class="ha-summary-card">
                   <div class="ha-card-pill-header">
                     <span class="ha-card-icon-pill">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg>
+                      <svg width="14" height="14" style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg>
                     </span>
                     <span class="ha-card-title">Total Summary</span>
                   </div>
@@ -1438,7 +1492,7 @@
             <div class="ha-footer-top-row">
               <div class="ha-thankyou-box">
                 <div class="ha-thankyou-script">${escapeHtml(config.thankYouMessage || 'Thank You!')}</div>
-                <svg class="ha-thankyou-swoop" viewBox="0 0 130 12" fill="none">
+                <svg class="ha-thankyou-swoop" width="130" height="12" style="width:130px;height:12px;display:block;" viewBox="0 0 130 12" fill="none">
                   <path d="M3 6 C 30 11, 75 11, 127 3" stroke="${primaryColor}" stroke-width="2.6" stroke-linecap="round" />
                 </svg>
               </div>
@@ -1449,7 +1503,7 @@
               <div class="ha-badges-row">
                 <div class="ha-badge-item">
                   <div class="ha-badge-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <svg width="15" height="15" style="width:15px;height:15px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                   </div>
                   <div class="ha-badge-text">
                     <span class="ha-badge-title">Manage Sales</span>
@@ -1461,7 +1515,7 @@
 
                 <div class="ha-badge-item">
                   <div class="ha-badge-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    <svg width="15" height="15" style="width:15px;height:15px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                   </div>
                   <div class="ha-badge-text">
                     <span class="ha-badge-title">Track Inventory</span>
@@ -1473,7 +1527,7 @@
 
                 <div class="ha-badge-item">
                   <div class="ha-badge-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    <svg width="15" height="15" style="width:15px;height:15px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                   </div>
                   <div class="ha-badge-text">
                     <span class="ha-badge-title">Grow Faster</span>
@@ -1679,6 +1733,15 @@
   <div id="haInvoiceContainer">
     ${getInvoiceBodyHTML(sale, shop, config)}
   </div>
+  ${options.autoPrint ? `
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        try { window.print(); } catch (e) {}
+      }, 350);
+    });
+  </script>
+  ` : ''}
 
   <script src="html2pdf.bundle.min.js"></script>
   <script src="pdf-invoice.js"></script>
@@ -2400,7 +2463,33 @@
       return Promise.resolve(filename);
     }
 
-    // 2. PRINT ACTION
+  /**
+   * Strict single-page A4 html2pdf options preventing pagination and SVG blowup
+   */
+  function getA4Html2PdfOptions(filename) {
+    return {
+      margin: 0,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        letterRendering: true,
+        logging: false,
+        windowWidth: 794 // 210mm at 96 DPI
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+  }
+
+  // 2. PRINT ACTION
     if (action === 'print') {
       return ensureHtml2Pdf()
         .then(function (html2pdfLib) {
@@ -2409,22 +2498,25 @@
               var host = document.createElement('div');
               host.style.position = 'fixed';
               host.style.top = '0';
-              host.style.left = '0';
+              host.style.left = '-9999px';
               host.style.width = '210mm';
-              host.style.opacity = '0.01';
-              host.style.pointerEvents = 'none';
-              host.style.zIndex = '-999';
+              host.style.maxWidth = '210mm';
+              host.style.height = '297mm';
+              host.style.maxHeight = '297mm';
+              host.style.overflow = 'hidden';
+              host.style.zIndex = '-9999';
               host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
               document.body.appendChild(host);
 
               var target = host.querySelector('.invoice-page') || host;
-              var opt = {
-                margin: 0,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-              };
+              target.style.width = '210mm';
+              target.style.maxWidth = '210mm';
+              target.style.height = '297mm';
+              target.style.maxHeight = '297mm';
+              target.style.boxSizing = 'border-box';
+              target.style.overflow = 'hidden';
+
+              var opt = getA4Html2PdfOptions(filename);
 
               return html2pdfLib()
                 .set(opt)
@@ -2466,21 +2558,23 @@
         var host = document.createElement('div');
         host.style.position = 'fixed';
         host.style.top = '0';
-        host.style.left = '0';
+        host.style.left = '-9999px';
         host.style.width = '210mm';
-        host.style.opacity = '0.01';
-        host.style.pointerEvents = 'none';
-        host.style.zIndex = '-999';
+        host.style.maxWidth = '210mm';
+        host.style.height = '297mm';
+        host.style.maxHeight = '297mm';
+        host.style.overflow = 'hidden';
+        host.style.zIndex = '-9999';
         host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
         document.body.appendChild(host);
         var target = host.querySelector('.invoice-page') || host;
-        var opt = {
-          margin: 0,
-          filename: filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        target.style.width = '210mm';
+        target.style.maxWidth = '210mm';
+        target.style.height = '297mm';
+        target.style.maxHeight = '297mm';
+        target.style.boxSizing = 'border-box';
+        target.style.overflow = 'hidden';
+        var opt = getA4Html2PdfOptions(filename);
         return html2pdfLib().set(opt).from(target).toPdf().get('pdf').then(function (pdfDoc) {
           host.remove();
           return pdfDoc.output('blob');
@@ -2519,31 +2613,25 @@
         var host = document.createElement('div');
         host.style.position = 'fixed';
         host.style.top = '0';
-        host.style.left = '0';
+        host.style.left = '-9999px';
         host.style.width = '210mm';
-        host.style.opacity = '0.01';
-        host.style.pointerEvents = 'none';
-        host.style.zIndex = '-999';
+        host.style.maxWidth = '210mm';
+        host.style.height = '297mm';
+        host.style.maxHeight = '297mm';
+        host.style.overflow = 'hidden';
+        host.style.zIndex = '-9999';
         host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
         document.body.appendChild(host);
 
         var target = host.querySelector('.invoice-page') || host;
-        var opt = {
-          margin: 0,
-          filename: filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            letterRendering: true,
-            logging: false
-          },
-          jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-          }
-        };
+        target.style.width = '210mm';
+        target.style.maxWidth = '210mm';
+        target.style.height = '297mm';
+        target.style.maxHeight = '297mm';
+        target.style.boxSizing = 'border-box';
+        target.style.overflow = 'hidden';
+
+        var opt = getA4Html2PdfOptions(filename);
 
         return html2pdfLib()
           .set(opt)

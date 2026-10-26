@@ -19,7 +19,7 @@ function sendJson(res, statusCode, data) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -112,9 +112,22 @@ module.exports = async function handler(req, res) {
           return sendJson(res, 200, { success: true, customer });
         }
 
+        case 'delete': {
+          if (!body.id) return sendJson(res, 400, { error: 'Customer ID is required' });
+          const result = await db.deleteCustomer({ id: body.id, adminEmail });
+          return sendJson(res, 200, { success: true, ...result });
+        }
+
         default:
           return sendJson(res, 400, { error: `Unsupported customer action: '${action}'` });
       }
+    }
+
+    if (req.method === 'DELETE') {
+      const id = (req.query && req.query.id) || (req.body && req.body.id);
+      if (!id) return sendJson(res, 400, { error: 'Customer ID is required' });
+      const result = await db.deleteCustomer({ id, adminEmail });
+      return sendJson(res, 200, { success: true, ...result });
     }
 
     return sendJson(res, 405, { error: `Method ${req.method} not allowed` });

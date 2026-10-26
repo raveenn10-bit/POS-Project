@@ -27,7 +27,7 @@ function sendJson(res, statusCode, data) {
 module.exports = async function handler(req, res) {
   // CORS support
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -66,8 +66,9 @@ module.exports = async function handler(req, res) {
 
       // 2. Get audit logs
       if (query.audit) {
+        const auditParam = query.audit.trim();
         const logs = await db.getAuditLogs({
-          subscriptionId: query.audit.trim(),
+          subscriptionId: auditParam === 'all' ? null : auditParam,
           limit: parseInt(query.limit, 10) || 50
         });
         return sendJson(res, 200, { success: true, audit_logs: logs });
@@ -189,9 +190,24 @@ module.exports = async function handler(req, res) {
           return sendJson(res, 201, { success: true, subscription: importedSub });
         }
 
+        case 'delete': {
+          const subscriptionId = body.subscriptionId || body.licenseId || body.id;
+          if (!subscriptionId) return sendJson(res, 400, { error: 'subscriptionId is required' });
+          const result = await db.deleteSubscription({ subscriptionId, adminEmail });
+          return sendJson(res, 200, { success: true, ...result });
+        }
+
         default:
           return sendJson(res, 400, { error: `Unsupported action: '${action}'` });
       }
+    }
+
+    if (req.method === 'DELETE') {
+      const subscriptionId = (req.query && (req.query.id || req.query.subscriptionId || req.query.licenseId)) || 
+                             (req.body && (req.body.id || req.body.subscriptionId || req.body.licenseId));
+      if (!subscriptionId) return sendJson(res, 400, { error: 'subscriptionId is required' });
+      const result = await db.deleteSubscription({ subscriptionId, adminEmail });
+      return sendJson(res, 200, { success: true, ...result });
     }
 
     return sendJson(res, 405, { error: `Method ${req.method} not allowed` });
