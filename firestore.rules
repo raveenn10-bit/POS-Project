@@ -1,0 +1,58 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Multi-tenant authorization helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isShopTenant(shopId) {
+      return isAuthenticated() && request.auth.token.shopId == shopId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 256;
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp || (ts is string && ts.size() >= 10);
+    }
+
+    function hasValidTimestamps() {
+      return request.resource == null || request.resource.data == null || (
+        (!('updated_at' in request.resource.data) || isValidTimestamp(request.resource.data.updated_at)) &&
+        (!('timestamp' in request.resource.data) || isValidTimestamp(request.resource.data.timestamp)) &&
+        (!('created_at' in request.resource.data) || isValidTimestamp(request.resource.data.created_at))
+      );
+    }
+
+    // Disallow global reads/writes outside tenant boundaries
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Strict multi-tenant isolation under /shops/{shopId}
+    match /shops/{shopId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.token.shopId == shopId;
+    }
+
+    // Enforce document validations (valid timestamps, non-empty IDs)
+    match /shops/{shopId}/products/{productId} {
+      allow read, write: if isShopTenant(shopId) && isValidId(productId) && hasValidTimestamps();
+    }
+
+    match /shops/{shopId}/sales/{saleId} {
+      allow read, write: if isShopTenant(shopId) && isValidId(saleId) && hasValidTimestamps();
+    }
+
+    match /shops/{shopId}/stock_movements/{movementId} {
+      allow read, write: if isShopTenant(shopId) && isValidId(movementId) && hasValidTimestamps();
+    }
+
+    match /shops/{shopId}/sync_events/{eventId} {
+      allow read, write: if isShopTenant(shopId) && isValidId(eventId) && hasValidTimestamps();
+    }
+  }
+}

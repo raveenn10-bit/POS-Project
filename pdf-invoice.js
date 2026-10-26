@@ -11,9 +11,14 @@
   } else {
     var exports = factory();
     root.generateInvoicePDF = exports.generateInvoicePDF;
+    root.generateThermalSlipPDF = exports.generateThermalSlipPDF;
     root.getInvoiceHTML = exports.getInvoiceHTML;
     root.getInvoiceCSS = exports.getInvoiceCSS;
     root.getInvoiceBodyHTML = exports.getInvoiceBodyHTML;
+    root.getThermalSlipHTML = exports.getThermalSlipHTML;
+    root.getThermalSlipCSS = exports.getThermalSlipCSS;
+    root.getThermalSlipBodyHTML = exports.getThermalSlipBodyHTML;
+    root.shareReceiptPDF = exports.shareReceiptPDF;
     root.PDFInvoice = exports;
   }
 })(typeof self !== 'undefined' ? self : this, function () {
@@ -987,16 +992,573 @@
   }
 
   /**
-   * Main PDF / Print / Preview controller function
+   * Returns standalone CSS for 58mm/80mm Thermal Receipt Slips with Zero Extra Blank Pages
+   */
+  function getThermalSlipCSS(paperWidth) {
+    var is80 = (paperWidth || '58mm') === '80mm';
+    var widthMm = is80 ? '80mm' : '58mm';
+    var fontSize = is80 ? '12.5px' : '11px';
+
+    return `
+      @page {
+        size: auto;
+        margin: 0mm;
+      }
+      *, *::before, *::after {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Courier New', monospace;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      .thermal-slip-page {
+        width: ${widthMm} !important;
+        max-width: ${widthMm} !important;
+        margin: 0 auto !important;
+        padding: ${is80 ? '3mm 4mm 0 4mm' : '2mm 3mm 0 3mm'} !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: ${fontSize} !important;
+        line-height: 1.25 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        height: auto !important;
+        min-height: 0 !important;
+      }
+      .thermal-slip-page > *:last-child {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+      }
+      table, tr, td, th, .slip-row, .slip-reprint-banner {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      .slip-header {
+        text-align: center;
+        margin-bottom: 4px;
+      }
+      .slip-title {
+        font-weight: 800;
+        font-size: ${is80 ? '16px' : '14px'};
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+      .slip-meta {
+        font-size: 0.9em;
+        line-height: 1.3;
+      }
+      .slip-divider {
+        border: none;
+        border-top: 1px dashed #000000;
+        margin: 4px 0;
+      }
+      .slip-reprint-banner {
+        border: 1.5px solid #000000;
+        padding: 3px;
+        text-align: center;
+        font-weight: 800;
+        margin: 4px 0;
+        background: #f4f4f4;
+      }
+      .slip-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 1px 0;
+        font-size: 0.92em;
+      }
+      .slip-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 4px 0;
+        font-size: inherit;
+      }
+      .slip-table th {
+        border-bottom: 1px solid #000000;
+        padding: 2px 0;
+        text-align: left;
+        font-size: 0.92em;
+      }
+      .slip-table td {
+        padding: 2px 0;
+        vertical-align: top;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .slip-total-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+      }
+      .slip-grand-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 900;
+        font-size: 1.2em;
+        margin: 4px 0;
+      }
+      .slip-footer {
+        text-align: center;
+        font-size: 0.85em;
+        margin-top: 4px;
+      }
+      .slip-branding {
+        text-align: center;
+        font-size: 0.75em;
+        color: #444444;
+        margin-top: 2px;
+      }
+      @media screen {
+        body {
+          background: #e2e8f0;
+          padding: 12px;
+        }
+        .thermal-slip-page {
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+          border-radius: 4px;
+        }
+      }
+    `;
+  }
+
+  /**
+   * Generates the inner body HTML of the 58mm/80mm thermal receipt slip
+   */
+  function getThermalSlipBodyHTML(sale, shop, options) {
+    sale = sale || {};
+    shop = shop || {};
+    options = options || {};
+
+    var shopName = shop.name || 'Harsh Apex Retail';
+    var shopLogo = shop.logo || '';
+    var shopAddress = shop.address || '';
+    var shopPhone = shop.phone || '';
+    var shopRegNo = shop.regNo || '';
+    var currency = shop.currency || 'Rs.';
+
+    var invoiceId = sale.id || sale.number || ('RCP-' + Date.now());
+    var isReprint = Boolean(options.isReprint || sale.isReprint);
+    var paperWidth = options.paperWidth || '58mm';
+    var is80 = paperWidth === '80mm';
+
+    // Date in Asia/Colombo
+    var dateStr = (function () {
+      var d = sale.at || sale.date ? new Date(sale.at || sale.date) : new Date();
+      try {
+        return d.toLocaleString('en-GB', {
+          timeZone: 'Asia/Colombo',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+      } catch (e) {
+        return formatInvoiceDate(sale.date || sale.at);
+      }
+    })();
+
+    var paymentMethod = sale.paymentMethod || sale.method || 'Cash';
+    var isCash = paymentMethod === 'Cash';
+    var isCard = paymentMethod === 'Card';
+    var isCredit = Boolean(sale.isCredit);
+    var creditCustomer = sale.creditCustomer || (sale.customer && sale.customer.name) || '';
+    var creditPhone = sale.creditPhone || (sale.customer && sale.customer.phone) || '';
+    var creditSettled = Boolean(sale.creditSettled);
+
+    var items = Array.isArray(sale.items) ? sale.items : [];
+    var calcSubtotal = 0;
+    items.forEach(function (it) {
+      var p = Number(it.price || it.unitPrice || 0);
+      var q = Number(it.qty || 1);
+      calcSubtotal += p * q;
+    });
+
+    var subtotal = Number(sale.subtotal !== undefined ? sale.subtotal : calcSubtotal);
+    var discount = Number(sale.discount || 0);
+    var total = Number(sale.total !== undefined ? sale.total : subtotal - discount);
+    var received = Number(sale.received || total);
+    var change = Number(sale.change || Math.max(0, received - total));
+
+    var qrSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges" width="80" height="80">
+        <rect width="29" height="29" fill="#ffffff"/>
+        <path fill="#000000" d="M0,0 h7 v7 h-7 z M1,1 v5 h5 v-5 z M2,2 h3 v3 h-3 z"/>
+        <path fill="#000000" d="M22,0 h7 v7 h-7 z M23,1 v5 h5 v-5 z M24,2 h3 v3 h-3 z"/>
+        <path fill="#000000" d="M0,22 h7 v7 h-7 z M1,23 v5 h5 v-5 z M2,24 h3 v3 h-3 z"/>
+        <path fill="#000000" d="M8,6 h2 v1 h-2 z M12,6 h2 v1 h-2 z M16,6 h2 v1 h-2 z M19,6 h1 v1 h-1 z"/>
+        <path fill="#000000" d="M6,8 v2 h1 v-2 z M6,12 v2 h1 v-2 z M6,16 v2 h1 v-2 z M6,19 v1 h1 v-1 z"/>
+        <path fill="#000000" d="M8,1 h2 v2 h-2 z M11,2 h2 v1 h-2 z M14,1 h3 v1 h-3 z M18,3 h2 v2 h-2 z M10,4 h2 v1 h-2 z"/>
+        <path fill="#000000" d="M8,9 h2 v2 h-2 z M12,8 h2 v2 h-2 z M16,9 h3 v1 h-3 z M11,12 h2 v2 h-2 z M14,11 h3 v2 h-3 z"/>
+        <path fill="#000000" d="M9,16 h3 v2 h-3 z M13,15 h2 v2 h-2 z M17,16 h3 v2 h-3 z M9,19 h2 v2 h-2 z M12,20 h3 v2 h-3 z"/>
+        <path fill="#000000" d="M8,23 h2 v2 h-2 z M12,24 h2 v2 h-2 z M16,22 h2 v2 h-2 z M19,25 h2 v2 h-2 z M23,23 h3 v2 h-3 z"/>
+        <path fill="#000000" d="M22,8 h2 v2 h-2 z M25,10 h3 v2 h-3 z M23,14 h2 v2 h-2 z M26,17 h2 v2 h-2 z M24,19 h3 v2 h-3 z"/>
+      </svg>
+    `;
+
+    return `
+      <div class="thermal-slip-page ${is80 ? 'slip-80' : 'slip-58'}">
+        ${shopLogo ? `
+          <div style="text-align:center;margin-bottom:4px;">
+            <img src="${escapeHtml(shopLogo)}" alt="Logo" style="max-height:44px;max-width:130px;object-fit:contain;image-rendering:crisp-edges;">
+          </div>
+        ` : ''}
+
+        <div class="slip-header">
+          <div class="slip-title">${escapeHtml(shopName)}</div>
+          ${shopAddress ? `<div class="slip-meta">${escapeHtml(shopAddress)}</div>` : ''}
+          ${shopPhone ? `<div class="slip-meta">Tel: ${escapeHtml(shopPhone)}</div>` : ''}
+          ${shopRegNo ? `<div class="slip-meta">BRN/Tax: ${escapeHtml(shopRegNo)}</div>` : ''}
+        </div>
+
+        <hr class="slip-divider">
+
+        ${isReprint ? `
+          <div class="slip-reprint-banner">
+            *** DUPLICATE / REPRINT RECEIPT ***
+            <div style="font-size:0.8em;font-weight:normal;margin-top:1px;">(Original issued: ${escapeHtml(dateStr)})</div>
+          </div>
+        ` : ''}
+
+        <div class="slip-row">
+          <span><b>Bill:</b> ${escapeHtml(invoiceId)}</span>
+          <span><b>Pay:</b> ${escapeHtml(paymentMethod)}</span>
+        </div>
+        <div class="slip-row">
+          <span><b>Date:</b> ${escapeHtml(dateStr)}</span>
+        </div>
+        <div class="slip-row">
+          <span><b>Cashier:</b> ${escapeHtml(sale.cashier || options.cashier || 'Cashier 01')}</span>
+        </div>
+
+        ${isCredit ? `
+          <div style="margin-top:3px;padding:3px;border:1px solid #000;background:#f9f9f9;font-size:0.9em;">
+            <b>Credit Customer:</b> ${escapeHtml(creditCustomer || 'Customer')}<br>
+            ${creditPhone ? `<b>Phone:</b> ${escapeHtml(creditPhone)}<br>` : ''}
+            <b>Status:</b> ${creditSettled ? 'SETTLED' : 'UNPAID'}
+          </div>
+        ` : ''}
+
+        ${sale.status === 'voided' ? `
+          <div style="margin:4px 0;padding:2px;border:1.5px solid #000;text-align:center;font-weight:bold;">
+            *** VOIDED TRANSACTION ***
+          </div>
+        ` : ''}
+
+        <hr class="slip-divider">
+
+        <table class="slip-table">
+          <thead>
+            <tr>
+              <th>Item Description</th>
+              <th class="align-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(function (it) {
+              var q = Number(it.qty || 1);
+              var qStr = Number.isInteger(q) ? String(q) : q.toFixed(3).replace(/\.?0+$/, '');
+              var unitStr = it.sellUnit || it.unit ? (' ' + (it.sellUnit || it.unit)) : '';
+              var p = Number(it.price || it.unitPrice || 0);
+              var t = Number(it.total !== undefined ? it.total : (q * p));
+              return `
+                <tr>
+                  <td>
+                    <div style="font-weight:600;">${escapeHtml(it.name || 'Item')}</div>
+                    <div style="font-size:0.88em;color:#222;">${qStr}${unitStr} × ${formatMoney(p, currency)}</div>
+                  </td>
+                  <td class="align-right" style="vertical-align:bottom;">${formatMoney(t, currency)}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+
+        <hr class="slip-divider">
+
+        ${discount > 0 ? `
+          <div class="slip-total-row">
+            <span>Subtotal:</span>
+            <span>${formatMoney(subtotal, currency)}</span>
+          </div>
+          <div class="slip-total-row">
+            <span>Discount:</span>
+            <span>-${formatMoney(discount, currency)}</span>
+          </div>
+        ` : ''}
+
+        <div class="slip-grand-total">
+          <span>TOTAL:</span>
+          <span>${formatMoney(total, currency)}</span>
+        </div>
+
+        <hr class="slip-divider" style="border-top:1px solid #000;">
+
+        ${isCash ? `
+          <div class="slip-total-row">
+            <span>Cash Tendered:</span>
+            <span>${formatMoney(received, currency)}</span>
+          </div>
+          <div class="slip-total-row">
+            <span>Change Due:</span>
+            <span>${formatMoney(change, currency)}</span>
+          </div>
+        ` : isCard ? `
+          <div class="slip-total-row">
+            <span>Payment Mode:</span>
+            <span>Card (Approved)</span>
+          </div>
+        ` : `
+          <div class="slip-total-row">
+            <span>Payment Mode:</span>
+            <span>${escapeHtml(paymentMethod)}</span>
+          </div>
+          <div class="slip-total-row">
+            <span>Status:</span>
+            <span>${isCredit ? (creditSettled ? 'Settled' : 'Unpaid') : 'Completed'}</span>
+          </div>
+        `}
+
+        <hr class="slip-divider" style="border-top:2px double #000;">
+
+        <div style="text-align:center;margin:5px 0 2px 0;">
+          ${qrSvg}
+          <div style="font-size:0.75em;color:#444;margin-top:1px;">Scan to Verify Invoice</div>
+        </div>
+
+        <div class="slip-footer">
+          ${escapeHtml(shop.receiptFooter || shop.footerNote || 'Thank you for your business! Please come again.')}
+        </div>
+        <div class="slip-branding">
+          Powered by Harsh Apex Retail POS
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Generates standalone HTML for 58mm/80mm thermal slip
+   */
+  function getThermalSlipHTML(sale, shop, options) {
+    options = options || {};
+    var paperWidth = options.paperWidth || '58mm';
+    var invoiceId = (sale && (sale.id || sale.number)) || 'Receipt';
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Receipt ${escapeHtml(invoiceId)}</title>
+        <style>
+          ${getThermalSlipCSS(paperWidth)}
+        </style>
+      </head>
+      <body>
+        ${getThermalSlipBodyHTML(sale, shop, options)}
+      </body>
+      </html>
+    `.trim();
+  }
+
+  /**
+   * Generates 58mm or 80mm thermal receipt PDF
+   */
+  function generateThermalSlipPDF(sale, shop, options) {
+    options = options || {};
+    var action = (options.action || 'download').toLowerCase();
+    var paperWidth = options.paperWidth || '58mm';
+    var is80 = paperWidth === '80mm';
+    var slipWidthMm = is80 ? 80 : 58;
+    var filename = (options.filename || ('Receipt-' + (sale.id || sale.number || Date.now()))) + '.pdf';
+
+    var items = Array.isArray(sale.items) ? sale.items : [];
+    var estimatedHeightMm = Math.max(is80 ? 110 : 90, 80 + (items.length * 12) + (sale.isCredit ? 25 : 0) + (options.isReprint ? 15 : 0));
+
+    // 1. PREVIEW ACTION
+    if (action === 'preview') {
+      if (typeof window === 'undefined') return Promise.resolve(null);
+      var previewHtml = getThermalSlipHTML(sale, shop, options);
+      var previewWin = window.open('', '_blank', 'width=450,height=650');
+      if (previewWin) {
+        previewWin.document.open();
+        previewWin.document.write(previewHtml);
+        previewWin.document.close();
+        previewWin.focus();
+        return Promise.resolve(previewWin);
+      }
+      return Promise.resolve(openDirectPrint(sale, shop));
+    }
+
+    if (typeof window === 'undefined') {
+      return Promise.resolve(filename);
+    }
+
+    return ensureHtml2Pdf().then(function (html2pdfLib) {
+      if (!html2pdfLib) {
+        console.warn('html2pdf unavailable, opening print dialog.');
+        openDirectPrint(sale, shop);
+        return Promise.resolve(filename);
+      }
+
+      var host = document.createElement('div');
+      host.style.position = 'fixed';
+      host.style.left = '-9999px';
+      host.style.top = '0';
+      host.style.width = slipWidthMm + 'mm';
+      host.style.zIndex = '-9999';
+      host.innerHTML = `<style>${getThermalSlipCSS(paperWidth)}</style>${getThermalSlipBodyHTML(sale, shop, options)}`;
+      document.body.appendChild(host);
+
+      var target = host.querySelector('.thermal-slip-page') || host;
+      var opt = {
+        margin: 0,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2.5,
+          useCORS: true,
+          letterRendering: true,
+          logging: false
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: [slipWidthMm, estimatedHeightMm],
+          orientation: 'portrait'
+        }
+      };
+
+      var worker = html2pdfLib().set(opt).from(target);
+
+      if (action === 'blob') {
+        return worker.toPdf().get('pdf').then(function (pdfDoc) {
+          host.remove();
+          return pdfDoc.output('blob');
+        });
+      }
+
+      if (action === 'file') {
+        return worker.toPdf().get('pdf').then(function (pdfDoc) {
+          host.remove();
+          var blob = pdfDoc.output('blob');
+          return new File([blob], filename, { type: 'application/pdf' });
+        });
+      }
+
+      if (action === 'share') {
+        return worker.toPdf().get('pdf').then(function (pdfDoc) {
+          host.remove();
+          var blob = pdfDoc.output('blob');
+          if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
+            var file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare({ files: [file] })) {
+              return navigator.share({
+                title: `Receipt ${sale.id || sale.number || ''}`,
+                text: `Receipt from ${shop.name || 'Harsh Apex Retail'}`,
+                files: [file]
+              }).then(function () { return { success: true, method: 'share-file' }; });
+            }
+          }
+          return worker.save().then(function () { return filename; });
+        }).catch(function (e) {
+          host.remove();
+          console.warn('Share error fallback:', e);
+          return filename;
+        });
+      }
+
+      if (action === 'print') {
+        return worker.toPdf().get('pdf').then(function (pdfDoc) {
+          host.remove();
+          var blobUrl = pdfDoc.output('bloburl');
+          var printWin = window.open(blobUrl, '_blank');
+          if (printWin) {
+            printWin.focus();
+            setTimeout(function () {
+              try { printWin.print(); } catch (e) {}
+            }, 500);
+            return printWin;
+          }
+          return openDirectPrint(sale, shop);
+        }).catch(function (err) {
+          host.remove();
+          return openDirectPrint(sale, shop);
+        });
+      }
+
+      // Default: Download
+      return worker.save().then(function () {
+        host.remove();
+        return filename;
+      }).catch(function (err) {
+        host.remove();
+        console.warn('Thermal slip save error:', err);
+        return filename;
+      });
+    });
+  }
+
+  /**
+   * Share receipt PDF via iOS Native Web Share API or WhatsApp
+   */
+  function shareReceiptPDF(sale, shop, options) {
+    options = options || {};
+    var format = (options.format || options.paperWidth || '58mm').toLowerCase();
+    if (format === 'a4') {
+      return generateInvoicePDF(sale, shop, 'share', options);
+    }
+    return generateThermalSlipPDF(sale, shop, Object.assign({}, options, { action: 'share' }));
+  }
+
+  /**
+   * Main PDF / Print / Preview / Share controller function
+   * Supports both A4 Full Invoices and 58mm/80mm Thermal Slips
    *
    * @param {Object} sale - Sale record object
    * @param {Object} shop - Shop settings object
-   * @param {string} action - 'download' | 'print' | 'preview'
+   * @param {string|Object} actionOrOptions - 'download' | 'print' | 'preview' | 'blob' | 'file' | 'share' | options
+   * @param {Object} [options] - Optional settings { format: 'a4'|'58mm'|'80mm', paperWidth, isReprint }
    */
-  function generateInvoicePDF(sale, shop, action) {
-    action = (action || 'download').toLowerCase();
+  function generateInvoicePDF(sale, shop, actionOrOptions, options) {
+    var action = 'download';
+    if (typeof actionOrOptions === 'object' && actionOrOptions !== null) {
+      options = actionOrOptions;
+      action = options.action || 'download';
+    } else if (typeof actionOrOptions === 'string') {
+      action = actionOrOptions;
+    }
+    options = options || {};
+    action = (action || options.action || 'download').toLowerCase();
     sale = sale || {};
     shop = shop || {};
+
+    var format = (options.format || options.paperWidth || '').toLowerCase();
+    if (format === '58mm' || format === '80mm' || action === '58mm' || action === '80mm' || action === 'thermal') {
+      return generateThermalSlipPDF(sale, shop, Object.assign({}, options, {
+        paperWidth: (format === '80mm' || action === '80mm') ? '80mm' : '58mm',
+        action: (action === '58mm' || action === '80mm' || action === 'thermal') ? (options.action || 'download') : action
+      }));
+    }
 
     var filename = 'Invoice-' + (sale.id || sale.number || Date.now()) + '.pdf';
 
@@ -1012,7 +1574,6 @@
         previewWin.focus();
         return Promise.resolve(previewWin);
       }
-      // If popup was blocked, fallback to direct print
       return Promise.resolve(openDirectPrint(sale, shop));
     }
 
@@ -1079,7 +1640,62 @@
         });
     }
 
-    // 3. DOWNLOAD ACTION (DEFAULT)
+    // 3. BLOB ACTION
+    if (action === 'blob') {
+      if (typeof window === 'undefined') return Promise.resolve(null);
+      return ensureHtml2Pdf().then(function (html2pdfLib) {
+        if (!html2pdfLib) return Promise.resolve(null);
+        var host = document.createElement('div');
+        host.style.position = 'fixed';
+        host.style.left = '-9999px';
+        host.style.top = '0';
+        host.style.width = '210mm';
+        host.style.zIndex = '-9999';
+        host.innerHTML = `<style>${getInvoiceCSS(shop.primaryColor)}</style>${getInvoiceBodyHTML(sale, shop)}`;
+        document.body.appendChild(host);
+        var target = host.querySelector('.invoice-page') || host;
+        var opt = {
+          margin: 0,
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        return html2pdfLib().set(opt).from(target).toPdf().get('pdf').then(function (pdfDoc) {
+          host.remove();
+          return pdfDoc.output('blob');
+        });
+      });
+    }
+
+    // 4. FILE ACTION
+    if (action === 'file') {
+      if (typeof window === 'undefined') return Promise.resolve(null);
+      return generateInvoicePDF(sale, shop, 'blob', options).then(function (blob) {
+        if (!blob) return null;
+        return new File([blob], filename, { type: 'application/pdf' });
+      });
+    }
+
+    // 5. SHARE ACTION
+    if (action === 'share') {
+      if (typeof window === 'undefined') return Promise.resolve(filename);
+      return generateInvoicePDF(sale, shop, 'blob', options).then(function (blob) {
+        if (blob && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
+          var file = new File([blob], filename, { type: 'application/pdf' });
+          if (navigator.canShare({ files: [file] })) {
+            return navigator.share({
+              title: `Invoice ${sale.id || sale.number || ''}`,
+              text: `Invoice from ${shop.name || 'Harsh Apex Retail'}`,
+              files: [file]
+            }).then(function () { return { success: true, method: 'share-file' }; });
+          }
+        }
+        return generateInvoicePDF(sale, shop, 'download', options);
+      });
+    }
+
+    // 6. DOWNLOAD ACTION (DEFAULT)
     if (typeof window === 'undefined') {
       return Promise.resolve(filename);
     }
@@ -1137,8 +1753,13 @@
 
   return {
     generateInvoicePDF: generateInvoicePDF,
+    generateThermalSlipPDF: generateThermalSlipPDF,
     getInvoiceHTML: getInvoiceHTML,
     getInvoiceCSS: getInvoiceCSS,
-    getInvoiceBodyHTML: getInvoiceBodyHTML
+    getInvoiceBodyHTML: getInvoiceBodyHTML,
+    getThermalSlipHTML: getThermalSlipHTML,
+    getThermalSlipCSS: getThermalSlipCSS,
+    getThermalSlipBodyHTML: getThermalSlipBodyHTML,
+    shareReceiptPDF: shareReceiptPDF
   };
 });

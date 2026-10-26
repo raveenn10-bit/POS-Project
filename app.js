@@ -1445,11 +1445,12 @@ $('checkout').onclick = () => {
 // -------------------------------------------------------------
 // 10. Thermal Receipt Formatting, PDF Invoice & Bluetooth Thermal
 // -------------------------------------------------------------
-function receiptHTML(s) {
+function receiptHTML(s, isReprint = false) {
   const shop = db.shop || {};
   const isCard = s.method === 'Card';
   const isCash = s.method === 'Cash';
   const hasDiscount = Number(s.discount || 0) > 0;
+  const duplicate = Boolean(isReprint || s.isReprint);
 
   return `
     ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
@@ -1458,9 +1459,10 @@ function receiptHTML(s) {
     ${shop.phone ? `<p class="center">Tel: ${esc(shop.phone)}</p>` : ''}
     ${shop.regNo ? `<p class="center">BRN/Tax: ${esc(shop.regNo)}</p>` : ''}
     <hr>
+    ${duplicate ? '<div class="center bold" style="border:1.5px solid #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
     <p>
       <b>Bill No: ${esc(s.number)}</b><br>
-      Date: ${new Date(s.at).toLocaleDateString('en-LK')} ${new Date(s.at).toLocaleTimeString('en-LK')}<br>
+      Date: ${new Date(s.at).toLocaleDateString('en-LK', { timeZone: 'Asia/Colombo' })} ${new Date(s.at).toLocaleTimeString('en-LK', { timeZone: 'Asia/Colombo' })}<br>
       Payment: <b>${esc(s.method)}${isCard ? ' (Approved)' : ''}</b>
       ${s.isCredit ? `<br><b style="color:#b45309">*** CREDIT BILL (${s.creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${esc(s.creditCustomer)} (${esc(s.creditPhone || 'No Phone')})` : ''}
       ${s.status === 'voided' ? '<br><b style="color:red">*** VOIDED / RETURNED BILL ***</b>' : ''}
@@ -1520,7 +1522,7 @@ async function printReceipt(sale, options = {}) {
   const receiptEl = $('receipt');
   if (receiptEl) {
     receiptEl.className = db.shop.receiptWidth === '80mm' ? 'receipt-80' : 'receipt-58';
-    receiptEl.innerHTML = receiptHTML(sale);
+    receiptEl.innerHTML = receiptHTML(sale, !!options.isReprint);
   }
   window.print();
 }

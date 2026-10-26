@@ -1,5 +1,6 @@
 # Private keys & credentials
 *private-key*.json
+service-account*.json
 *.pem
 *.key
 .env*

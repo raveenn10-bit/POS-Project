@@ -23,6 +23,7 @@ const customersHandler = require('./api/customers');
 const licensesHandler = require('./api/licenses');
 const devicesHandler = require('./api/devices');
 const paymentsHandler = require('./api/payments');
+const firebaseTokenHandler = require('./api/firebase-token');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const ROOT_DIR = __dirname;
@@ -163,6 +164,11 @@ const server = http.createServer(async (req, res) => {
     return deviceCheckinHandler(req, res);
   }
 
+  if (pathname === '/api/firebase-token' || pathname.startsWith('/api/firebase-token/')) {
+    req.body = await parseRequestBody(req);
+    return firebaseTokenHandler(req, res);
+  }
+
   // Static File Routing
   let targetFile = pathname;
   if (targetFile === '/' || targetFile === '') {
@@ -207,6 +213,7 @@ if (require.main === module) {
     console.log(`  - Auth API:          http://localhost:${PORT}/api/auth`);
     console.log(`  - Subscriptions API: http://localhost:${PORT}/api/subscriptions`);
     console.log(`  - Device Check-in:   http://localhost:${PORT}/api/device-checkin`);
+    console.log(`  - Firebase Token:    http://localhost:${PORT}/api/firebase-token`);
     console.log(`======================================================\n`);
   });
 }

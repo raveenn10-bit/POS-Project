@@ -157,30 +157,49 @@
         margin: 0;
         size: auto;
       }
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box;
+      }
       html, body {
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
+        color: #000 !important;
         width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, 'Courier New', monospace !important;
+        -webkit-font-smoothing: antialiased;
       }
       body > *:not(#receipt):not(#invoicePrintContainer) { display: none !important; }
       #receipt:not(:empty) {
         display: block !important;
         background: white;
         color: black;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, 'Courier New', monospace !important;
         font-size: 12px;
         padding: 4px 6px;
         margin: 0 auto;
         width: 100%;
         box-sizing: border-box;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        height: auto !important;
+        min-height: 0 !important;
       }
       #receipt:empty { display: none !important; }
       #receipt.receipt-58 { width: 58mm !important; max-width: 58mm !important; font-size: 11px !important; }
       #receipt.receipt-80 { width: 80mm !important; max-width: 80mm !important; font-size: 12px !important; }
       #receipt h2 { text-align: center; margin: 4px 0; font-size: 15px; }
       #receipt p { margin: 2px 0; }
-      #receipt table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: inherit; }
+      #receipt table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: inherit; page-break-inside: avoid !important; break-inside: avoid !important; }
+      #receipt table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
       #receipt table th { border-bottom: 1px dashed black; text-align: left; padding: 2px 0; }
       #receipt table td { padding: 2px 0; vertical-align: top; }
       #receipt td:last-child, #receipt th:last-child { text-align: right; }
@@ -188,6 +207,7 @@
       #receipt .center { text-align: center; }
       #receipt .right { text-align: right; }
       #receipt .bold { font-weight: bold; }
+      #receipt > *:last-child { margin-bottom: 0 !important; padding-bottom: 0 !important; }
 
       #invoicePrintContainer { display: block !important; background: white !important; color: #172b31 !important; margin: 0 auto !important; padding: 0 !important; width: 100% !important; }
       #invoicePrintContainer:empty { display: none !important; }
@@ -921,6 +941,7 @@
   <script src="html2pdf.bundle.min.js"></script>
   <script src="pdf-invoice.js"></script>
   <script src="sliding-clock.js"></script>
+  <script src="ios-print-engine.js"></script>
   <script src="print-system.js"></script>
   <script src="app.js"></script>
   <script src="install.js"></script>
