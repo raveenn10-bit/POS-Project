@@ -41,6 +41,7 @@ const MIME_TYPES = {
   '.webmanifest': 'application/manifest+json',
   '.pdf': 'application/pdf',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.map': 'application/json'
 };
 

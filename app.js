@@ -1452,20 +1452,25 @@ function receiptHTML(s, isReprint = false) {
   const hasDiscount = Number(s.discount || 0) > 0;
   const duplicate = Boolean(isReprint || s.isReprint);
 
+  const dateObj = new Date(s.at || s.date || Date.now());
+  const dateFormatted = !isNaN(dateObj)
+    ? `${dateObj.toLocaleDateString('en-LK', { timeZone: 'Asia/Colombo' })} ${dateObj.toLocaleTimeString('en-LK', { timeZone: 'Asia/Colombo' })}`
+    : '';
+
   return `
     ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
-    <h2>${esc(shop.name || 'Harsh Apex POS')}</h2>
+    <h2 class="center bold">${esc(shop.name || 'Harsh Apex POS')}</h2>
     ${shop.address ? `<p class="center">${esc(shop.address)}</p>` : ''}
     ${shop.phone ? `<p class="center">Tel: ${esc(shop.phone)}</p>` : ''}
     ${shop.regNo ? `<p class="center">BRN/Tax: ${esc(shop.regNo)}</p>` : ''}
     <hr>
-    ${duplicate ? '<div class="center bold" style="border:1.5px solid #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
+    ${duplicate ? '<div class="center bold" style="border:1px dashed #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
     <p>
-      <b>Bill No: ${esc(s.number)}</b><br>
-      Date: ${new Date(s.at).toLocaleDateString('en-LK', { timeZone: 'Asia/Colombo' })} ${new Date(s.at).toLocaleTimeString('en-LK', { timeZone: 'Asia/Colombo' })}<br>
-      Payment: <b>${esc(s.method)}${isCard ? ' (Approved)' : ''}</b>
-      ${s.isCredit ? `<br><b style="color:#b45309">*** CREDIT BILL (${s.creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${esc(s.creditCustomer)} (${esc(s.creditPhone || 'No Phone')})` : ''}
-      ${s.status === 'voided' ? '<br><b style="color:red">*** VOIDED / RETURNED BILL ***</b>' : ''}
+      <b>Bill No: ${esc(s.number || s.id || '')}</b><br>
+      Date: ${dateFormatted}<br>
+      Payment: <b>${esc(s.method || 'Cash')}${isCard ? ' (Approved)' : ''}</b>
+      ${s.isCredit ? `<br><b>*** CREDIT BILL (${s.creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${esc(s.creditCustomer || (s.customer && s.customer.name) || 'Customer')} (${esc(s.creditPhone || (s.customer && s.customer.phone) || 'No Phone')})` : ''}
+      ${s.status === 'voided' ? '<br><b>*** VOIDED / RETURNED BILL ***</b>' : ''}
     </p>
     <hr>
     <table>
@@ -1473,13 +1478,16 @@ function receiptHTML(s, isReprint = false) {
         <tr><th>Item</th><th style="text-align:right">Amount</th></tr>
       </thead>
       <tbody>
-        ${s.items.map(x => {
-          const qtyStr = `${x.qty} ${x.sellUnit || x.unit || ''}`.trim();
-          const unitPrice = x.unitPrice || x.price;
-          const lineTotal = x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price);
+        ${(s.items || []).map(x => {
+          const qtyNum = Number(x.qty !== undefined ? x.qty : 1);
+          const formattedQty = Number.isInteger(qtyNum) ? String(qtyNum) : qtyNum.toFixed(3).replace(/\.?0+$/, '');
+          const unit = x.sellUnit || x.unit || '';
+          const qtyStr = unit ? `${formattedQty} ${unit}` : formattedQty;
+          const unitPrice = x.unitPrice !== undefined ? x.unitPrice : x.price;
+          const lineTotal = x.lineTotal !== undefined ? x.lineTotal : (qtyNum * (x.price || unitPrice || 0));
           return `
             <tr>
-              <td><b>${esc(x.name)}</b><br>${qtyStr} × ${money(unitPrice)}</td>
+              <td><b>${esc(x.name || 'Item')}</b><br>${qtyStr} × ${money(unitPrice)}</td>
               <td style="text-align:right;vertical-align:bottom">${money(lineTotal)}</td>
             </tr>
           `;
@@ -1491,9 +1499,9 @@ function receiptHTML(s, isReprint = false) {
       Subtotal: <span style="float:right">${money(s.subtotal)}</span><br>
       ${hasDiscount ? `Discount: <span style="float:right">-${money(s.discount)}</span><br>` : ''}
       <span class="bold" style="font-size:15px">Grand Total: <span style="float:right">${money(s.total)}</span></span><br>
-      ${isCash ? `Amount Received: <span style="float:right">${money(s.received)}</span><br>Balance: <span style="float:right">${money(s.change)}</span>` : ''}
+      ${isCash ? `Cash Received: <span style="float:right">${money(s.received)}</span><br>Balance: <span style="float:right">${money(s.change)}</span>` : ''}
       ${isCard ? `Card Paid: <span style="float:right">${money(s.total)}</span>` : ''}
-      ${s.isCredit ? `Credit Balance Due: <span style="float:right">${money(s.total)}</span>` : ''}
+      ${s.isCredit ? `Credit Due: <span style="float:right">${money(s.total)}</span>` : ''}
     </p>
     <hr>
     <p class="center" style="font-size:11px">${esc(shop.receiptFooter || 'Thank you for your business! Please come again.')}</p>
@@ -1503,7 +1511,8 @@ function receiptHTML(s, isReprint = false) {
 
 async function printReceipt(sale, options = {}) {
   if (!sale) return;
-  if (window.PrintSystem && window.PrintSystem.printManager) {
+  // If an explicit transport was forced (e.g. forceTransport: 'ble' for Bluetooth hardware)
+  if (options.forceTransport && window.PrintSystem && window.PrintSystem.printManager) {
     try {
       const pm = window.PrintSystem.printManager;
       const opts = Object.assign({ shop: db.shop, isReprint: !!options.isReprint }, options);
@@ -1519,9 +1528,11 @@ async function printReceipt(sale, options = {}) {
       console.warn('PrintSystem dispatch error, fallback to browser print:', e);
     }
   }
+
+  // Authentic Standard Browser Thermal Printing
   const receiptEl = $('receipt');
   if (receiptEl) {
-    receiptEl.className = db.shop.receiptWidth === '80mm' ? 'receipt-80' : 'receipt-58';
+    receiptEl.className = (db.shop && db.shop.receiptWidth === '80mm') ? 'receipt-80' : 'receipt-58';
     receiptEl.innerHTML = receiptHTML(sale, !!options.isReprint);
   }
   window.print();

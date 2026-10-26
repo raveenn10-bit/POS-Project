@@ -1880,7 +1880,7 @@
   function getThermalSlipCSS(paperWidth) {
     var is80 = (paperWidth || '58mm') === '80mm';
     var widthMm = is80 ? '80mm' : '58mm';
-    var fontSize = is80 ? '12.5px' : '11px';
+    var fontSize = is80 ? '12px' : '11px';
 
     return `
       @page {
@@ -1900,7 +1900,7 @@
         min-height: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Courier New', monospace;
+        font-family: 'Courier New', Courier, monospace !important;
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
       }
@@ -1908,12 +1908,13 @@
         width: ${widthMm} !important;
         max-width: ${widthMm} !important;
         margin: 0 auto !important;
-        padding: ${is80 ? '3mm 4mm 0 4mm' : '2mm 3mm 0 3mm'} !important;
+        padding: ${is80 ? '4mm 5mm 0 5mm' : '3mm 4mm 0 4mm'} !important;
         box-sizing: border-box !important;
         background: #ffffff !important;
         color: #000000 !important;
+        font-family: 'Courier New', Courier, monospace !important;
         font-size: ${fontSize} !important;
-        line-height: 1.25 !important;
+        line-height: 1.3 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         page-break-after: avoid !important;
@@ -1938,45 +1939,45 @@
         margin-bottom: 4px;
       }
       .slip-title {
-        font-weight: 800;
-        font-size: ${is80 ? '16px' : '14px'};
-        text-transform: uppercase;
-        margin-bottom: 2px;
+        font-weight: bold;
+        font-size: 15px;
+        text-align: center;
+        margin: 4px 0 2px 0;
       }
       .slip-meta {
         font-size: 0.9em;
         line-height: 1.3;
+        text-align: center;
       }
       .slip-divider {
-        border: none;
-        border-top: 1px dashed #000000;
-        margin: 4px 0;
+        border: none !important;
+        border-top: 1px dashed #000000 !important;
+        margin: 4px 0 !important;
       }
       .slip-reprint-banner {
-        border: 1.5px solid #000000;
+        border: 1px dashed #000000;
         padding: 3px;
         text-align: center;
-        font-weight: 800;
+        font-weight: bold;
         margin: 4px 0;
-        background: #f4f4f4;
+        background: #f5f5f5;
       }
       .slip-row {
-        display: flex;
-        justify-content: space-between;
-        margin: 1px 0;
-        font-size: 0.92em;
+        margin: 2px 0;
+        font-size: inherit;
       }
       .slip-table {
         width: 100%;
         border-collapse: collapse;
         margin: 4px 0;
         font-size: inherit;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       .slip-table th {
-        border-bottom: 1px solid #000000;
+        border-bottom: 1px dashed #000000;
         padding: 2px 0;
         text-align: left;
-        font-size: 0.92em;
       }
       .slip-table td {
         padding: 2px 0;
@@ -1985,28 +1986,19 @@
       .align-right {
         text-align: right;
       }
-      .slip-total-row {
-        display: flex;
-        justify-content: space-between;
+      .slip-total-p {
         margin: 2px 0;
-      }
-      .slip-grand-total {
-        display: flex;
-        justify-content: space-between;
-        font-weight: 900;
-        font-size: 1.2em;
-        margin: 4px 0;
       }
       .slip-footer {
         text-align: center;
-        font-size: 0.85em;
+        font-size: 11px;
         margin-top: 4px;
       }
       .slip-branding {
         text-align: center;
-        font-size: 0.75em;
-        color: #444444;
-        margin-top: 2px;
+        font-size: 10px;
+        color: #888888;
+        margin-top: 6px;
       }
       @media screen {
         body {
@@ -2029,31 +2021,23 @@
     shop = shop || {};
     options = options || {};
 
-    var shopName = shop.name || 'Harsh Apex Retail';
+    var shopName = shop.name || 'Harsh Apex POS';
     var shopLogo = shop.logo || '';
     var shopAddress = shop.address || '';
     var shopPhone = shop.phone || '';
     var shopRegNo = shop.regNo || '';
     var currency = shop.currency || 'Rs.';
 
-    var invoiceId = sale.id || sale.number || ('RCP-' + Date.now());
+    var invoiceId = sale.number || sale.id || ('RCP-' + Date.now());
     var isReprint = Boolean(options.isReprint || sale.isReprint);
-    var paperWidth = options.paperWidth || '58mm';
+    var paperWidth = options.paperWidth || shop.receiptWidth || '58mm';
     var is80 = paperWidth === '80mm';
 
     var dateStr = (function () {
       var d = sale.at || sale.date ? new Date(sale.at || sale.date) : new Date();
       try {
-        return d.toLocaleString('en-GB', {
-          timeZone: 'Asia/Colombo',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        });
+        return d.toLocaleDateString('en-LK', { timeZone: 'Asia/Colombo' }) + ' ' +
+               d.toLocaleTimeString('en-LK', { timeZone: 'Asia/Colombo' });
       } catch (e) {
         return formatColomboDate(sale.date || sale.at);
       }
@@ -2070,19 +2054,20 @@
     var items = Array.isArray(sale.items) ? sale.items : [];
     var calcSubtotal = 0;
     items.forEach(function (it) {
-      var p = Number(it.price || it.unitPrice || 0);
+      var p = Number(it.unitPrice !== undefined ? it.unitPrice : (it.price || 0));
       var q = Number(it.qty !== undefined ? it.qty : 1);
       calcSubtotal += p * q;
     });
 
     var subtotal = Number(sale.subtotal !== undefined ? sale.subtotal : calcSubtotal);
     var discount = Number(sale.discount || 0);
-    var total = Number(sale.total !== undefined ? sale.total : subtotal - discount);
-    var received = Number(sale.received || total);
-    var change = Number(sale.change || Math.max(0, received - total));
+    var total = Number(sale.total !== undefined ? sale.total : (subtotal - discount));
+    var received = Number(sale.received !== undefined ? sale.received : (isCash ? total : total));
+    var change = Number(sale.change !== undefined ? sale.change : Math.max(0, received - total));
+    var hasDiscount = discount > 0;
 
     var qrSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges" width="80" height="80">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges" width="70" height="70" style="display:inline-block;margin:0 auto">
         <rect width="29" height="29" fill="#ffffff"/>
         <path fill="#000000" d="M0,0 h7 v7 h-7 z M1,1 v5 h5 v-5 z M2,2 h3 v3 h-3 z"/>
         <path fill="#000000" d="M22,0 h7 v7 h-7 z M23,1 v5 h5 v-5 z M24,2 h3 v3 h-3 z"/>
@@ -2100,13 +2085,13 @@
     return `
       <div class="thermal-slip-page ${is80 ? 'slip-80' : 'slip-58'}">
         ${shopLogo ? `
-          <div style="text-align:center;margin-bottom:4px;">
-            <img src="${escapeHtml(shopLogo)}" alt="Logo" style="max-height:44px;max-width:130px;object-fit:contain;image-rendering:crisp-edges;">
+          <div style="text-align:center;margin-bottom:8px;">
+            <img src="${escapeHtml(shopLogo)}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;">
           </div>
         ` : ''}
 
         <div class="slip-header">
-          <div class="slip-title">${escapeHtml(shopName)}</div>
+          <div class="slip-title"><b>${escapeHtml(shopName)}</b></div>
           ${shopAddress ? `<div class="slip-meta">${escapeHtml(shopAddress)}</div>` : ''}
           ${shopPhone ? `<div class="slip-meta">Tel: ${escapeHtml(shopPhone)}</div>` : ''}
           ${shopRegNo ? `<div class="slip-meta">BRN/Tax: ${escapeHtml(shopRegNo)}</div>` : ''}
@@ -2117,41 +2102,23 @@
         ${isReprint ? `
           <div class="slip-reprint-banner">
             *** DUPLICATE / REPRINT RECEIPT ***
-            <div style="font-size:0.8em;font-weight:normal;margin-top:1px;">(Original issued: ${escapeHtml(dateStr)})</div>
           </div>
         ` : ''}
 
-        <div class="slip-row">
-          <span><b>Bill:</b> ${escapeHtml(invoiceId)}</span>
-          <span><b>Pay:</b> ${escapeHtml(paymentMethod)}</span>
-        </div>
-        <div class="slip-row">
-          <span><b>Date:</b> ${escapeHtml(dateStr)}</span>
-        </div>
-        <div class="slip-row">
-          <span><b>Cashier:</b> ${escapeHtml(sale.cashier || options.cashier || 'Cashier 01')}</span>
-        </div>
-
-        ${isCredit ? `
-          <div style="margin-top:3px;padding:3px;border:1px solid #000;background:#f9f9f9;font-size:0.9em;">
-            <b>Credit Customer:</b> ${escapeHtml(creditCustomer || 'Customer')}<br>
-            ${creditPhone ? `<b>Phone:</b> ${escapeHtml(creditPhone)}<br>` : ''}
-            <b>Status:</b> ${creditSettled ? 'SETTLED' : 'UNPAID'}
-          </div>
-        ` : ''}
-
-        ${sale.status === 'voided' ? `
-          <div style="margin:4px 0;padding:2px;border:1.5px solid #000;text-align:center;font-weight:bold;">
-            *** VOIDED TRANSACTION ***
-          </div>
-        ` : ''}
+        <p class="slip-row">
+          <b>Bill No: ${escapeHtml(invoiceId)}</b><br>
+          Date: ${escapeHtml(dateStr)}<br>
+          Payment: <b>${escapeHtml(paymentMethod)}${isCard ? ' (Approved)' : ''}</b>
+          ${isCredit ? `<br><b>*** CREDIT BILL (${creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${escapeHtml(creditCustomer || 'Customer')} (${escapeHtml(creditPhone || 'No Phone')})` : ''}
+          ${sale.status === 'voided' ? '<br><b>*** VOIDED / RETURNED BILL ***</b>' : ''}
+        </p>
 
         <hr class="slip-divider">
 
         <table class="slip-table">
           <thead>
             <tr>
-              <th>Item Description</th>
+              <th>Item</th>
               <th class="align-right">Amount</th>
             </tr>
           </thead>
@@ -2159,14 +2126,14 @@
             ${items.map(function (it) {
               var q = Number(it.qty !== undefined ? it.qty : 1);
               var qStr = Number.isInteger(q) ? String(q) : q.toFixed(3).replace(/\.?0+$/, '');
-              var unitStr = it.sellUnit || it.unit ? (' ' + (it.sellUnit || it.unit)) : '';
-              var p = Number(it.price || it.unitPrice || 0);
-              var t = Number(it.total !== undefined ? it.total : (q * p));
+              var unitStr = (it.sellUnit || it.unit) ? (' ' + (it.sellUnit || it.unit)) : '';
+              var p = Number(it.unitPrice !== undefined ? it.unitPrice : (it.price || 0));
+              var t = Number(it.lineTotal !== undefined ? it.lineTotal : (it.total !== undefined ? it.total : (q * p)));
               return `
                 <tr>
                   <td>
-                    <div style="font-weight:600;">${escapeHtml(it.name || 'Item')}</div>
-                    <div style="font-size:0.88em;color:#222;">${qStr}${unitStr} × ${formatMoney(p, currency)}</div>
+                    <b>${escapeHtml(it.name || 'Item')}</b><br>
+                    ${qStr}${unitStr} × ${formatMoney(p, currency)}
                   </td>
                   <td class="align-right" style="vertical-align:bottom;">${formatMoney(t, currency)}</td>
                 </tr>
@@ -2177,64 +2144,30 @@
 
         <hr class="slip-divider">
 
-        ${discount > 0 ? `
-          <div class="slip-total-row">
-            <span>Subtotal:</span>
-            <span>${formatMoney(subtotal, currency)}</span>
-          </div>
-          <div class="slip-total-row">
-            <span>Discount:</span>
-            <span>-${formatMoney(discount, currency)}</span>
-          </div>
-        ` : ''}
+        <p class="slip-total-p">
+          Subtotal: <span style="float:right;">${formatMoney(subtotal, currency)}</span><br>
+          ${hasDiscount ? `Discount: <span style="float:right;">-${formatMoney(discount, currency)}</span><br>` : ''}
+          <span style="font-weight:bold;font-size:15px;">Grand Total: <span style="float:right;">${formatMoney(total, currency)}</span></span><br>
+          ${isCash ? `Cash Received: <span style="float:right;">${formatMoney(received, currency)}</span><br>Balance: <span style="float:right;">${formatMoney(change, currency)}</span>` : ''}
+          ${isCard ? `Card Paid: <span style="float:right;">${formatMoney(total, currency)}</span>` : ''}
+          ${isCredit ? `Credit Due: <span style="float:right;">${formatMoney(total, currency)}</span>` : ''}
+        </p>
 
-        <div class="slip-grand-total">
-          <span>TOTAL:</span>
-          <span>${formatMoney(total, currency)}</span>
-        </div>
+        <hr class="slip-divider">
 
-        <hr class="slip-divider" style="border-top:1px solid #000;">
-
-        ${isCash ? `
-          <div class="slip-total-row">
-            <span>Cash Tendered:</span>
-            <span>${formatMoney(received, currency)}</span>
-          </div>
-          <div class="slip-total-row">
-            <span>Change Due:</span>
-            <span>${formatMoney(change, currency)}</span>
-          </div>
-        ` : isCard ? `
-          <div class="slip-total-row">
-            <span>Payment Mode:</span>
-            <span>Card (Approved)</span>
-          </div>
-        ` : `
-          <div class="slip-total-row">
-            <span>Payment Mode:</span>
-            <span>${escapeHtml(paymentMethod)}</span>
-          </div>
-          <div class="slip-total-row">
-            <span>Status:</span>
-            <span>${isCredit ? (creditSettled ? 'Settled' : 'Unpaid') : 'Completed'}</span>
-          </div>
-        `}
-
-        <hr class="slip-divider" style="border-top:2px double #000;">
-
-        <div style="text-align:center;margin:5px 0 2px 0;">
+        <div style="text-align:center;margin:4px 0 2px 0;">
           ${qrSvg}
-          <div style="font-size:0.75em;color:#444;margin-top:1px;">Scan to Verify Invoice</div>
+          <div style="font-size:10px;color:#444;margin-top:1px;">Scan to Verify Invoice</div>
         </div>
 
         <div class="slip-footer">
           ${escapeHtml(shop.receiptFooter || shop.footerNote || 'Thank you for your business! Please come again.')}
         </div>
         <div class="slip-branding">
-          Powered by Harsh Apex Retail POS
+          Powered by Harsh Apex Digital
         </div>
       </div>
-    `;
+    `.trim();
   }
 
   /**

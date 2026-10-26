@@ -2210,3 +2210,294 @@ body.drawer-open {
   }
 }
 
+/* ==========================================================================
+   Small Business Benefits & Comparison Grid Section
+   Traditional POS (Rs. 250,000+) vs Harsh Apex POS (Rs. 2,500/mo)
+   ========================================================================== */
+.comparison-section {
+  padding: 80px 0;
+  position: relative;
+}
+
+.comparison-container {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.comparison-card-vs {
+  display: grid;
+  grid-template-columns: 1fr auto 1.08fr;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+}
+
+.vs-column {
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.vs-traditional {
+  background: rgba(15, 23, 42, 0.4);
+  border-right: 1px dashed rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.vs-apex {
+  background: linear-gradient(145deg, rgba(14, 118, 110, 0.22) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-left: 1px solid rgba(20, 184, 166, 0.3);
+  position: relative;
+  box-shadow: inset 0 0 40px rgba(20, 184, 166, 0.08);
+}
+
+.vs-popular-tag {
+  position: absolute;
+  top: 14px;
+  right: 20px;
+  background: linear-gradient(135deg, var(--emerald-primary), var(--cyan-accent));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.vs-header {
+  margin-bottom: 28px;
+}
+
+.vs-badge-old {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--danger);
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  padding: 4px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.vs-badge-apex {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--emerald-mint);
+  background: rgba(45, 212, 191, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  padding: 4px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.vs-price-old {
+  font-size: 32px;
+  font-weight: 900;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+  text-decoration-thickness: 3px;
+}
+
+.vs-price-apex {
+  font-size: 36px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.vs-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.vs-divider-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 0;
+  z-index: 2;
+}
+
+.vs-divider-pill span {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #090e1a;
+  border: 2px solid rgba(20, 184, 166, 0.5);
+  color: var(--emerald-mint);
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(20, 184, 166, 0.4);
+  transform: translateX(-50%);
+}
+
+.vs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vs-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.vs-cross {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(244, 63, 94, 0.18);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vs-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--emerald-mint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vs-list li strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.vs-traditional .vs-list li strong {
+  color: #cbd5e1;
+}
+
+.vs-list li p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.vs-cta-box {
+  margin-top: 10px;
+}
+
+/* 4 Value Pillars Grid */
+.benefits-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.pillar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 24px 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all var(--transition-normal);
+}
+
+.pillar-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--surface-border-hover);
+  background: var(--bg-card-hover);
+}
+
+.pillar-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+
+.pillar-card h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.pillar-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .comparison-card-vs {
+    grid-template-columns: 1fr;
+  }
+  .vs-traditional {
+    border-right: none;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+  .vs-apex {
+    border-left: none;
+  }
+  .vs-divider-pill {
+    width: 100%;
+    height: 0;
+  }
+  .vs-divider-pill span {
+    transform: translateY(-50%);
+  }
+  .benefits-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .vs-column {
+    padding: 28px 20px;
+  }
+  .benefits-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+  .vs-price-old {
+    font-size: 26px;
+  }
+  .vs-price-apex {
+    font-size: 28px;
+  }
+}
+
+

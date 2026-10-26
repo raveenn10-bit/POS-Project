@@ -1551,6 +1551,22 @@
       "created_by": "admin@apexpos.lk",
       "created_at": "2026-10-26T05:40:32.925Z",
       "updated_at": "2026-10-26T05:40:32.951Z"
+    },
+    {
+      "id": "SUB-20261026-E91A",
+      "customer_name": "Silva Retail Traders",
+      "shop_name": "Silva Mart Galle",
+      "whatsapp_number": "0771234567",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T06:25:23.327Z",
+      "expiry_timestamp": "2026-11-25T06:25:23.327Z",
+      "payment_status": "paid",
+      "payment_reference": null,
+      "subscription_status": "active",
+      "notes": null,
+      "created_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T06:25:23.327Z",
+      "updated_at": "2026-10-26T06:25:23.356Z"
     }
   ],
   "device_bindings": [
@@ -5291,6 +5307,48 @@
       "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtTkVXLW1za2liNCIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5MzIzMjk1MSwiZXhwaXJlcyI6MTc5NTU4NTIzMjkyNSwic2VyaWFsIjoiMTI0ZjE1M2EtN2IwYy00MjUyLTlhOTQtMjc2YmRhN2FmNmU4In0.be8fRLQvitrMxLT9D9wu0jL8ttJVCEhEhn74o3k8pSwFgdh6cuPJqMlrEkDPsjnptR7AjxD2zhpqTx5FHI08NA",
       "created_at": "2026-10-26T05:40:32.951Z",
       "updated_at": "2026-10-26T05:40:32.951Z"
+    },
+    {
+      "id": "DEV-20261026-34F6",
+      "subscription_id": "SUB-20261026-E91A",
+      "device_id": "DEV-PHONE-06xk9o",
+      "device_name": "Counter Phone",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T06:25:23.327Z",
+      "last_seen_at": null,
+      "replacement_reason": "Old phone display broken in shop",
+      "replaced_by_device_id": "DEV-PHONE-NEW-ddislf",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtMDZ4azlvIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IlNpbHZhIFJldGFpbCBUcmFkZXJzIiwiaXNzdWVkIjoxNzkyOTk1OTIzMzI3LCJleHBpcmVzIjoxNzk1NTg3OTIzMzI3LCJzZXJpYWwiOiI2YmY5ZjU3Yy1lNWRkLTRkZWEtODdjZi01MjIzMTI0ZTdmYWUifQ.iuqul0a1PQCxR2U33Zb1DwDNXQVRpISSrz1DrfZHRj37Y2AhFXKsdBaxAYDZKQis7e63qgl2RB8Q0eVa7KVOaA",
+      "created_at": "2026-10-26T06:25:23.327Z",
+      "updated_at": "2026-10-26T06:25:23.356Z"
+    },
+    {
+      "id": "DEV-20261026-24A1",
+      "subscription_id": "SUB-20261026-E91A",
+      "device_id": "DEV-TABLET-ayck1g",
+      "device_name": "Billing Tablet",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T06:25:23.337Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEFCTEVULWF5Y2sxZyIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5NTkyMzMzNywiZXhwaXJlcyI6MTc5NTU4NzkyMzMyNywic2VyaWFsIjoiYmNhYjMxYmQtMDc5My00M2FhLTkxNmEtZDk2MzQ4M2JkYWEzIn0.TjM-ZFsZqcTaIlhmWuuL-yQAJ1CWEfM-3k3dInQ8dcyvETT3ZKYbLFU7Knd1h19IDe1SfNBaSkmkVkIBwXvUBg",
+      "created_at": "2026-10-26T06:25:23.337Z",
+      "updated_at": "2026-10-26T06:25:23.337Z"
+    },
+    {
+      "id": "DEV-20261026-CB93",
+      "subscription_id": "SUB-20261026-E91A",
+      "device_id": "DEV-PHONE-NEW-ddislf",
+      "device_name": "Replacement Phone",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T06:25:23.356Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtTkVXLWRkaXNsZiIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5NTkyMzM1NiwiZXhwaXJlcyI6MTc5NTU4NzkyMzMyNywic2VyaWFsIjoiMjZlMGJkYTMtNWQyOC00MmUyLWJhYzYtYWNhNTI0MWM0YjM2In0.giRMffaA_WCmE63Vc226x8j_-S_S6WKWSUpGEfgs3DM3vEcr95j-ZzZ1hsmDf_IBdH9l6ymJqEw3BtldM7qtiA",
+      "created_at": "2026-10-26T06:25:23.356Z",
+      "updated_at": "2026-10-26T06:25:23.356Z"
     }
   ],
   "audit_logs": [
@@ -10548,6 +10606,47 @@
       },
       "reason": "Old phone display broken in shop",
       "created_at": "2026-10-26T05:40:32.951Z"
+    },
+    {
+      "id": "AUD-1792995923330-253D2E",
+      "subscription_id": "SUB-20261026-E91A",
+      "action": "create",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T06:25:23.327Z",
+        "deviceId": "DEV-PHONE-06xk9o",
+        "deviceName": "Counter Phone"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T06:25:23.327Z"
+    },
+    {
+      "id": "AUD-1792995923338-BA0020",
+      "subscription_id": "SUB-20261026-E91A",
+      "action": "link_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "deviceId": "DEV-TABLET-ayck1g",
+        "deviceName": "Billing Tablet",
+        "expiry": "2026-11-25T06:25:23.327Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T06:25:23.337Z"
+    },
+    {
+      "id": "AUD-1792995923356-7C3B5C",
+      "subscription_id": "SUB-20261026-E91A",
+      "action": "replace_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "oldDeviceId": "DEV-PHONE-06xk9o",
+        "newDeviceId": "DEV-PHONE-NEW-ddislf",
+        "reason": "Old phone display broken in shop",
+        "expiry": "2026-11-25T06:25:23.327Z"
+      },
+      "reason": "Old phone display broken in shop",
+      "created_at": "2026-10-26T06:25:23.356Z"
     }
   ],
   "admin_sessions": [
@@ -11731,6 +11830,18 @@
       "notes": "Auto-recorded upon license creation",
       "recorded_by": "admin@apexpos.lk",
       "created_at": "2026-10-26T05:40:32.925Z"
+    },
+    {
+      "id": "PAY-20261026-5928",
+      "license_id": "SUB-20261026-E91A",
+      "customer_name": "Silva Mart Galle",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T06:25:23.327Z"
     }
   ]
 }

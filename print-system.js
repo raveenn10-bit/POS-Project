@@ -493,82 +493,77 @@
     /**
      * Generates Clean HTML for AirPrint and Browser Printing with Anti-Blank-Page CSS
      */
-    static generateHtml(canonical, settings) {
-      if (typeof IosPrintEngine !== 'undefined' && typeof IosPrintEngine.generateReceiptHtml === 'function') {
-        return IosPrintEngine.generateReceiptHtml(canonical, settings);
-      }
-
-      const is80 = settings.paperWidth === '80mm';
+    /**
+     * Generates Clean HTML for Thermal Receipt Printing matching authentic classic monospace layout
+     */
+    static generateHtml(canonical, settings = {}) {
+      const is80 = (settings && settings.paperWidth) === '80mm';
       const maxWidth = is80 ? '80mm' : '58mm';
-      const fontSize = is80 ? '13px' : '11px';
-      const curr = canonical.store.currency;
+      const fontSize = is80 ? '12px' : '11px';
+      const shop = canonical.store || {};
+      const payment = canonical.payment || {};
+      const isCard = payment.method === 'Card';
+      const isCash = payment.method === 'Cash';
+      const hasDiscount = Number(canonical.discount || 0) > 0;
+      const duplicate = Boolean(canonical.isReprint);
+      const curr = shop.currency || 'Rs.';
+
+      const formatItemQty = (q, unit) => {
+        const qtyNum = Number(q !== undefined ? q : 1);
+        const formatted = Number.isInteger(qtyNum) ? String(qtyNum) : qtyNum.toFixed(3).replace(/\.?0+$/, '');
+        return unit ? `${formatted} ${unit}` : formatted;
+      };
 
       return `
-        <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="width:${maxWidth};max-width:${maxWidth};margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans Sinhala','Iskoola Pota','SF Pro Text','Segoe UI',Roboto,'Courier New',monospace;font-size:${fontSize};color:#000;background:#fff;padding:4px 6px;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid;height:auto;min-height:0">
-          ${canonical.store.logo ? `<div style="text-align:center;margin-bottom:6px"><img src="${canonical.store.logo}" style="max-height:44px;max-width:130px;object-fit:contain;image-rendering:crisp-edges"></div>` : ''}
-          <div style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:3px;text-transform:uppercase">${canonical.store.name}</div>
-          ${canonical.store.address ? `<div style="text-align:center;font-size:0.92em">${canonical.store.address}</div>` : ''}
-          ${canonical.store.phone ? `<div style="text-align:center;font-size:0.92em">Tel: ${canonical.store.phone}</div>` : ''}
-          ${canonical.store.regNo ? `<div style="text-align:center;font-size:0.92em">BRN/Tax: ${canonical.store.regNo}</div>` : ''}
-          <div style="border-top:1px dashed #000;margin:5px 0"></div>
-          
-          ${canonical.isReprint ? '<div style="text-align:center;font-weight:bold;border:1.5px solid #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
-          <div style="display:flex;justify-content:space-between">
-            <span>Bill: <b>${canonical.id}</b></span>
-            <span>Pay: <b>${canonical.payment.method}</b></span>
-          </div>
-          <div>Date: ${canonical.dateFormatted}</div>
-          <div>Cashier: ${canonical.cashier}</div>
-
-          ${canonical.payment.isCredit ? `
-            <div style="margin-top:4px;padding:3px;border:1px solid #000;background:#f9f9f9;font-size:0.92em">
-              <b>Credit To:</b> ${canonical.payment.creditCustomer} (${canonical.payment.creditPhone || 'No Phone'})<br>
-              <b>Status:</b> ${canonical.payment.creditSettled ? 'SETTLED' : 'UNPAID'}
-            </div>
-          ` : ''}
-
-          ${canonical.status === 'voided' ? '<div style="text-align:center;color:red;font-weight:bold;margin:4px 0;border:1px solid red;padding:2px">*** VOIDED TRANSACTION ***</div>' : ''}
-
-          <div style="border-top:1px dashed #000;margin:5px 0"></div>
-
-          <table style="width:100%;border-collapse:collapse;font-size:inherit;page-break-inside:avoid;break-inside:avoid">
+        <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="width:${maxWidth};max-width:${maxWidth};margin:0 auto;font-family:'Courier New',Courier,monospace;font-size:${fontSize};line-height:1.3;color:#000;background:#fff;padding:6px 4px;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid;height:auto;min-height:0">
+          ${shop.logo ? `<div style="text-align:center;margin-bottom:8px"><img src="${shop.logo}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
+          <h2 style="text-align:center;font-weight:bold;font-size:15px;margin:4px 0">${shop.name || 'Harsh Apex POS'}</h2>
+          ${shop.address ? `<p style="text-align:center;margin:2px 0">${shop.address}</p>` : ''}
+          ${shop.phone ? `<p style="text-align:center;margin:2px 0">Tel: ${shop.phone}</p>` : ''}
+          ${shop.regNo ? `<p style="text-align:center;margin:2px 0">BRN/Tax: ${shop.regNo}</p>` : ''}
+          <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
+          ${duplicate ? '<div style="text-align:center;font-weight:bold;border:1px dashed #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
+          <p style="margin:2px 0">
+            <b>Bill No: ${canonical.id}</b><br>
+            Date: ${canonical.dateFormatted}<br>
+            Payment: <b>${payment.method || 'Cash'}${isCard ? ' (Approved)' : ''}</b>
+            ${payment.isCredit ? `<br><b>*** CREDIT BILL (${payment.creditSettled ? 'SETTLED' : 'UNPAID'}) ***</b><br>Customer: ${payment.creditCustomer || 'Customer'} (${payment.creditPhone || 'No Phone'})` : ''}
+            ${canonical.status === 'voided' ? '<br><b>*** VOIDED / RETURNED BILL ***</b>' : ''}
+          </p>
+          <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
+          <table style="width:100%;border-collapse:collapse;margin:4px 0;font-size:inherit;page-break-inside:avoid;break-inside:avoid">
             <thead>
-              <tr style="border-bottom:1px solid #000">
+              <tr style="border-bottom:1px dashed #000">
                 <th style="text-align:left;padding:2px 0">Item</th>
                 <th style="text-align:right;padding:2px 0">Amount</th>
               </tr>
             </thead>
             <tbody>
-              ${canonical.items.map(it => `
-                <tr style="page-break-inside:avoid;break-inside:avoid">
-                  <td style="padding:2px 0"><b>${it.name}</b><br><span style="font-size:0.9em">${it.qty}${it.unit ? ' ' + it.unit : ''} × ${this.formatMoney(it.price, curr)}</span></td>
-                  <td style="text-align:right;vertical-align:bottom;padding:2px 0">${this.formatMoney(it.total, curr)}</td>
-                </tr>
-              `).join('')}
+              ${(canonical.items || []).map(x => {
+                const qtyStr = formatItemQty(x.qty, x.unit);
+                const unitPrice = x.price;
+                const lineTotal = x.total !== undefined ? x.total : (Number(x.qty || 1) * Number(x.price || 0));
+                return `
+                  <tr style="page-break-inside:avoid;break-inside:avoid">
+                    <td style="padding:2px 0;vertical-align:top"><b>${x.name || 'Item'}</b><br>${qtyStr} × ${this.formatMoney(unitPrice, curr)}</td>
+                    <td style="text-align:right;vertical-align:bottom;padding:2px 0">${this.formatMoney(lineTotal, curr)}</td>
+                  </tr>
+                `;
+              }).join('')}
             </tbody>
           </table>
-
-          <div style="border-top:1px dashed #000;margin:5px 0"></div>
-
-          <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><span>${this.formatMoney(canonical.subtotal, curr)}</span></div>
-          ${canonical.discount > 0 ? `<div style="display:flex;justify-content:space-between"><span>Discount:</span><span>-${this.formatMoney(canonical.discount, curr)}</span></div>` : ''}
-          <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:1.2em;margin:4px 0">
-            <span>TOTAL:</span><span>${this.formatMoney(canonical.total, curr)}</span>
-          </div>
-          ${canonical.payment.method === 'Cash' ? `
-            <div style="display:flex;justify-content:space-between"><span>Cash Paid:</span><span>${this.formatMoney(canonical.payment.received, curr)}</span></div>
-            <div style="display:flex;justify-content:space-between"><span>Change:</span><span>${this.formatMoney(canonical.payment.change, curr)}</span></div>
-          ` : canonical.payment.method === 'Card' ? `
-            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>Card</span></div>
-            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>Paid / Approved</span></div>
-          ` : `
-            <div style="display:flex;justify-content:space-between"><span>Payment Method:</span><span>${canonical.payment.method}</span></div>
-            <div style="display:flex;justify-content:space-between"><span>Payment Status:</span><span>${canonical.payment.isCredit ? (canonical.payment.creditSettled ? 'Settled' : 'Unpaid') : 'Completed'}</span></div>
-          `}
-
-          <div style="border-top:1px dashed #000;margin:5px 0"></div>
-          <div style="text-align:center;font-size:0.9em;margin-top:5px">${canonical.store.footer || 'Thank you for shopping with us! Please come again.'}</div>
-          <div style="text-align:center;font-size:0.8em;color:#555;margin-top:3px">Powered by Harsh Apex Retail POS</div>
+          <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
+          <p style="margin:2px 0">
+            Subtotal: <span style="float:right">${this.formatMoney(canonical.subtotal, curr)}</span><br>
+            ${hasDiscount ? `Discount: <span style="float:right">-${this.formatMoney(canonical.discount, curr)}</span><br>` : ''}
+            <span style="font-weight:bold;font-size:15px">Grand Total: <span style="float:right">${this.formatMoney(canonical.total, curr)}</span></span><br>
+            ${isCash ? `Cash Received: <span style="float:right">${this.formatMoney(payment.received, curr)}</span><br>Balance: <span style="float:right">${this.formatMoney(payment.change, curr)}</span>` : ''}
+            ${isCard ? `Card Paid: <span style="float:right">${this.formatMoney(canonical.total, curr)}</span>` : ''}
+            ${payment.isCredit ? `Credit Due: <span style="float:right">${this.formatMoney(canonical.total, curr)}</span>` : ''}
+          </p>
+          <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
+          <p style="text-align:center;font-size:11px;margin:2px 0">${shop.footer || 'Thank you for your business! Please come again.'}</p>
+          <p style="text-align:center;font-size:10px;margin-top:6px;color:#888">Powered by Harsh Apex Digital</p>
         </div>
       `;
     }
@@ -925,11 +920,13 @@
       return typeof window !== 'undefined' && typeof window.print === 'function';
     }
 
-    async print(job, canonical, settings) {
-      const html = ReceiptTemplateEngine.generateHtml(canonical, settings);
+    async print(job, canonical, settings = {}) {
+      const is80 = (settings && settings.paperWidth) === '80mm';
       const container = document.getElementById('receipt') || document.body;
-      const originalHtml = container.innerHTML;
-
+      if (container.id === 'receipt') {
+        container.className = is80 ? 'receipt-80' : 'receipt-58';
+      }
+      const html = ReceiptTemplateEngine.generateHtml(canonical, settings);
       container.innerHTML = html;
       window.print();
       

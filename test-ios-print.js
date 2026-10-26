@@ -286,13 +286,21 @@ async function runTestSuite() {
     const canonical = ReceiptTemplateEngine.toCanonical(sampleSale, sampleShop);
     let sharedPayload = null;
 
-    global.navigator = {
+    const setNavigator = (navObj) => {
+      try {
+        Object.defineProperty(global, 'navigator', { value: navObj, configurable: true, writable: true });
+      } catch (e) {
+        global.navigator = navObj;
+      }
+    };
+
+    setNavigator({
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
       share: async (payload) => {
         sharedPayload = payload;
         return true;
       }
-    };
+    });
 
     const res = await IosPrintEngine.shareReceipt(canonical);
     assert.strictEqual(res.success, true);
@@ -314,14 +322,22 @@ async function runTestSuite() {
       }
     };
 
-    global.navigator = {
+    const setNavigator = (navObj) => {
+      try {
+        Object.defineProperty(global, 'navigator', { value: navObj, configurable: true, writable: true });
+      } catch (e) {
+        global.navigator = navObj;
+      }
+    };
+
+    setNavigator({
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
       canShare: (opts) => Boolean(opts && opts.files),
       share: async (opts) => {
         sharedFiles = opts.files;
         return true;
       }
-    };
+    });
 
     const dummyBlob = { size: 1024, type: 'application/pdf' };
     const res = await IosPrintEngine.shareReceipt(canonical, { pdfBlob: dummyBlob });
@@ -335,12 +351,20 @@ async function runTestSuite() {
     const canonical = ReceiptTemplateEngine.toCanonical(sampleSale, sampleShop);
     let copiedText = '';
 
-    global.navigator = {
+    const setNavigator = (navObj) => {
+      try {
+        Object.defineProperty(global, 'navigator', { value: navObj, configurable: true, writable: true });
+      } catch (e) {
+        global.navigator = navObj;
+      }
+    };
+
+    setNavigator({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
       clipboard: {
         writeText: async (t) => { copiedText = t; }
       }
-    };
+    });
 
     const res = await IosPrintEngine.shareReceipt(canonical);
     assert.strictEqual(res.success, true);

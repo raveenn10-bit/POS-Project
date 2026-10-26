@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /pos
+Allow: /app.html
+Allow: /sitemap.xml
+Allow: /manifest.webmanifest
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.svg$
+Allow: /*.webmanifest$
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /api/
+
+Sitemap: https://pos.harshapex.com.lk/sitemap.xml
