@@ -96,7 +96,14 @@ async function runTestSuite() {
   console.log('🧪 Starting Harsh Apex POS Production Test Suite');
   console.log('======================================================\n');
 
-  // --- Group 1: Grocery & Decimal Precision ---
+  let originalDbContent = null;
+  try {
+    const dbPath = path.join(__dirname, 'data', 'licensing.json');
+    if (fs.existsSync(dbPath)) originalDbContent = fs.readFileSync(dbPath, 'utf8');
+  } catch {}
+
+  try {
+    // --- Group 1: Grocery & Decimal Precision ---
   console.log('📦 1. Testing Grocery Quantities & Decimal Precision...');
   it('Calculates 0.5 kg sugar at Rs. 260/kg correctly (Rs. 130.00)', () => {
     const total = calculateItemTotal(260, 0.5);
@@ -279,6 +286,14 @@ async function runTestSuite() {
     }
     assert(rejected, 'Past timestamp must be rejected');
   });
+
+  } finally {
+    if (originalDbContent) {
+      try {
+        fs.writeFileSync(path.join(__dirname, 'data', 'licensing.json'), originalDbContent, 'utf8');
+      } catch {}
+    }
+  }
 
   console.log('\n======================================================');
   console.log(`Results: ${passedTests} passed, ${failedTests} failed`);
