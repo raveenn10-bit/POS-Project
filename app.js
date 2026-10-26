@@ -241,6 +241,15 @@ window.initExpiryClock = function(payload) {
         <b>උපදෙස්:</b> Devices දෙකටම එකම subscription කාලය අදාළ වේ. Products, stock සහ sales දත්ත ස්වයංක්‍රීයව devices අතර sync නොවේ.
       </div>
       <p style="color:#718187;font-size:12px;margin-top:10px">Codes work only on this device. Keep a backup of your POS data before reinstalling.</p>
+      <div style="margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:11px;color:#718187;text-align:center;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 10px;">
+        <a href="/terms-and-conditions" target="_blank" style="color:#0e766e;text-decoration:none;font-weight:600;">Terms &amp; Conditions</a>
+        <span>•</span>
+        <a href="/privacy-policy" target="_blank" style="color:#0e766e;text-decoration:none;font-weight:600;">Privacy Policy</a>
+        <span>•</span>
+        <a href="/refund-policy" target="_blank" style="color:#0e766e;text-decoration:none;font-weight:600;">Refund Policy</a>
+        <span>•</span>
+        <a href="/subscription-policy" target="_blank" style="color:#0e766e;text-decoration:none;font-weight:600;">Subscription Policy</a>
+      </div>
     </div>
   `;
   document.body.appendChild(gate);

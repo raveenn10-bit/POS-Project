@@ -43,6 +43,26 @@
     {
       "source": "/api/firebase-token",
       "destination": "/api/firebase-token.js"
+    },
+    {
+      "source": "/refund-policy",
+      "destination": "/refund-policy.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms-and-conditions.html"
+    },
+    {
+      "source": "/delivery-policy",
+      "destination": "/delivery-policy.html"
+    },
+    {
+      "source": "/subscription-policy",
+      "destination": "/subscription-policy.html"
     }
   ],
   "headers": [

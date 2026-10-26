@@ -38,4 +38,34 @@
       <image:caption>Harsh Apex Retail POS Standalone Web Application</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>https://pos.harshapex.com.lk/refund-policy</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://pos.harshapex.com.lk/privacy-policy</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://pos.harshapex.com.lk/terms-and-conditions</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://pos.harshapex.com.lk/delivery-policy</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://pos.harshapex.com.lk/subscription-policy</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>

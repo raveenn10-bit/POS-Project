@@ -178,6 +178,16 @@ const server = http.createServer(async (req, res) => {
     targetFile = '/admin.html';
   } else if (targetFile === '/pos' || targetFile === '/app') {
     targetFile = '/app.html';
+  } else if (targetFile === '/refund-policy') {
+    targetFile = '/refund-policy.html';
+  } else if (targetFile === '/privacy-policy') {
+    targetFile = '/privacy-policy.html';
+  } else if (targetFile === '/terms-and-conditions') {
+    targetFile = '/terms-and-conditions.html';
+  } else if (targetFile === '/delivery-policy') {
+    targetFile = '/delivery-policy.html';
+  } else if (targetFile === '/subscription-policy') {
+    targetFile = '/subscription-policy.html';
   }
 
   // Prevent directory traversal attacks
