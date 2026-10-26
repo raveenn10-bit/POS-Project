@@ -345,17 +345,9 @@ db.products.forEach(p => {
   if (!p.unit) p.unit = 'pcs';
 });
 
-if (db.products.length === 0) {
-  db.products = [
-    { id: uid(), name: 'Samba Rice White', sku: '2001', category: 'Grocery', unit: 'kg', price: 230, cost: 195, stock: 50, low: 10 },
-    { id: uid(), name: 'Red Dhal (Mysore)', sku: '2002', category: 'Grocery', unit: 'kg', price: 320, cost: 275, stock: 35.5, low: 5 },
-    { id: uid(), name: 'White Sugar', sku: '2003', category: 'Grocery', unit: 'kg', price: 260, cost: 225, stock: 40, low: 10 },
-    { id: uid(), name: 'Wheat Flour Premix', sku: '2004', category: 'Grocery', unit: 'kg', price: 180, cost: 150, stock: 25, low: 5 },
-    { id: uid(), name: 'Fresh Potatoes (Nuwara Eliya)', sku: '2005', category: 'Grocery', unit: 'kg', price: 290, cost: 235, stock: 18.25, low: 5 },
-    { id: uid(), name: 'Pure Coconut Oil', sku: '2006', category: 'Grocery', unit: 'L', price: 850, cost: 740, stock: 20, low: 3 },
-    { id: uid(), name: 'Whole Cardamom (කරදමුංගු)', sku: '2007', category: 'Grocery', unit: 'g', price: 6.5, cost: 4.8, stock: 1500, low: 200 },
-    { id: uid(), name: 'Anchor Full Cream Milk Powder 400g', sku: '4792011001', category: 'Dairy & Frozen', unit: 'pcs', price: 1150, cost: 1020, stock: 24, low: 6 }
-  ];
+// Production Clean State: Default to 0 products. Users can add products or optionally load demo data.
+if (!Array.isArray(db.products)) {
+  db.products = [];
 }
 
 const money = n => `${(db && db.shop && db.shop.currency && db.shop.currency.trim()) || 'Rs.'} ${Number(n || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -2689,6 +2681,49 @@ $('importFile').onchange = async e => {
     e.target.value = '';
   }
 };
+
+// -------------------------------------------------------------
+// 15b. Production Data Management: Clear All & Demo Loader
+// -------------------------------------------------------------
+window.loadDemoProducts = function() {
+  if (db.products.length > 0 && !confirm('Add 8 sample demo grocery items to existing inventory?')) return;
+  const demoItems = [
+    { id: uid(), name: 'Samba Rice White', sku: '2001', category: 'Grocery', unit: 'kg', price: 230, cost: 195, stock: 50, low: 10 },
+    { id: uid(), name: 'Red Dhal (Mysore)', sku: '2002', category: 'Grocery', unit: 'kg', price: 320, cost: 275, stock: 35.5, low: 5 },
+    { id: uid(), name: 'White Sugar', sku: '2003', category: 'Grocery', unit: 'kg', price: 260, cost: 225, stock: 40, low: 10 },
+    { id: uid(), name: 'Wheat Flour Premix', sku: '2004', category: 'Grocery', unit: 'kg', price: 180, cost: 150, stock: 25, low: 5 },
+    { id: uid(), name: 'Fresh Potatoes (Nuwara Eliya)', sku: '2005', category: 'Grocery', unit: 'kg', price: 290, cost: 235, stock: 18.25, low: 5 },
+    { id: uid(), name: 'Pure Coconut Oil', sku: '2006', category: 'Grocery', unit: 'L', price: 850, cost: 740, stock: 20, low: 3 },
+    { id: uid(), name: 'Whole Cardamom (කරදමුංගු)', sku: '2007', category: 'Grocery', unit: 'g', price: 6.5, cost: 4.8, stock: 1500, low: 200 },
+    { id: uid(), name: 'Anchor Full Cream Milk Powder 400g', sku: '4792011001', category: 'Dairy & Frozen', unit: 'pcs', price: 1150, cost: 1020, stock: 24, low: 6 }
+  ];
+  db.products.push(...demoItems);
+  save();
+  renderProducts();
+  renderBillProducts();
+  toast('Sample demo products loaded!');
+};
+
+const clearPosBtn = $('btnClearAllPosData');
+if (clearPosBtn) {
+  clearPosBtn.onclick = () => {
+    if (!confirm('Are you sure you want to completely clear all products, sales history, and customer records? This will reset the POS to a clean production state.')) return;
+    db.products = [];
+    db.sales = [];
+    db.debts = [];
+    db.holdBills = [];
+    cart = [];
+    try { localStorage.removeItem(SNAPSHOT_KEY); } catch (e) {}
+    save();
+    toast('POS data reset to clean production state!');
+    setTimeout(() => location.reload(), 300);
+  };
+}
+
+const loadDemoBtn = $('btnLoadDemoProducts');
+if (loadDemoBtn) {
+  loadDemoBtn.onclick = () => window.loadDemoProducts();
+}
 
 // -------------------------------------------------------------
 // 16. Master Render
