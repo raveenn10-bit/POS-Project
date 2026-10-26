@@ -46,3 +46,12 @@ For complete setup instructions, hardware guides, and administrative manuals, re
 4. **[Super Admin Operations Manual](docs/SUPER_ADMIN_OPERATIONS_MANUAL.md)**: Executive control center guide for administrator (`chamilka.ch@gmail.com`), custom Colombo timezone expiries, 2-device slot enforcement, broken hardware swaps, and payment logging.
 5. **[Customer Handover Guide (සිංහල)](docs/CUSTOMER_HANDOVER_SINHALA.md)**: A dedicated, friendly Sinhala customer guide (පාරිභෝගික අත්පොත) covering setup, billing, printing, backups, device replacement, and WhatsApp support (+94 77 066 3154).
 
+## ⚠️ Strict Production Data Persistence Policy (දත්ත සුරැකීමේ නීතිය)
+
+**CRITICAL MANDATE**:
+During any future system updates, code refactoring, test executions, or server redeployments:
+- **DO NOT WIPE OR CLEAN PRODUCTION DATA**.
+- All customer profiles, active subscriptions, device bindings, payments, sales, and products in Supabase Cloud (`pos_system_data`), local store (`data/licensing.json`), and client `localStorage` MUST BE STRICTLY PRESERVED.
+- Automated test suites must only clean up their own generated temporary test IDs using targeted `deleteSubscription(testId)` / `deleteCustomer(testId)`, and NEVER call global database wipe commands.
+- The `cleanDatabase()` function is strictly restricted to intentional manual admin disaster operations with explicit authorization flags.
+

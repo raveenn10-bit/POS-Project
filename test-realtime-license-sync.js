@@ -70,9 +70,6 @@ async function run() {
   }
 
   try {
-    // Clean slate for test
-    await db.cleanDatabase();
-
     const testDeviceId = 'DEV-REALTIME-TEST-' + Math.floor(1000 + Math.random() * 9000);
     const now = Date.now();
     const expiry = now + (30 * 86400000);
@@ -270,9 +267,10 @@ async function run() {
     assert(boundDev, 'New device must be bound under subscription');
     pass('Device auto-binding successfully linked device to subscription (2/2 slots)');
 
-    // 9. Clean database cleanly for production
-    await db.cleanDatabase();
-    pass('Database cleanly restored to 0 records');
+    // 9. Clean up test records only (preserves existing production data!)
+    if (sub && sub.id) await db.deleteSubscription(sub.id);
+    if (sub2 && sub2.id) await db.deleteSubscription(sub2.id);
+    pass('Test records cleaned up safely without wiping production database');
 
     console.log(`\n🎉 All ${passed} Realtime License Tests PASSED 100%!`);
   } finally {

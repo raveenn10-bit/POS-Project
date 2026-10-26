@@ -385,14 +385,17 @@ async function runVerificationSuite() {
     pass('New replacement device receives matching tenant shopId for Firestore');
 
     // -------------------------------------------------------------------------
-    // 6. Database Clean-up Back to 0 Records
+    // 6. Safe Test Records Cleanup (Preserves Production Data)
     // -------------------------------------------------------------------------
-    console.log('\n🧹 6. Testing Complete Database Clean-up Back to 0 Records...');
+    console.log('\n🧹 6. Testing Safe Test Records Cleanup (Preserves Production Data)...');
 
-    // Clean up using db.cleanDatabase
-    const cleanResult = await db.cleanDatabase({ keepAdminSessions: true });
-    assert.strictEqual(cleanResult.success, true);
-    pass('db.cleanDatabase executed cleanly');
+    if (createdSub && createdSub.id) {
+      await db.deleteSubscription(createdSub.id);
+    }
+    if (createdCustomer && createdCustomer.id) {
+      await db.deleteCustomer(createdCustomer.id);
+    }
+    pass('Test subscription and customer deleted cleanly');
 
     // Verify Supabase cloud snapshot directly
     const { data: cleanCloudRow } = await sb
@@ -401,21 +404,9 @@ async function runVerificationSuite() {
       .eq('key', 'licensing_db')
       .single();
 
-    assert.strictEqual(cleanCloudRow.value.customers.length, 0, 'Cloud customers must be 0');
-    assert.strictEqual(cleanCloudRow.value.subscriptions.length, 0, 'Cloud subscriptions must be 0');
-    assert.strictEqual(cleanCloudRow.value.device_bindings.length, 0, 'Cloud device bindings must be 0');
-    assert.strictEqual(cleanCloudRow.value.payments.length, 0, 'Cloud payments must be 0');
-    pass('Verified Supabase cloud pos_system_data has strictly 0 customers and 0 licenses');
-
-    // Verify Dashboard API reports 0
-    const dashRes = await makeHttpRequest('GET', '/api/dashboard', {
-      'Authorization': `Bearer ${adminToken}`
-    });
-    assert.strictEqual(dashRes.statusCode, 200);
-    assert.strictEqual(dashRes.data.stats.total_customers, 0);
-    assert.strictEqual(dashRes.data.stats.active_licenses, 0);
-    assert.strictEqual(dashRes.data.stats.total_devices, 0);
-    pass('Verified Dashboard API returns 0 customers, 0 active licenses, 0 devices');
+    assert(!cleanCloudRow.value.subscriptions.some(s => s.id === createdSub.id), 'Test license must be removed from cloud');
+    assert(!cleanCloudRow.value.customers.some(c => c.id === createdCustomer.id), 'Test customer must be removed from cloud');
+    pass('Verified Supabase cloud removed test records without touching other data');
 
     console.log('\n======================================================');
     console.log(`🎉 Cloud Persistence & Multi-Device Sync: ${testsPassed} passed, ${testsFailed} failed`);
