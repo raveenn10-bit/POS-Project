@@ -2301,6 +2301,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnNewLic = $('btnHeaderNewLicense');
   if (btnNewLic) btnNewLic.onclick = () => openModal('modalCreateLicense');
 
+  const btnCleanDb = $('btnHeaderCleanDb');
+  if (btnCleanDb) {
+    btnCleanDb.onclick = async () => {
+      const confirmText = prompt('⚠️ DANGER: This will permanently wipe ALL customers, subscriptions, device bindings, audit logs, and payment records from Supabase and local storage, resetting database to 0 records.\n\nTo confirm, type "CLEAN" below:');
+      if (confirmText !== 'CLEAN') return;
+      btnCleanDb.disabled = true;
+      btnCleanDb.innerHTML = '<i data-lucide="loader"></i><span>Wiping to 0 records...</span>';
+      try {
+        await apiCall('/api/dashboard', 'POST', { action: 'clean_database' });
+        showToast('Database Wiped Clean', 'All subscriptions, devices, customers, and payments reset to 0 records in Supabase and local DB!', 'success');
+        await loadAllData();
+      } catch (err) {
+        showToast('Wipe Failed', err.message || 'Failed to wipe database', 'error');
+      } finally {
+        btnCleanDb.disabled = false;
+        btnCleanDb.innerHTML = '<i data-lucide="trash-2"></i><span>Clean Database</span>';
+        refreshLucideIcons();
+      }
+    };
+  }
+
   // Sign in tabs
   const tabSignIn = $('btnTabSignIn');
   const tabOneTime = $('btnTabOneTimeSetup');

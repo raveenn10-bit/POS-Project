@@ -42,6 +42,19 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    if (req.method === 'POST') {
+      const action = req.body && req.body.action;
+      if (action === 'clean_database' || action === 'reset_production') {
+        const result = await db.cleanDatabase({ keepAdminSessions: true });
+        return sendJson(res, 200, {
+          success: true,
+          message: 'Production database completely wiped to 0 records',
+          result
+        });
+      }
+      return sendJson(res, 400, { error: 'Unknown dashboard action' });
+    }
+
     return sendJson(res, 405, { error: `Method ${req.method} not allowed` });
   } catch (err) {
     console.error('API /api/dashboard error:', err);

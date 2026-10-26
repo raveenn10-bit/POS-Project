@@ -10,6 +10,19 @@ window.addEventListener('touchstart', function(e) {
   }
 }, { passive: false });
 
+// Instant POS Clean Slate & Factory Reset via query string: /pos?clean=1 or /app?reset=1
+try {
+  if (typeof window !== 'undefined' && window.location && (
+    window.location.search.includes('clean=1') ||
+    window.location.search.includes('reset=1') ||
+    window.location.search.includes('factory_reset=1')
+  )) {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = window.location.pathname;
+  }
+} catch (e) {}
+
 // -------------------------------------------------------------
 // Real-time Spring Sliding Expiry Clock Controller
 // -------------------------------------------------------------
@@ -3653,6 +3666,19 @@ if (clearPosBtn) {
 const loadDemoBtn = $('btnLoadDemoProducts');
 if (loadDemoBtn) {
   loadDemoBtn.onclick = () => window.loadDemoProducts();
+}
+
+const factoryResetBtn = $('btnFactoryResetTerminal');
+if (factoryResetBtn) {
+  factoryResetBtn.onclick = () => {
+    if (!confirm('⚠️ WARNING: This will completely wipe ALL POS inventory, sales, customer debts, AND deactivate the current license on this machine. The terminal will return to a clean activation screen.\n\nAre you sure you want to proceed with full factory reset?')) return;
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {}
+    alert('Terminal factory reset complete! Refreshing...');
+    location.reload();
+  };
 }
 
 // -------------------------------------------------------------
