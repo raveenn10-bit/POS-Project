@@ -30,6 +30,7 @@ const CONFIG = {
   SUPABASE_URL: 'https://meiiweucccymseqewouk.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1laWl3ZXVjY2N5bXNlcWV3b3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5Nzg2OTIsImV4cCI6MjEwODU1NDY5Mn0.RWAkFmx7ZC3Pe3MjzQWdZEBWYln47tCF_ePr7ZsAqJs',
   SUPER_ADMIN_EMAIL: 'chamilka.ch@gmail.com',
+  SUPER_ADMIN_EMAILS: ['chamilka.ch@gmail.com', 'raveen10@gmail.com'],
   SESSION_STORAGE_KEY: 'apex_admin_token',
   SESSION_EMAIL_KEY: 'apex_admin_email',
   SESSION_AUTH_TYPE_KEY: 'apex_admin_auth_type' // 'supabase' or 'local'
@@ -37,6 +38,10 @@ const CONFIG = {
 
 // Built-in credential hashes for zero-dependency local emergency admin
 const LOCAL_AUTH_HASHES = {
+  emails: [
+    'b7e06f76e531ad3315e0774bb26b1ff1bbea7113ba73c048a9f3edb1654dfe0a', // chamilka.ch@gmail.com
+    '84da9481fdb55b15c8ca949f27669a85a0257218aae7447c8edb38198e43c0e3'  // raveen10@gmail.com
+  ],
   e: 'b7e06f76e531ad3315e0774bb26b1ff1bbea7113ba73c048a9f3edb1654dfe0a', // chamilka.ch@gmail.com
   p: '87c042e1af86468760454172b15c4c73c8403c92f8c6f61696ccd4609d3b11ea'
 };
@@ -46,6 +51,8 @@ const LOCAL_AUTH_HASHES = {
 // ---------------------------------------------------------------------------
 const state = {
   token: null,
+  serverSessionToken: null,
+  isUnauthorizedHandling: false,
   adminEmail: CONFIG.SUPER_ADMIN_EMAIL,
   authType: 'supabase', // 'supabase' or 'local'
   supabase: null,
@@ -323,8 +330,9 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     'Content-Type': 'application/json'
   };
   
-  if (state.token) {
-    headers['Authorization'] = `Bearer ${state.token}`;
+  const tokenToUse = state.token || state.serverSessionToken;
+  if (tokenToUse) {
+    headers['Authorization'] = `Bearer ${tokenToUse}`;
   }
   
   const options = {
@@ -355,9 +363,18 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 function handleUnauthorized() {
+  if (state.isUnauthorizedHandling) return;
+  state.isUnauthorizedHandling = true;
+  setTimeout(() => {
+    state.isUnauthorizedHandling = false;
+  }, 2500);
+
   sessionStorage.removeItem(CONFIG.SESSION_STORAGE_KEY);
   sessionStorage.removeItem(CONFIG.SESSION_EMAIL_KEY);
+  sessionStorage.removeItem(CONFIG.SESSION_AUTH_TYPE_KEY);
+  sessionStorage.removeItem('apex_server_session_token');
   state.token = null;
+  state.serverSessionToken = null;
   showToast('Session Expired', 'Please sign in again to continue.', 'warning');
   showLoginView();
 }
@@ -463,6 +480,22 @@ async function handleLogin(e) {
           token = data.session.access_token;
           authenticated = true;
           authType = 'supabase';
+
+          // When Supabase Auth succeeds, also establish local server session with token exchange
+          try {
+            const syncRes = await fetch('/api/auth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, supabaseToken: token })
+            });
+            const syncData = await syncRes.json().catch(() => ({}));
+            if (syncRes.ok && syncData.token) {
+              state.serverSessionToken = syncData.token;
+              sessionStorage.setItem('apex_server_session_token', syncData.token);
+            }
+          } catch (syncErr) {
+            console.warn('Local session sync notice:', syncErr);
+          }
         } else if (error) {
           console.warn('Supabase signInWithPassword returned error:', error.message);
           lastError = error.message;
@@ -498,7 +531,12 @@ async function handleLogin(e) {
     if (!authenticated) {
       const eHash = await sha256Hex(email);
       const pHash = await sha256Hex(password);
-      if (eHash === LOCAL_AUTH_HASHES.e && pHash === LOCAL_AUTH_HASHES.p) {
+      if (
+        (eHash === LOCAL_AUTH_HASHES.e || 
+         (LOCAL_AUTH_HASHES.emails && LOCAL_AUTH_HASHES.emails.includes(eHash)) || 
+         (CONFIG.SUPER_ADMIN_EMAILS && CONFIG.SUPER_ADMIN_EMAILS.includes(email))) && 
+        pHash === LOCAL_AUTH_HASHES.p
+      ) {
         token = 'local_session_' + Date.now();
         authenticated = true;
         authType = 'local';
@@ -645,17 +683,20 @@ async function handleLogout() {
     if (state.supabase) {
       await state.supabase.auth.signOut().catch(() => {});
     }
-    if (state.token) {
+    const tokenToRevoke = state.serverSessionToken || state.token;
+    if (tokenToRevoke) {
       await fetch('/api/auth', {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${state.token}` }
+        headers: { Authorization: `Bearer ${tokenToRevoke}` }
       }).catch(() => {});
     }
   } finally {
     sessionStorage.removeItem(CONFIG.SESSION_STORAGE_KEY);
     sessionStorage.removeItem(CONFIG.SESSION_EMAIL_KEY);
     sessionStorage.removeItem(CONFIG.SESSION_AUTH_TYPE_KEY);
+    sessionStorage.removeItem('apex_server_session_token');
     state.token = null;
+    state.serverSessionToken = null;
     showToast('Signed Out', 'You have been signed out safely.', 'info');
     showLoginView();
   }
@@ -689,6 +730,17 @@ async function checkExistingAuth() {
         state.token = data.session.access_token;
         state.adminEmail = data.session.user.email || CONFIG.SUPER_ADMIN_EMAIL;
         state.authType = 'supabase';
+        // Background sync local session if needed
+        fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: state.adminEmail, supabaseToken: state.token })
+        }).then(r => r.json()).then(res => {
+          if (res && res.token) {
+            state.serverSessionToken = res.token;
+            sessionStorage.setItem('apex_server_session_token', res.token);
+          }
+        }).catch(() => {});
         showDashboardView();
         loadAllData();
         return;
@@ -702,9 +754,11 @@ async function checkExistingAuth() {
   const storedToken = sessionStorage.getItem(CONFIG.SESSION_STORAGE_KEY);
   const storedEmail = sessionStorage.getItem(CONFIG.SESSION_EMAIL_KEY);
   const storedType = sessionStorage.getItem(CONFIG.SESSION_AUTH_TYPE_KEY);
+  const storedServerToken = sessionStorage.getItem('apex_server_session_token');
   
   if (storedToken) {
     state.token = storedToken;
+    state.serverSessionToken = storedServerToken || null;
     state.adminEmail = storedEmail || CONFIG.SUPER_ADMIN_EMAIL;
     state.authType = storedType || 'local';
     showDashboardView();

@@ -12,8 +12,14 @@
 const crypto = require('crypto');
 const db = require('../lib/licensing-db');
 
+const SUPER_ADMINS = ['chamilka.ch@gmail.com', 'raveen10@gmail.com'];
+
 // Built-in credential hashes (matches admin.js)
 const AUTH_HASHES = {
+  emails: [
+    'b7e06f76e531ad3315e0774bb26b1ff1bbea7113ba73c048a9f3edb1654dfe0a', // chamilka.ch@gmail.com
+    '84da9481fdb55b15c8ca949f27669a85a0257218aae7447c8edb38198e43c0e3'  // raveen10@gmail.com
+  ],
   e: 'b7e06f76e531ad3315e0774bb26b1ff1bbea7113ba73c048a9f3edb1654dfe0a',
   p: '87c042e1af86468760454172b15c4c73c8403c92f8c6f61696ccd4609d3b11ea'
 };
@@ -40,12 +46,48 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // 1. POST /api/auth -> Login
+    // 1. POST /api/auth -> Login or Session Token Exchange
     if (req.method === 'POST') {
       const body = req.body || {};
       const email = (body.email || '').trim().toLowerCase();
       const password = body.password || '';
+      const supabaseToken = (body.supabaseToken || '').trim();
 
+      // Case A: Exchange Supabase JWT for local session token
+      if (supabaseToken) {
+        try {
+          const { getSupabaseClient } = require('../lib/supabase-client');
+          const sb = getSupabaseClient();
+          const cleanToken = supabaseToken.replace(/^Bearer\s+/i, '').trim();
+          const { data, error } = await sb.auth.getUser(cleanToken);
+
+          if (!error && data && data.user) {
+            const userEmail = (data.user.email || email || '').toLowerCase();
+            let isSuperAdmin = SUPER_ADMINS.includes(userEmail);
+
+            if (!isSuperAdmin) {
+              const { data: adminRow } = await sb.from('pos_super_admins').select('user_id').eq('user_id', data.user.id).single();
+              if (adminRow) isSuperAdmin = true;
+            }
+
+            if (isSuperAdmin) {
+              const session = await db.createAdminSession(userEmail);
+              return sendJson(res, 200, {
+                success: true,
+                token: session.token,
+                email: session.adminEmail,
+                expiresAt: session.expiresAt
+              });
+            }
+          }
+          return sendJson(res, 401, { error: 'Invalid Supabase authorization token or not a super administrator.' });
+        } catch (sbErr) {
+          console.error('API /api/auth Supabase exchange error:', sbErr);
+          return sendJson(res, 401, { error: 'Failed to verify Supabase token: ' + sbErr.message });
+        }
+      }
+
+      // Case B: Password Login
       if (!email || !password) {
         return sendJson(res, 400, { error: 'Email and password are required' });
       }
@@ -55,8 +97,13 @@ module.exports = async function handler(req, res) {
 
       let authenticated = false;
 
-      // Check against standard hash
-      if (emailHash === AUTH_HASHES.e && passHash === AUTH_HASHES.p) {
+      // Check against standard hash / super admins
+      if (
+        (emailHash === AUTH_HASHES.e || 
+         AUTH_HASHES.emails.includes(emailHash) || 
+         SUPER_ADMINS.includes(email)) && 
+        passHash === AUTH_HASHES.p
+      ) {
         authenticated = true;
       }
 
@@ -67,6 +114,29 @@ module.exports = async function handler(req, res) {
           password === process.env.APEX_ADMIN_PASSWORD
         ) {
           authenticated = true;
+        }
+      }
+
+      // Supabase Auth verification as fallback for valid credentials
+      if (!authenticated) {
+        try {
+          const { getSupabaseClient } = require('../lib/supabase-client');
+          const sb = getSupabaseClient();
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+          if (!error && data && data.user) {
+            const userEmail = (data.user.email || '').toLowerCase();
+            let isSuperAdmin = SUPER_ADMINS.includes(userEmail);
+            if (!isSuperAdmin && data.session) {
+              const authedSb = getSupabaseClient(data.session.access_token);
+              const { data: adminRow } = await authedSb.from('pos_super_admins').select('user_id').eq('user_id', data.user.id).single();
+              if (adminRow) isSuperAdmin = true;
+            }
+            if (isSuperAdmin) {
+              authenticated = true;
+            }
+          }
+        } catch (sbErr) {
+          // ignore sb login error
         }
       }
 

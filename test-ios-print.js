@@ -424,7 +424,7 @@ async function runTestSuite() {
     assert(typeof PDFInvoice.getThermalSlipHTML === 'function');
     const html = PDFInvoice.getThermalSlipHTML(sampleSale, sampleShop, { paperWidth: '58mm' });
     assert(html.includes('thermal-slip-page'));
-    assert(html.includes('APEX SUPER STORE'));
+    assert(html.includes('Apex Super Store'));
     assert(html.includes('Munchee Super Cream Cracker'));
     assert(html.includes('Scan to Verify Invoice'));
   });

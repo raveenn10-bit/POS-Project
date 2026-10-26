@@ -1423,6 +1423,86 @@
       "created_by": "tester@apexpos.lk",
       "created_at": "2026-10-26T05:05:47.235Z",
       "updated_at": "2026-10-26T05:05:47.295Z"
+    },
+    {
+      "id": "SUB-20261026-0BD7",
+      "customer_name": "Silva Retail Traders",
+      "shop_name": "Silva Mart Galle",
+      "whatsapp_number": "0771234567",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T05:13:37.241Z",
+      "expiry_timestamp": "2026-11-25T05:13:37.241Z",
+      "payment_status": "paid",
+      "payment_reference": null,
+      "subscription_status": "active",
+      "notes": null,
+      "created_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T05:13:37.241Z",
+      "updated_at": "2026-10-26T05:13:37.274Z"
+    },
+    {
+      "id": "SUB-20261026-3D87",
+      "customer_name": "Kandy Grocers",
+      "shop_name": "Kandy City Branch",
+      "whatsapp_number": "0712345678",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T05:13:47.118Z",
+      "expiry_timestamp": "2026-11-25T05:13:47.118Z",
+      "payment_status": "paid",
+      "payment_reference": null,
+      "subscription_status": "revoked",
+      "notes": null,
+      "created_by": "admin@test.com",
+      "created_at": "2026-10-26T05:13:47.118Z",
+      "updated_at": "2026-10-26T05:13:47.201Z"
+    },
+    {
+      "id": "SUB-20261026-B521",
+      "customer_name": "Nimal Perera",
+      "shop_name": "Galle Gems & Spices",
+      "whatsapp_number": "0779988776",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T05:13:54.719Z",
+      "expiry_timestamp": "2026-12-25T05:13:54.794Z",
+      "payment_status": "paid",
+      "payment_reference": "TXN-COM-881928",
+      "subscription_status": "active",
+      "notes": null,
+      "created_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:13:54.719Z",
+      "updated_at": "2026-10-26T05:13:54.829Z"
+    },
+    {
+      "id": "SUB-20261026-F665",
+      "customer_name": "Nimal Perera",
+      "shop_name": "Galle Gems & Spices",
+      "whatsapp_number": "0779988776",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T05:20:47.823Z",
+      "expiry_timestamp": "2026-12-25T05:20:47.885Z",
+      "payment_status": "paid",
+      "payment_reference": "TXN-COM-881928",
+      "subscription_status": "active",
+      "notes": null,
+      "created_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:20:47.823Z",
+      "updated_at": "2026-10-26T05:20:47.916Z"
+    },
+    {
+      "id": "SUB-20261026-F115",
+      "customer_name": "Silva Retail Traders",
+      "shop_name": "Silva Mart Galle",
+      "whatsapp_number": "0771234567",
+      "plan": "monthly",
+      "start_timestamp": "2026-10-26T05:21:01.342Z",
+      "expiry_timestamp": "2026-11-25T05:21:01.342Z",
+      "payment_status": "paid",
+      "payment_reference": null,
+      "subscription_status": "active",
+      "notes": null,
+      "created_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T05:21:01.342Z",
+      "updated_at": "2026-10-26T05:21:01.366Z"
     }
   ],
   "device_bindings": [
@@ -4827,9 +4907,317 @@
       "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtRklSRUJBU0UtMDAyIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IkZpcmViYXNlIFRlc3QgU3RvcmUiLCJpc3N1ZWQiOjE3OTI5OTExNDcyNzMsImV4cGlyZXMiOjE3OTU1ODMxNDcyMzUsInNlcmlhbCI6IjMwMGVkZjVkLWRmNGItNDAzYi1hMDYxLTgwM2JhY2YyZGY5ZiJ9.bBqplwCCFf3VjuOoc2ibjMmjI30-rjUr-bFbcfrxPq3Q4-tHjS4q7Xtb9dLKacjEUEA6GHQvxXL6qwQrLi-6ow",
       "created_at": "2026-10-26T05:05:47.273Z",
       "updated_at": "2026-10-26T05:05:47.295Z"
+    },
+    {
+      "id": "DEV-20261026-31C9",
+      "subscription_id": "SUB-20261026-0BD7",
+      "device_id": "DEV-PHONE-oz7z4d",
+      "device_name": "Counter Phone",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T05:13:37.241Z",
+      "last_seen_at": null,
+      "replacement_reason": "Old phone display broken in shop",
+      "replaced_by_device_id": "DEV-PHONE-NEW-rhe6gm",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtb3o3ejRkIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IlNpbHZhIFJldGFpbCBUcmFkZXJzIiwiaXNzdWVkIjoxNzkyOTkxNjE3MjQxLCJleHBpcmVzIjoxNzk1NTgzNjE3MjQxLCJzZXJpYWwiOiIxY2I2ZTJiMy1kOGFjLTQxOTQtYTQwNy1hZWQ1MGQzYjBlOWUifQ.jMMvovIeVfNhF-2czpXT45FtpIjjLRKxRPlhxlyaxcjG9zHqni53XftpKZfh3T-nTXR-3V5619h9ktTxfFJHtQ",
+      "created_at": "2026-10-26T05:13:37.241Z",
+      "updated_at": "2026-10-26T05:13:37.274Z"
+    },
+    {
+      "id": "DEV-20261026-240C",
+      "subscription_id": "SUB-20261026-0BD7",
+      "device_id": "DEV-TABLET-qkync6",
+      "device_name": "Billing Tablet",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:13:37.254Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEFCTEVULXFreW5jNiIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5MTYxNzI1NCwiZXhwaXJlcyI6MTc5NTU4MzYxNzI0MSwic2VyaWFsIjoiYTRjOTAyY2EtYWMzNC00Mjg1LWFjODktYjlmZjVkNGU4Yzc2In0.pYBIJ2QNUzrrl5BvFCovMLTbFiJfafxHrYZMAmmy6x2uCULz35TzrmTnowJqJXaUxcHRZettYysp06jDr0oIvA",
+      "created_at": "2026-10-26T05:13:37.254Z",
+      "updated_at": "2026-10-26T05:13:37.254Z"
+    },
+    {
+      "id": "DEV-20261026-26BC",
+      "subscription_id": "SUB-20261026-0BD7",
+      "device_id": "DEV-PHONE-NEW-rhe6gm",
+      "device_name": "Replacement Phone",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:13:37.274Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtTkVXLXJoZTZnbSIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5MTYxNzI3NCwiZXhwaXJlcyI6MTc5NTU4MzYxNzI0MSwic2VyaWFsIjoiZWM3OTA0YjUtMzM3YS00M2U3LWFmMWYtYjJhNTk3ZmI2ZDA1In0.hZOVXRjB_Lvo5Qltv8rhkAWWLjoOLTxS6OtJAVVA1Om-gAAEatlIRZsen2DFqNWuSr4SfFufBCVLsELArDRP2g",
+      "created_at": "2026-10-26T05:13:37.274Z",
+      "updated_at": "2026-10-26T05:13:37.274Z"
+    },
+    {
+      "id": "DEV-20261026-223F",
+      "subscription_id": "SUB-20261026-3D87",
+      "device_id": "DEV-HTTP-1-e22nm",
+      "device_name": "Main Counter POS",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T05:13:47.118Z",
+      "last_seen_at": "2026-10-26T05:13:47.135Z",
+      "replacement_reason": "Physical screen damage",
+      "replaced_by_device_id": "DEV-HTTP-1-NEW-biejg",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtSFRUUC0xLWUyMm5tIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IkthbmR5IEdyb2NlcnMiLCJpc3N1ZWQiOjE3OTI5OTE2MjcxMTgsImV4cGlyZXMiOjE3OTU1ODM2MjcxMTgsInNlcmlhbCI6ImIyMTIxZGU1LWRiZmUtNGRmYy1hNzg1LTY0ZmE2ZjNlNmQ0ZCJ9.6ajSzlqmfovpohb1FXWrBRCH1BHIk3zx-VdqtLaRZRWIyfEQLBH5VMLLno1Jd_OHHtCAor0GrTcogYSsScsYGA",
+      "created_at": "2026-10-26T05:13:47.118Z",
+      "updated_at": "2026-10-26T05:13:47.171Z"
+    },
+    {
+      "id": "DEV-20261026-323E",
+      "subscription_id": "SUB-20261026-3D87",
+      "device_id": "DEV-HTTP-2-jerpd",
+      "device_name": "Manager Phone",
+      "binding_status": "revoked",
+      "linked_at": "2026-10-26T05:13:47.147Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtSFRUUC0yLWplcnBkIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IkthbmR5IEdyb2NlcnMiLCJpc3N1ZWQiOjE3OTI5OTE2MjcxNDcsImV4cGlyZXMiOjE3OTU1ODM2MjcxMTgsInNlcmlhbCI6IjYyNTViMmU4LWU3NmQtNGMxOC1iMjYwLTdkNDA3NjAwMTgyZSJ9.zdQxNb-0vdiXT-v4yKBq8Du9cIofhZUIeKhlitZMFnyNpBrKKJ8HKoPM_OZDgOIsFsY5b1G-OFlFQPBg8373YA",
+      "created_at": "2026-10-26T05:13:47.147Z",
+      "updated_at": "2026-10-26T05:13:47.201Z"
+    },
+    {
+      "id": "DEV-20261026-8AA7",
+      "subscription_id": "SUB-20261026-3D87",
+      "device_id": "DEV-HTTP-1-NEW-biejg",
+      "device_name": "Counter Replacement Phone",
+      "binding_status": "revoked",
+      "linked_at": "2026-10-26T05:13:47.171Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtSFRUUC0xLU5FVy1iaWVqZyIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJLYW5keSBHcm9jZXJzIiwiaXNzdWVkIjoxNzkyOTkxNjI3MTcxLCJleHBpcmVzIjoxNzk1NTgzNjI3MTE4LCJzZXJpYWwiOiJjODVmZDZmNC00NDFmLTQ1ZDQtODY0ZS03NDU2YmFkMWM4YWEifQ.v6AyCcb4SVDq4g0UctiPjZ6hcJSYhUiuY5tgviEFAAvxmHg7aC4-vfj4ZG8_CE83eRB1YTUg6-4wOZVMKVqakQ",
+      "created_at": "2026-10-26T05:13:47.171Z",
+      "updated_at": "2026-10-26T05:13:47.201Z"
+    },
+    {
+      "id": "DEV-20261026-E7E1",
+      "subscription_id": "SUB-20261026-B521",
+      "device_id": "DEV-TEST-A-itblc",
+      "device_name": "Billing Counter 1",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T05:13:54.719Z",
+      "last_seen_at": null,
+      "replacement_reason": "Physical display cracked at store",
+      "replaced_by_device_id": "DEV-TEST-A-NEW-9j2oz",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1BLWl0YmxjIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6Ik5pbWFsIFBlcmVyYSIsImlzc3VlZCI6MTc5Mjk5MTYzNDcxOSwiZXhwaXJlcyI6MTc5NTU4MzYzNDcxOSwic2VyaWFsIjoiYjQ5MzIxYjktYmNmMy00MmExLWFhMTMtMTAyYjU2MzA5MGM5In0.vQMfK7lXEyDPc3_C44SEvIDFqBxrahtrgiKSvPThDbFxN4y6cxCR0HDXMxYoNk85WzkCQCCNj2jWWRu2oHpqLA",
+      "created_at": "2026-10-26T05:13:54.719Z",
+      "updated_at": "2026-10-26T05:13:54.765Z"
+    },
+    {
+      "id": "DEV-20261026-086A",
+      "subscription_id": "SUB-20261026-B521",
+      "device_id": "DEV-TEST-B-g89sk",
+      "device_name": "Manager Mobile",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:13:54.739Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1CLWc4OXNrIiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6Ik5pbWFsIFBlcmVyYSIsImlzc3VlZCI6MTc5Mjk5MTYzNDgwMywiZXhwaXJlcyI6MTc5ODE3NTYzNDc5NCwic2VyaWFsIjoiZDA4OGQ2YTMtOWJhZS00MDc1LWE2NWUtZGQ2ZmZiMzJhYzRhIn0.O_JiybH3_ZfrBMtFXtVrjAwoA8EoziJaex3B5ccN1g4ouy4jROLMOjifPbGgXoDHu9yurMNY8tagEB1uqvW_wg",
+      "created_at": "2026-10-26T05:13:54.739Z",
+      "updated_at": "2026-10-26T05:13:54.803Z"
+    },
+    {
+      "id": "DEV-20261026-C1D4",
+      "subscription_id": "SUB-20261026-B521",
+      "device_id": "DEV-TEST-A-NEW-9j2oz",
+      "device_name": "Replacement Phone",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:13:54.765Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1BLU5FVy05ajJveiIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJOaW1hbCBQZXJlcmEiLCJpc3N1ZWQiOjE3OTI5OTE2MzQ4MDMsImV4cGlyZXMiOjE3OTgxNzU2MzQ3OTQsInNlcmlhbCI6ImExMTdhZDFlLTg0ZjUtNGZlZC1iZmY5LTExNGU4ZTNkM2Q2OCJ9.RqaSmHtZygQbDxnHLHO86WkJBskPopcbLU0fYxtty1UUl3Q1hN492hr6Pjvhkwc1Di3rYNUJfZH8crhPjql6tA",
+      "created_at": "2026-10-26T05:13:54.765Z",
+      "updated_at": "2026-10-26T05:13:54.803Z"
+    },
+    {
+      "id": "DEV-20261026-CCEE",
+      "subscription_id": "SUB-20261026-F665",
+      "device_id": "DEV-TEST-A-eoyy7",
+      "device_name": "Billing Counter 1",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T05:20:47.823Z",
+      "last_seen_at": null,
+      "replacement_reason": "Physical display cracked at store",
+      "replaced_by_device_id": "DEV-TEST-A-NEW-defow",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1BLWVveXk3IiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6Ik5pbWFsIFBlcmVyYSIsImlzc3VlZCI6MTc5Mjk5MjA0NzgyMywiZXhwaXJlcyI6MTc5NTU4NDA0NzgyMywic2VyaWFsIjoiMDA3NjRmNTEtM2FjOC00MjE5LTllNzMtYTA3ZDY1Yzc0OTY4In0.t_GclXDPRiBS5dEI37ze98ng5C1LPI5cIiYxMJo9Hjb7wJ39Yv-2lxLtYSjRF-UCRKJkaxGd19TnZrMoWb37RA",
+      "created_at": "2026-10-26T05:20:47.823Z",
+      "updated_at": "2026-10-26T05:20:47.861Z"
+    },
+    {
+      "id": "DEV-20261026-171B",
+      "subscription_id": "SUB-20261026-F665",
+      "device_id": "DEV-TEST-B-jciiy",
+      "device_name": "Manager Mobile",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:20:47.839Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1CLWpjaWl5IiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6Ik5pbWFsIFBlcmVyYSIsImlzc3VlZCI6MTc5Mjk5MjA0Nzg5MywiZXhwaXJlcyI6MTc5ODE3NjA0Nzg4NSwic2VyaWFsIjoiMjAwYTNjNTMtNGZiMi00ZDNiLTgxYmEtZjM1OGQ2MmJhMTI2In0.zT6DcHFfUrsIfS9voI5kBju7Ae16xVUyxnOnavZTbRFUr4PYXj308_CrQzfVA0cGgEFWYTJya5LHJ4_eM7AEaA",
+      "created_at": "2026-10-26T05:20:47.839Z",
+      "updated_at": "2026-10-26T05:20:47.893Z"
+    },
+    {
+      "id": "DEV-20261026-40AE",
+      "subscription_id": "SUB-20261026-F665",
+      "device_id": "DEV-TEST-A-NEW-defow",
+      "device_name": "Replacement Phone",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:20:47.861Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEVTVC1BLU5FVy1kZWZvdyIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJOaW1hbCBQZXJlcmEiLCJpc3N1ZWQiOjE3OTI5OTIwNDc4OTMsImV4cGlyZXMiOjE3OTgxNzYwNDc4ODUsInNlcmlhbCI6ImJmNjA3MDIwLWE4MDgtNDhkMi05MWRmLTI4NjkyMGIxNWQwMSJ9.3I3bAA3dSE_hhJkLLQsW-_0lxe-RzzrfcmJ_unKLNx2z5fX2jQZZuGTdkeXeJ6ZMQfk5MSwvu1RgXzOtTyUZLg",
+      "created_at": "2026-10-26T05:20:47.861Z",
+      "updated_at": "2026-10-26T05:20:47.893Z"
+    },
+    {
+      "id": "DEV-20261026-8A6B",
+      "subscription_id": "SUB-20261026-F115",
+      "device_id": "DEV-PHONE-8tfwgy",
+      "device_name": "Counter Phone",
+      "binding_status": "replaced",
+      "linked_at": "2026-10-26T05:21:01.342Z",
+      "last_seen_at": null,
+      "replacement_reason": "Old phone display broken in shop",
+      "replaced_by_device_id": "DEV-PHONE-NEW-rf9qae",
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtOHRmd2d5IiwicGxhbiI6Im1vbnRobHkiLCJjdXN0b21lciI6IlNpbHZhIFJldGFpbCBUcmFkZXJzIiwiaXNzdWVkIjoxNzkyOTkyMDYxMzQyLCJleHBpcmVzIjoxNzk1NTg0MDYxMzQyLCJzZXJpYWwiOiJkOWNlZDlkMS1mNWUzLTRjNWItOGU3MC05NmEyNzg4MmQ3OGMifQ.s7V0e0wg4GE25B0VSusOgfTUuOKGgtalJyaRCSuo9cxU4ohoAIXnydAtWMSkDNq0pblsa0sdz2d3heKBgjwG0Q",
+      "created_at": "2026-10-26T05:21:01.342Z",
+      "updated_at": "2026-10-26T05:21:01.366Z"
+    },
+    {
+      "id": "DEV-20261026-29A1",
+      "subscription_id": "SUB-20261026-F115",
+      "device_id": "DEV-TABLET-ugmnm4",
+      "device_name": "Billing Tablet",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:21:01.351Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtVEFCTEVULXVnbW5tNCIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5MjA2MTM1MSwiZXhwaXJlcyI6MTc5NTU4NDA2MTM0Miwic2VyaWFsIjoiNDhjMmU2N2MtZWI4NS00ODI2LTk2OTQtMTFhZGRjM2Y0MWVjIn0.gZ3gGftmXsGtDSDfo1m5FAr_x2YTXssm1VDBLk09vT1qjLrs15Wc1MTzdZ9qyKWFoXhSOzHKdOMreV_Oa6Dfkg",
+      "created_at": "2026-10-26T05:21:01.351Z",
+      "updated_at": "2026-10-26T05:21:01.351Z"
+    },
+    {
+      "id": "DEV-20261026-64FC",
+      "subscription_id": "SUB-20261026-F115",
+      "device_id": "DEV-PHONE-NEW-rf9qae",
+      "device_name": "Replacement Phone",
+      "binding_status": "active",
+      "linked_at": "2026-10-26T05:21:01.366Z",
+      "last_seen_at": null,
+      "replacement_reason": null,
+      "replaced_by_device_id": null,
+      "latest_activation_code": "eyJ2IjoxLCJkZXZpY2UiOiJERVYtUEhPTkUtTkVXLXJmOXFhZSIsInBsYW4iOiJtb250aGx5IiwiY3VzdG9tZXIiOiJTaWx2YSBSZXRhaWwgVHJhZGVycyIsImlzc3VlZCI6MTc5Mjk5MjA2MTM2NiwiZXhwaXJlcyI6MTc5NTU4NDA2MTM0Miwic2VyaWFsIjoiZjg5ZGVkMjUtMTc3Zi00OTUzLThjMWYtZmNjNTc4ZGEwNWZhIn0.TabRQWBSNsTo6wUY7Zwi2SjqNgS5qDZ6BMbGe38fdGpKXweh74suHH-ksH0OPajJK2a3fE8SV1GrY9AqXbaLRQ",
+      "created_at": "2026-10-26T05:21:01.366Z",
+      "updated_at": "2026-10-26T05:21:01.366Z"
     }
   ],
   "audit_logs": [
+    {
+      "id": "AUD-1792992047916-95F970",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "unsuspend",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "subscriptionId": "SUB-20261026-F665"
+      },
+      "reason": "Reactivated by administrator",
+      "created_at": "2026-10-26T05:20:47.916Z"
+    },
+    {
+      "id": "AUD-1792992047904-F19F70",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "suspend",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "subscriptionId": "SUB-20261026-F665",
+        "reason": "Temporary suspension for audit"
+      },
+      "reason": "Temporary suspension for audit",
+      "created_at": "2026-10-26T05:20:47.904Z"
+    },
+    {
+      "id": "AUD-1792992047873-F0E3AE",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "record_payment",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "paymentId": "PAY-20261026-2819",
+        "amount": 2500,
+        "method": "bank_transfer",
+        "reference": "TXN-COM-881928"
+      },
+      "reason": "Payment recorded: LKR 2500 (bank_transfer)",
+      "created_at": "2026-10-26T05:20:47.873Z"
+    },
+    {
+      "id": "AUD-1792992047801-FBE408",
+      "subscription_id": null,
+      "action": "create_customer",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "customerId": "CUST-20261026-6164",
+        "businessName": "Galle Gems & Spices"
+      },
+      "reason": "New customer created",
+      "created_at": "2026-10-26T05:20:47.801Z"
+    },
+    {
+      "id": "AUD-1792991634829-75AC60",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "unsuspend",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "subscriptionId": "SUB-20261026-B521"
+      },
+      "reason": "Reactivated by administrator",
+      "created_at": "2026-10-26T05:13:54.829Z"
+    },
+    {
+      "id": "AUD-1792991634816-617528",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "suspend",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "subscriptionId": "SUB-20261026-B521",
+        "reason": "Temporary suspension for audit"
+      },
+      "reason": "Temporary suspension for audit",
+      "created_at": "2026-10-26T05:13:54.817Z"
+    },
+    {
+      "id": "AUD-1792991634781-FD19A9",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "record_payment",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "paymentId": "PAY-20261026-6091",
+        "amount": 2500,
+        "method": "bank_transfer",
+        "reference": "TXN-COM-881928"
+      },
+      "reason": "Payment recorded: LKR 2500 (bank_transfer)",
+      "created_at": "2026-10-26T05:13:54.781Z"
+    },
+    {
+      "id": "AUD-1792991634694-4DB5B7",
+      "subscription_id": null,
+      "action": "create_customer",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "customerId": "CUST-20261026-6824",
+        "businessName": "Galle Gems & Spices"
+      },
+      "reason": "New customer created",
+      "created_at": "2026-10-26T05:13:54.694Z"
+    },
     {
       "id": "AUD-1792989317763-A9172A",
       "subscription_id": "SUB-20261026-FDF7",
@@ -9547,6 +9935,257 @@
       },
       "reason": "Testing revocation safety",
       "created_at": "2026-10-26T05:05:47.295Z"
+    },
+    {
+      "id": "AUD-1792991617245-5F1DA3",
+      "subscription_id": "SUB-20261026-0BD7",
+      "action": "create",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T05:13:37.241Z",
+        "deviceId": "DEV-PHONE-oz7z4d",
+        "deviceName": "Counter Phone"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T05:13:37.241Z"
+    },
+    {
+      "id": "AUD-1792991617255-24D7CF",
+      "subscription_id": "SUB-20261026-0BD7",
+      "action": "link_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "deviceId": "DEV-TABLET-qkync6",
+        "deviceName": "Billing Tablet",
+        "expiry": "2026-11-25T05:13:37.241Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T05:13:37.254Z"
+    },
+    {
+      "id": "AUD-1792991617274-5C5CB9",
+      "subscription_id": "SUB-20261026-0BD7",
+      "action": "replace_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "oldDeviceId": "DEV-PHONE-oz7z4d",
+        "newDeviceId": "DEV-PHONE-NEW-rhe6gm",
+        "reason": "Old phone display broken in shop",
+        "expiry": "2026-11-25T05:13:37.241Z"
+      },
+      "reason": "Old phone display broken in shop",
+      "created_at": "2026-10-26T05:13:37.274Z"
+    },
+    {
+      "id": "AUD-1792991627123-6C7C9F",
+      "subscription_id": "SUB-20261026-3D87",
+      "action": "create",
+      "admin_email": "admin@test.com",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T05:13:47.118Z",
+        "deviceId": "DEV-HTTP-1-e22nm",
+        "deviceName": "Main Counter POS"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T05:13:47.118Z"
+    },
+    {
+      "id": "AUD-1792991627148-BCA767",
+      "subscription_id": "SUB-20261026-3D87",
+      "action": "link_device",
+      "admin_email": "admin@test.com",
+      "details": {
+        "deviceId": "DEV-HTTP-2-jerpd",
+        "deviceName": "Manager Phone",
+        "expiry": "2026-11-25T05:13:47.118Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T05:13:47.147Z"
+    },
+    {
+      "id": "AUD-1792991627172-0C01A5",
+      "subscription_id": "SUB-20261026-3D87",
+      "action": "replace_device",
+      "admin_email": "admin@test.com",
+      "details": {
+        "oldDeviceId": "DEV-HTTP-1-e22nm",
+        "newDeviceId": "DEV-HTTP-1-NEW-biejg",
+        "reason": "Physical screen damage",
+        "expiry": "2026-11-25T05:13:47.118Z"
+      },
+      "reason": "Physical screen damage",
+      "created_at": "2026-10-26T05:13:47.171Z"
+    },
+    {
+      "id": "AUD-1792991627202-6C88F5",
+      "subscription_id": "SUB-20261026-3D87",
+      "action": "revoke",
+      "admin_email": "admin@test.com",
+      "details": {
+        "revokedDevices": [
+          "DEV-HTTP-2-jerpd",
+          "DEV-HTTP-1-NEW-biejg"
+        ]
+      },
+      "reason": "Canceled by store owner",
+      "created_at": "2026-10-26T05:13:47.201Z"
+    },
+    {
+      "id": "AUD-1792991634725-6E656C",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "create",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T05:13:54.719Z",
+        "deviceId": "DEV-TEST-A-itblc",
+        "deviceName": "Billing Counter 1"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T05:13:54.719Z"
+    },
+    {
+      "id": "AUD-1792991634739-9F1C3D",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "link_device",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "deviceId": "DEV-TEST-B-g89sk",
+        "deviceName": "Manager Mobile",
+        "expiry": "2026-11-25T05:13:54.719Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T05:13:54.739Z"
+    },
+    {
+      "id": "AUD-1792991634767-23F98F",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "replace_device",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "oldDeviceId": "DEV-TEST-A-itblc",
+        "newDeviceId": "DEV-TEST-A-NEW-9j2oz",
+        "reason": "Physical display cracked at store",
+        "expiry": "2026-11-25T05:13:54.719Z"
+      },
+      "reason": "Physical display cracked at store",
+      "created_at": "2026-10-26T05:13:54.765Z"
+    },
+    {
+      "id": "AUD-1792991634805-7894EB",
+      "subscription_id": "SUB-20261026-B521",
+      "action": "change_expiry",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "oldExpiry": "2026-11-25T05:13:54.719Z",
+        "newExpiry": "2026-12-25T05:13:54.794Z",
+        "activeDevicesUpdated": [
+          "DEV-TEST-B-g89sk",
+          "DEV-TEST-A-NEW-9j2oz"
+        ]
+      },
+      "reason": "Paid 30-day renewal",
+      "created_at": "2026-10-26T05:13:54.803Z"
+    },
+    {
+      "id": "AUD-1792992047828-9D9ECD",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "create",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T05:20:47.823Z",
+        "deviceId": "DEV-TEST-A-eoyy7",
+        "deviceName": "Billing Counter 1"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T05:20:47.823Z"
+    },
+    {
+      "id": "AUD-1792992047840-4C322C",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "link_device",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "deviceId": "DEV-TEST-B-jciiy",
+        "deviceName": "Manager Mobile",
+        "expiry": "2026-11-25T05:20:47.823Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T05:20:47.839Z"
+    },
+    {
+      "id": "AUD-1792992047862-E64729",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "replace_device",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "oldDeviceId": "DEV-TEST-A-eoyy7",
+        "newDeviceId": "DEV-TEST-A-NEW-defow",
+        "reason": "Physical display cracked at store",
+        "expiry": "2026-11-25T05:20:47.823Z"
+      },
+      "reason": "Physical display cracked at store",
+      "created_at": "2026-10-26T05:20:47.861Z"
+    },
+    {
+      "id": "AUD-1792992047893-10261D",
+      "subscription_id": "SUB-20261026-F665",
+      "action": "change_expiry",
+      "admin_email": "chamilka.ch@gmail.com",
+      "details": {
+        "oldExpiry": "2026-11-25T05:20:47.823Z",
+        "newExpiry": "2026-12-25T05:20:47.885Z",
+        "activeDevicesUpdated": [
+          "DEV-TEST-B-jciiy",
+          "DEV-TEST-A-NEW-defow"
+        ]
+      },
+      "reason": "Paid 30-day renewal",
+      "created_at": "2026-10-26T05:20:47.893Z"
+    },
+    {
+      "id": "AUD-1792992061344-BDE902",
+      "subscription_id": "SUB-20261026-F115",
+      "action": "create",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "plan": "monthly",
+        "expiry": "2026-11-25T05:21:01.342Z",
+        "deviceId": "DEV-PHONE-8tfwgy",
+        "deviceName": "Counter Phone"
+      },
+      "reason": "New subscription activated",
+      "created_at": "2026-10-26T05:21:01.342Z"
+    },
+    {
+      "id": "AUD-1792992061351-7FF438",
+      "subscription_id": "SUB-20261026-F115",
+      "action": "link_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "deviceId": "DEV-TABLET-ugmnm4",
+        "deviceName": "Billing Tablet",
+        "expiry": "2026-11-25T05:21:01.342Z"
+      },
+      "reason": "Secondary device linked to subscription",
+      "created_at": "2026-10-26T05:21:01.351Z"
+    },
+    {
+      "id": "AUD-1792992061367-3DA037",
+      "subscription_id": "SUB-20261026-F115",
+      "action": "replace_device",
+      "admin_email": "admin@apexpos.lk",
+      "details": {
+        "oldDeviceId": "DEV-PHONE-8tfwgy",
+        "newDeviceId": "DEV-PHONE-NEW-rf9qae",
+        "reason": "Old phone display broken in shop",
+        "expiry": "2026-11-25T05:21:01.342Z"
+      },
+      "reason": "Old phone display broken in shop",
+      "created_at": "2026-10-26T05:21:01.366Z"
     }
   ],
   "admin_sessions": [
@@ -9735,9 +10374,85 @@
       "admin_email": "admin@test.com",
       "created_at": "2026-10-26T05:05:22.965Z",
       "expires_at": "2026-10-27T05:05:22.965Z"
+    },
+    {
+      "token": "79453b1866bc85dfa372191797c4b5f010cc26e39f6291ef7d61c7a52662529b",
+      "admin_email": "admin@test.com",
+      "created_at": "2026-10-26T05:13:47.097Z",
+      "expires_at": "2026-10-27T05:13:47.097Z"
+    },
+    {
+      "token": "5d62681b89675b078fde07883fee5db619f1241f3c3c7486cbdb18845c561dc3",
+      "admin_email": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:13:54.669Z",
+      "expires_at": "2026-10-27T05:13:54.669Z"
+    },
+    {
+      "token": "0540f205ac1dd62fe12af71fc6d6208d5920410505b7dfebce57d51c870d5d7d",
+      "admin_email": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:19:37.560Z",
+      "expires_at": "2026-10-27T05:19:37.560Z"
+    },
+    {
+      "token": "baa30c0b3557b4d30058b05ea7db98c1cac791abf1107d4a554852c809331487",
+      "admin_email": "raveen10@gmail.com",
+      "created_at": "2026-10-26T05:19:37.581Z",
+      "expires_at": "2026-10-27T05:19:37.581Z"
+    },
+    {
+      "token": "db0247be5f528f17d1a53fae9fa042f45969678a076ebd01c65e34004db90bc8",
+      "admin_email": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:19:52.673Z",
+      "expires_at": "2026-10-27T05:19:52.673Z"
+    },
+    {
+      "token": "070ec216ae060e327978bcf99a91a10c2a1924e63616c5459c669c3f2c2b0085",
+      "admin_email": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:20:36.890Z",
+      "expires_at": "2026-10-27T05:20:36.890Z"
+    },
+    {
+      "token": "710e838ff86d09545e1d5deb88642f493d3a69ce1dd141ecaa324df8ad8724a0",
+      "admin_email": "raveen10@gmail.com",
+      "created_at": "2026-10-26T05:20:36.901Z",
+      "expires_at": "2026-10-27T05:20:36.901Z"
+    },
+    {
+      "token": "4fd3357b947b484ee8628e1a4a57c25a83a7277aa5944b1e5d80c28d39f610e8",
+      "admin_email": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:20:47.780Z",
+      "expires_at": "2026-10-27T05:20:47.780Z"
+    },
+    {
+      "token": "84c4053cc7351339f1f2ab56b2e07fa024850e2511526752f2ffd9d910dee676",
+      "admin_email": "raveen10@gmail.com",
+      "created_at": "2026-10-26T05:21:18.382Z",
+      "expires_at": "2026-10-27T05:21:18.382Z"
     }
   ],
   "customers": [
+    {
+      "id": "CUST-20261026-6164",
+      "business_name": "Galle Gems & Spices",
+      "contact_name": "Nimal Perera",
+      "phone": "0779988776",
+      "email": "nimal@gallegems.lk",
+      "notes": "Main Street Galle",
+      "status": "active",
+      "created_at": "2026-10-26T05:20:47.801Z",
+      "updated_at": "2026-10-26T05:20:47.801Z"
+    },
+    {
+      "id": "CUST-20261026-6824",
+      "business_name": "Galle Gems & Spices",
+      "contact_name": "Nimal Perera",
+      "phone": "0779988776",
+      "email": "nimal@gallegems.lk",
+      "notes": "Main Street Galle",
+      "status": "active",
+      "created_at": "2026-10-26T05:13:54.694Z",
+      "updated_at": "2026-10-26T05:13:54.694Z"
+    },
     {
       "id": "CUST-20261026-7067",
       "business_name": "Galle Gems & Spices",
@@ -9894,6 +10609,30 @@
     }
   ],
   "payments": [
+    {
+      "id": "PAY-20261026-2819",
+      "license_id": "SUB-20261026-F665",
+      "customer_name": "Galle Gems & Spices",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "TXN-COM-881928",
+      "status": "paid",
+      "notes": "Standard 30-day subscription",
+      "recorded_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:20:47.873Z"
+    },
+    {
+      "id": "PAY-20261026-6091",
+      "license_id": "SUB-20261026-B521",
+      "customer_name": "Galle Gems & Spices",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "TXN-COM-881928",
+      "status": "paid",
+      "notes": "Standard 30-day subscription",
+      "recorded_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:13:54.781Z"
+    },
     {
       "id": "PAY-20261026-1219",
       "license_id": "SUB-20261026-FDF7",
@@ -10481,6 +11220,66 @@
       "notes": "Auto-recorded upon license creation",
       "recorded_by": "tester@apexpos.lk",
       "created_at": "2026-10-26T05:05:47.235Z"
+    },
+    {
+      "id": "PAY-20261026-7647",
+      "license_id": "SUB-20261026-0BD7",
+      "customer_name": "Silva Mart Galle",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T05:13:37.241Z"
+    },
+    {
+      "id": "PAY-20261026-2527",
+      "license_id": "SUB-20261026-3D87",
+      "customer_name": "Kandy City Branch",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "admin@test.com",
+      "created_at": "2026-10-26T05:13:47.118Z"
+    },
+    {
+      "id": "PAY-20261026-4593",
+      "license_id": "SUB-20261026-B521",
+      "customer_name": "Galle Gems & Spices",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:13:54.719Z"
+    },
+    {
+      "id": "PAY-20261026-8642",
+      "license_id": "SUB-20261026-F665",
+      "customer_name": "Galle Gems & Spices",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "chamilka.ch@gmail.com",
+      "created_at": "2026-10-26T05:20:47.823Z"
+    },
+    {
+      "id": "PAY-20261026-3637",
+      "license_id": "SUB-20261026-F115",
+      "customer_name": "Silva Mart Galle",
+      "amount_lkr": 2500,
+      "payment_method": "bank_transfer",
+      "reference": "Initial Activation",
+      "status": "paid",
+      "notes": "Auto-recorded upon license creation",
+      "recorded_by": "admin@apexpos.lk",
+      "created_at": "2026-10-26T05:21:01.342Z"
     }
   ]
 }

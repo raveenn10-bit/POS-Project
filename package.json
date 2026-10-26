@@ -5,9 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test-licensing-system.js && node test-server-api.js",
+    "test": "node test-licensing-system.js && node test-server-api.js && node test-firebase-identity-bridge.js",
     "test:sync": "node test-storage-sync.js",
-    "test:all": "node test-all.js && node test-storage-sync.js",
+    "test:firebase": "node test-firebase-identity-bridge.js",
+    "test:all": "node test-all.js && node test-storage-sync.js && node test-firebase-identity-bridge.js",
     "build:desktop": "node scripts/build-desktop.js"
   },
   "dependencies": {
