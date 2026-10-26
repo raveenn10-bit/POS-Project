@@ -318,7 +318,21 @@
      */
     static toCanonical(sale, shop = {}, options = {}) {
       sale = sale || {};
+      if (shop && shop.shop && typeof shop.shop === 'object') {
+        options = Object.assign({}, shop, options);
+        shop = shop.shop;
+      }
       shop = shop || {};
+      options = options || {};
+
+      const storeName = (shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex Retail POS';
+      const storeAddress = (shop.address && shop.address.trim()) || '';
+      const storePhone = (shop.phone && shop.phone.trim()) || '';
+      const storeReg = (shop.regNo || shop.taxNo || shop.vatNo || '').trim();
+      const storeCurrency = (shop.currency && shop.currency.trim()) || 'Rs.';
+      const storeWidth = shop.receiptWidth || options.paperWidth || '58mm';
+      const storeFooter = (shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footer && shop.footer.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us!';
+      const storeLogo = shop.logo || '';
 
       return {
         id: sale.number || sale.id || `RCP-${Date.now()}`,
@@ -342,13 +356,14 @@
         })(),
         isReprint: Boolean(options.isReprint),
         store: {
-          name: shop.name || 'Harsh Apex Retail POS',
-          address: shop.address || '',
-          phone: shop.phone || '',
-          regNo: shop.regNo || '',
-          currency: shop.currency || 'Rs.',
-          footer: shop.receiptFooter || 'Thank you for shopping with us!',
-          logo: shop.logo || ''
+          name: storeName,
+          address: storeAddress,
+          phone: storePhone,
+          regNo: storeReg,
+          currency: storeCurrency,
+          receiptWidth: storeWidth,
+          footer: storeFooter,
+          logo: storeLogo
         },
         cashier: options.cashier || 'Cashier 01',
         payment: {
@@ -393,7 +408,7 @@
 
       if (canonical.store.address) enc.line(canonical.store.address);
       if (canonical.store.phone) enc.line(`Tel: ${canonical.store.phone}`);
-      if (canonical.store.regNo) enc.line(`BRN/Tax: ${canonical.store.regNo}`);
+      if (canonical.store.regNo) enc.line(`Tax / BRN: ${canonical.store.regNo}`);
 
       enc.rule('=');
 
@@ -497,7 +512,7 @@
      * Generates Clean HTML for Thermal Receipt Printing matching authentic classic monospace layout
      */
     static generateHtml(canonical, settings = {}) {
-      const is80 = (settings && settings.paperWidth) === '80mm';
+      const is80 = (settings && settings.paperWidth === '80mm') || (canonical.store && canonical.store.receiptWidth === '80mm') || (canonical.store && canonical.store.paperWidth === '80mm');
       const maxWidth = is80 ? '80mm' : '58mm';
       const fontSize = is80 ? '12px' : '11px';
       const shop = canonical.store || {};
@@ -506,7 +521,7 @@
       const isCash = payment.method === 'Cash';
       const hasDiscount = Number(canonical.discount || 0) > 0;
       const duplicate = Boolean(canonical.isReprint);
-      const curr = shop.currency || 'Rs.';
+      const curr = (shop.currency && shop.currency.trim()) || 'Rs.';
 
       const formatItemQty = (q, unit) => {
         const qtyNum = Number(q !== undefined ? q : 1);
@@ -514,13 +529,19 @@
         return unit ? `${formatted} ${unit}` : formatted;
       };
 
+      const storeName = (shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex POS';
+      const storeAddress = (shop.address && shop.address.trim()) || '';
+      const storePhone = (shop.phone && shop.phone.trim()) || '';
+      const storeReg = (shop.regNo || shop.taxNo || shop.vatNo || '').trim();
+      const footerMsg = (shop.footer && shop.footer.trim()) || (shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us! Returns accepted within 3 days with receipt.';
+
       return `
         <div class="thermal-receipt ${is80 ? 'receipt-80' : 'receipt-58'}" style="width:${maxWidth};max-width:${maxWidth};margin:0 auto;font-family:'Courier New',Courier,monospace;font-size:${fontSize};line-height:1.3;color:#000;background:#fff;padding:6px 4px;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid;height:auto;min-height:0">
           ${shop.logo ? `<div style="text-align:center;margin-bottom:8px"><img src="${shop.logo}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
-          <h2 style="text-align:center;font-weight:bold;font-size:15px;margin:4px 0">${shop.name || 'Harsh Apex POS'}</h2>
-          ${shop.address ? `<p style="text-align:center;margin:2px 0">${shop.address}</p>` : ''}
-          ${shop.phone ? `<p style="text-align:center;margin:2px 0">Tel: ${shop.phone}</p>` : ''}
-          ${shop.regNo ? `<p style="text-align:center;margin:2px 0">BRN/Tax: ${shop.regNo}</p>` : ''}
+          <h2 style="text-align:center;font-weight:bold;font-size:15px;margin:4px 0">${storeName}</h2>
+          ${storeAddress ? `<p style="text-align:center;margin:2px 0">${storeAddress}</p>` : ''}
+          ${storePhone ? `<p style="text-align:center;margin:2px 0">Tel: ${storePhone}</p>` : ''}
+          ${storeReg ? `<p style="text-align:center;margin:2px 0">Tax / BRN: ${storeReg}</p>` : ''}
           <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
           ${duplicate ? '<div style="text-align:center;font-weight:bold;border:1px dashed #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
           <p style="margin:2px 0">
@@ -562,7 +583,7 @@
             ${payment.isCredit ? `Credit Due: <span style="float:right">${this.formatMoney(canonical.total, curr)}</span>` : ''}
           </p>
           <hr style="border:none;border-top:1px dashed #000;margin:4px 0">
-          <p style="text-align:center;font-size:11px;margin:2px 0">${shop.footer || 'Thank you for your business! Please come again.'}</p>
+          <p style="text-align:center;font-size:11px;margin:2px 0">${footerMsg}</p>
           <p style="text-align:center;font-size:10px;margin-top:6px;color:#888">Powered by Harsh Apex Digital</p>
         </div>
       `;

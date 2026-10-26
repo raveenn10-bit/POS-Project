@@ -106,20 +106,157 @@
     .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 18px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 200; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: toastPop 0.2s ease-out; }
     @keyframes toastPop { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-    /* Responsive Billing Grid & Touch Targets */
+    /* ========================================================================= */
+    /* MULTI-DEVICE RESPONSIVE ARCHITECTURE (Desktop, Tablet, iPhone, Android)   */
+    /* ========================================================================= */
+    
+    /* 1. Base Mobile / Phone Layout (Default < 768px: iPhone & Android) */
     .billing-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
     }
-    @media (min-width: 900px) {
-      .wrap { max-width: 1040px; padding: 18px 20px; }
+    .desktop-nav {
+      display: none;
+    }
+    
+    /* Critical iOS Safari auto-zoom prevention: Input font-size MUST be >= 16px */
+    @media (max-width: 767px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+      body {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 16px)) !important;
+      }
+      .tabs {
+        padding-bottom: max(8px, env(safe-area-inset-bottom, 12px)) !important;
+      }
+      .wrap {
+        padding: 10px 12px;
+      }
+      .card {
+        padding: 14px 12px;
+        border-radius: 14px;
+      }
+      button, .chip, .chip-weight {
+        min-height: 44px;
+      }
+      #billProducts {
+        max-height: 320px;
+        overflow-y: auto;
+      }
+      /* Mobile Floating Cart Summary Bar */
+      #mobileCartBar {
+        position: fixed;
+        bottom: calc(64px + env(safe-area-inset-bottom, 10px));
+        left: 12px;
+        right: 12px;
+        background: #0f172a;
+        color: #fff;
+        border-radius: 14px;
+        padding: 11px 16px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 45;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        cursor: pointer;
+        animation: toastPop 0.2s ease-out;
+      }
+    }
+
+    /* 2. Tablet Layout (iPad / Android Tablets: 768px to 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .wrap {
+        max-width: 960px;
+        padding: 16px 20px;
+      }
       .billing-grid {
         grid-template-columns: 1.15fr 0.85fr;
         gap: 16px;
         align-items: start;
       }
-      #billProducts { max-height: 480px !important; }
+      #billProducts {
+        max-height: 440px !important;
+      }
+      .stats-4 {
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
+      .tabs button {
+        font-size: 12px;
+        padding: 8px 6px;
+      }
+      .tabs button svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* 3. Desktop Workstation Layout (>= 1024px: Laptops, Desktops, Point-of-Sale Terminals) */
+    @media (min-width: 1024px) {
+      body {
+        padding-bottom: 24px !important;
+      }
+      .tabs {
+        display: none !important; /* Replaced by sleek desktop top navigation */
+      }
+      .desktop-nav {
+        display: flex !important;
+      }
+      .wrap {
+        max-width: 1380px !important;
+        padding: 20px 28px !important;
+      }
+      .billing-grid {
+        grid-template-columns: 1.3fr 0.7fr !important;
+        gap: 22px !important;
+        align-items: start !important;
+      }
+      /* Sticky Cart Sidebar: Always visible as cashier scrolls products */
+      .billing-grid > .card:nth-child(2) {
+        position: sticky !important;
+        top: 16px !important;
+        max-height: calc(100vh - 32px) !important;
+        overflow-y: auto !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+      }
+      #billProducts {
+        max-height: 520px !important;
+      }
+      #billProducts > .item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        transition: background 0.15s ease;
+      }
+      #billProducts > .item:hover {
+        background: #f8fafc;
+      }
+      .desktop-tab {
+        background: transparent;
+        border: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 7px 14px;
+        border-radius: 9px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+      }
+      .desktop-tab:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+      }
+      .desktop-tab.active {
+        background: #ffffff;
+        color: var(--primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      }
+      .stats-4 {
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
     }
     .chip-weight {
       border: 1px solid #cbd5e1;
@@ -180,7 +317,7 @@
         display: block !important;
         background: white;
         color: black;
-        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans Sinhala', 'Iskoola Pota', 'SF Pro Text', 'Segoe UI', Roboto, 'Courier New', monospace !important;
+        font-family: 'Courier New', Courier, monospace !important;
         font-size: 12px;
         padding: 4px 6px;
         margin: 0 auto;
@@ -192,6 +329,9 @@
         break-after: avoid !important;
         height: auto !important;
         min-height: 0 !important;
+      }
+      #receipt, #receipt * {
+        font-family: 'Courier New', Courier, monospace !important;
       }
       #receipt:empty { display: none !important; }
       #receipt.receipt-58 { width: 58mm !important; max-width: 58mm !important; font-size: 11px !important; }
@@ -324,6 +464,15 @@
         <button id="quickScannerBtn" class="scan-btn" type="button" style="padding:8px 12px;font-size:12px">📷 Scan</button>
       </div>
     </div>
+    <!-- Desktop Top Navigation Bar (>= 1024px) -->
+    <nav class="desktop-nav" style="display:none;align-items:center;gap:6px;margin-top:14px;background:rgba(0,0,0,0.22);padding:5px 8px;border-radius:12px;width:fit-content;flex-wrap:wrap">
+      <button type="button" class="desktop-tab" data-tab="billing" onclick="show('billing')">➕ New Bill</button>
+      <button type="button" class="desktop-tab active" data-tab="dashboard" onclick="show('dashboard')">📊 Dashboard</button>
+      <button type="button" class="desktop-tab" data-tab="products" onclick="show('products')">📦 Products &amp; Stock</button>
+      <button type="button" class="desktop-tab" data-tab="reports" onclick="show('reports')">🧾 Bills History</button>
+      <button type="button" class="desktop-tab" data-tab="customers" onclick="show('customers')">👥 Customers</button>
+      <button type="button" class="desktop-tab" data-tab="settings" onclick="show('settings')">⚙️ Settings</button>
+    </nav>
   </header>
 
   <main class="wrap">
@@ -995,6 +1144,18 @@
       </div>
     </section>
   </main>
+
+  <!-- MOBILE FLOATING CART CHECKOUT BAR (iPhone / Android) -->
+  <div id="mobileCartBar" onclick="document.querySelector('#cartList').scrollIntoView({ behavior: 'smooth' })">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🛒</span>
+      <div>
+        <b id="mobCartCount" style="font-size:13px;display:block">0 Items</b>
+        <div id="mobCartTotal" style="font-size:12px;color:#94a3b8">Rs. 0.00</div>
+      </div>
+    </div>
+    <span style="font-weight:700;font-size:13px;color:#2dd4bf;display:inline-flex;align-items:center;gap:4px">View Cart ➔</span>
+  </div>
 
   <!-- NAVIGATION TABS -->
   <nav class="tabs">

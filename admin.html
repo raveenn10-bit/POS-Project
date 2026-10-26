@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#070c14">
+  <meta name="theme-color" content="#F8FAFD">
   <title>Harsh Apex POS • Super Admin SaaS Command Center</title>
   
   <script>
@@ -19,43 +19,58 @@
 
   <style>
     :root {
-      --bg: #070c14;
-      --sidebar-bg: #0c1322;
-      --card-bg: #0f172a;
-      --card-bg-elevated: #152033;
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-hover: rgba(20, 184, 166, 0.35);
-      --input-bg: #0b1220;
-      --input-border: rgba(255, 255, 255, 0.12);
+      --bg: #F8FAFD;
+      --bg-silver-shine: linear-gradient(135deg, #FFFFFF 0%, #F1F4F9 50%, #E9EDF5 100%);
+      --sidebar-bg: #FFFFFF;
+      --card-bg: #FFFFFF;
+      --card-bg-elevated: #F8FAFD;
+      --card-border: #E2E8F0;
+      --card-border-hover: #B8C0FF;
+      --input-bg: #FFFFFF;
+      --input-border: #CBD5E1;
       
-      --primary: #14b8a6;
-      --primary-hover: #2dd4bf;
-      --primary-dark: #0f766e;
-      --primary-soft: rgba(20, 184, 166, 0.12);
-      --accent: #38bdf8;
+      --primary: #090D16;
+      --primary-hover: #1E293B;
+      --primary-dark: #000000;
+      --primary-soft: rgba(184, 192, 255, 0.2);
+      --accent: #4338CA;
+
+      /* Dreamy Periwinkle Palette */
+      --periwinkle-light: #E7D8FF;
+      --periwinkle: #B8C0FF;
+      --periwinkle-dark: #4338CA;
+      --periwinkle-soft: rgba(184, 192, 255, 0.28);
+      --gradient-periwinkle: linear-gradient(135deg, #B8C0FF 0%, #E7D8FF 100%);
+
+      /* Peach Champagne Palette */
+      --peach: #FFD3B6;
+      --peach-light: #FFF4ED;
+      --peach-dark: #9A3412;
+      --peach-soft: rgba(255, 211, 182, 0.35);
+      --gradient-peach: linear-gradient(135deg, #FFD3B6 0%, #FFE8D6 100%);
+
+      --text: #090D16;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
       
-      --text: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      
-      --success: #10b981;
-      --success-soft: rgba(16, 185, 129, 0.12);
-      --warning: #f59e0b;
-      --warning-soft: rgba(245, 158, 11, 0.14);
-      --danger: #f43f5e;
-      --danger-soft: rgba(244, 63, 94, 0.14);
-      --purple: #8b5cf6;
-      --purple-soft: rgba(139, 92, 246, 0.14);
+      --success: #059669;
+      --success-soft: rgba(5, 150, 105, 0.12);
+      --warning: #D97706;
+      --warning-soft: rgba(255, 211, 182, 0.45);
+      --danger: #E11D48;
+      --danger-soft: rgba(225, 29, 72, 0.12);
+      --purple: #7C3AED;
+      --purple-soft: rgba(231, 216, 255, 0.45);
       
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 18px;
       --radius-xl: 24px;
       
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.45);
-      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
-      --shadow-glow: 0 0 25px rgba(20, 184, 166, 0.25);
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+      --shadow-md: 0 10px 25px -5px rgba(184, 192, 255, 0.25), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 20px 40px -10px rgba(184, 192, 255, 0.3), 0 1px 3px rgba(15, 23, 42, 0.05);
+      --shadow-glow: 0 0 25px rgba(184, 192, 255, 0.35);
       
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -71,9 +86,10 @@
       min-height: 100vh;
       background-color: var(--bg);
       background-image: 
-        radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 90%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+        radial-gradient(circle at 12% 12%, rgba(231, 216, 255, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 88% 85%, rgba(255, 211, 182, 0.4) 0%, transparent 45%),
+        radial-gradient(circle at 50% 30%, rgba(184, 192, 255, 0.2) 0%, transparent 60%),
+        linear-gradient(180deg, #FFFFFF 0%, #F5F7FB 50%, #ECEFF5 100%);
       background-attachment: fixed;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -82,9 +98,9 @@
 
     /* Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.4); }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.15); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--periwinkle); }
 
     /* Code Font */
     code, pre, .font-mono {
@@ -109,7 +125,7 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius-xl);
       padding: 36px 32px;
-      box-shadow: var(--shadow-lg), var(--shadow-glow);
+      box-shadow: 0 20px 45px -10px rgba(184, 192, 255, 0.35), 0 1px 3px rgba(15, 23, 42, 0.05);
       backdrop-filter: blur(16px);
       position: relative;
       overflow: hidden;
@@ -120,7 +136,7 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--primary), var(--accent), var(--purple));
+      background: linear-gradient(90deg, #B8C0FF, #E7D8FF, #FFD3B6);
     }
 
     .login-brand {
@@ -135,13 +151,13 @@
       height: 50px;
       border-radius: var(--radius-md);
       object-fit: cover;
-      box-shadow: 0 0 20px rgba(20, 184, 166, 0.4);
+      box-shadow: 0 4px 14px rgba(184, 192, 255, 0.4);
     }
 
     .login-brand h1 {
       font-size: 22px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
       letter-spacing: -0.02em;
     }
 
@@ -153,11 +169,11 @@
     /* Login Mode Tabs (Sign In vs One-Time Setup) */
     .login-tabs {
       display: flex;
-      background: rgba(0, 0, 0, 0.3);
+      background: #F1F5F9;
       padding: 4px;
       border-radius: var(--radius-md);
       margin-bottom: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
     }
 
     .login-tab-btn {
@@ -178,18 +194,19 @@
     }
 
     .login-tab-btn.active {
-      background: var(--card-bg-elevated);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      background: #FFFFFF;
+      color: #090D16;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
     }
 
     .one-time-badge {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--warning);
+      background: #FFE8D6;
+      color: #9A3412;
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 10px;
       font-weight: 700;
+      border: 1px solid #FFD3B6;
     }
 
     /* Form Inputs */
@@ -234,17 +251,21 @@
       border: 1px solid var(--input-border);
       border-radius: var(--radius-md);
       padding: 12px 14px 12px 42px;
-      color: #fff;
+      color: var(--text);
       font-size: 14px;
       font-family: inherit;
       outline: none;
       transition: all 0.2s ease;
     }
 
+    input::placeholder, textarea::placeholder {
+      color: #94A3B8;
+    }
+
     input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
-      background: #0f192b;
+      border-color: #B8C0FF;
+      box-shadow: 0 0 0 3px rgba(184, 192, 255, 0.3);
+      background: #FFFFFF;
     }
 
     .no-icon-input {
@@ -282,43 +303,44 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #041014;
+      background: #090D16;
+      color: #FFFFFF;
       font-weight: 700;
-      box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35);
+      box-shadow: 0 4px 14px rgba(9, 13, 22, 0.25);
     }
     .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+      background: #1E293B;
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(20, 184, 166, 0.45);
+      box-shadow: 0 6px 20px rgba(184, 192, 255, 0.45);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      color: var(--text);
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      color: #090D16;
     }
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: #F8FAFD;
+      border-color: #B8C0FF;
+      color: #090D16;
     }
 
     .btn-danger {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      color: var(--danger);
+      background: #FFE4E6;
+      border: 1px solid #FDA4AF;
+      color: #E11D48;
     }
     .btn-danger:hover {
-      background: rgba(244, 63, 94, 0.25);
+      background: #FECDD3;
     }
 
     .btn-success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--success);
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #059669;
     }
     .btn-success:hover {
-      background: rgba(16, 185, 129, 0.25);
+      background: #BBF7D0;
     }
 
     .btn-sm {
@@ -344,27 +366,27 @@
     }
 
     .alert-box.info {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      color: #7dd3fc;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
     }
 
     .alert-box.warning {
-      background: var(--warning-soft);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fde68a;
+      background: #FFF4ED;
+      border: 1px solid #FFD3B6;
+      color: #9A3412;
     }
 
     .alert-box.error {
-      background: var(--danger-soft);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      color: #fca5a5;
+      background: #FFE4E6;
+      border: 1px solid #FDA4AF;
+      color: #9F1239;
     }
 
     .alert-box.success {
-      background: var(--success-soft);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #6ee7b7;
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #166534;
     }
 
     /* ========================================================================= */
@@ -383,6 +405,7 @@
       min-width: 270px;
       background: var(--sidebar-bg);
       border-right: 1px solid var(--card-border);
+      box-shadow: 2px 0 16px rgba(15, 23, 42, 0.03);
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -405,13 +428,13 @@
       height: 42px;
       border-radius: var(--radius-md);
       object-fit: cover;
-      box-shadow: 0 0 16px rgba(20, 184, 166, 0.35);
+      box-shadow: 0 4px 12px rgba(184, 192, 255, 0.35);
     }
 
     .sidebar-brand-text h2 {
       font-size: 17px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
       letter-spacing: -0.01em;
       line-height: 1.2;
     }
@@ -422,12 +445,12 @@
       gap: 4px;
       font-size: 10px;
       font-weight: 700;
-      background: rgba(20, 184, 166, 0.15);
-      color: var(--primary);
+      background: linear-gradient(90deg, #E7D8FF 0%, #F3ECFF 100%);
+      color: #312E81;
       padding: 2px 7px;
       border-radius: 12px;
       margin-top: 4px;
-      border: 1px solid rgba(20, 184, 166, 0.3);
+      border: 1px solid #B8C0FF;
     }
 
     /* Sidebar Navigation Links */
@@ -455,7 +478,7 @@
       justify-content: space-between;
       padding: 10px 14px;
       border-radius: var(--radius-md);
-      color: var(--text-secondary);
+      color: #475569;
       text-decoration: none;
       font-size: 13.5px;
       font-weight: 600;
@@ -479,22 +502,23 @@
     }
 
     .nav-item:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.04);
+      color: #090D16;
+      background: #F8FAFD;
     }
 
     .nav-item:hover svg, .nav-item:hover i {
-      color: var(--primary);
+      color: #4338CA;
     }
 
     .nav-item.active {
-      color: #fff;
-      background: linear-gradient(90deg, rgba(20, 184, 166, 0.16) 0%, rgba(20, 184, 166, 0.05) 100%);
-      border-color: rgba(20, 184, 166, 0.3);
+      color: #090D16;
+      background: linear-gradient(90deg, #E7D8FF 0%, #F4EEFF 100%);
+      border: 1px solid #B8C0FF;
+      box-shadow: 0 2px 8px rgba(184, 192, 255, 0.35);
     }
 
     .nav-item.active svg, .nav-item.active i {
-      color: var(--primary);
+      color: #4338CA;
     }
 
     .nav-badge {
@@ -502,12 +526,12 @@
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-secondary);
+      background: #F1F5F9;
+      color: #475569;
     }
 
     .nav-badge.danger {
-      background: rgba(244, 63, 94, 0.2);
+      background: #FFE4E6;
       color: var(--danger);
       animation: pulseAlert 2s infinite ease-in-out;
     }
@@ -521,7 +545,7 @@
     .sidebar-footer {
       padding: 16px;
       border-top: 1px solid var(--card-border);
-      background: rgba(0, 0, 0, 0.15);
+      background: #F8FAFC;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -538,8 +562,8 @@
       width: 36px;
       height: 36px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, #14b8a6, #3b82f6);
-      color: #fff;
+      background: linear-gradient(135deg, #090D16 0%, #312E81 100%);
+      color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -555,7 +579,7 @@
     .admin-name {
       font-size: 13px;
       font-weight: 700;
-      color: #fff;
+      color: #090D16;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -563,7 +587,7 @@
 
     .admin-role {
       font-size: 11px;
-      color: var(--primary);
+      color: #4338CA;
       font-weight: 600;
     }
 
@@ -582,7 +606,7 @@
       position: sticky;
       top: 0;
       z-index: 90;
-      background: rgba(12, 19, 34, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--card-border);
       padding: 14px 24px;
@@ -600,7 +624,7 @@
 
     .btn-mobile-menu {
       display: none;
-      background: none;
+      background: #FFFFFF;
       border: 1px solid var(--card-border);
       color: var(--text);
       padding: 7px;
@@ -619,7 +643,7 @@
     .breadcrumb h2 {
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
     }
 
     .header-clock {
@@ -627,11 +651,11 @@
       align-items: center;
       gap: 6px;
       font-size: 12.5px;
-      color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.04);
+      color: #475569;
+      background: #FFFFFF;
       padding: 5px 10px;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
     }
 
     .header-right {
@@ -651,21 +675,21 @@
     }
 
     .status-pill.online {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: var(--success);
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #059669;
     }
 
     .status-pill.offline {
-      background: rgba(244, 63, 94, 0.12);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      color: var(--danger);
+      background: #FFE4E6;
+      border: 1px solid #FDA4AF;
+      color: #E11D48;
     }
 
     .status-pill.warning {
-      background: var(--warning-soft);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: var(--warning);
+      background: #FFE8D6;
+      border: 1px solid #FFD3B6;
+      color: #9A3412;
     }
 
     .status-dot {
@@ -686,8 +710,8 @@
 
     /* Expiring Alert Banner */
     .expiring-alert-banner {
-      background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: linear-gradient(90deg, #FFE8D6 0%, #FFF4ED 100%);
+      border: 1px solid #FFD3B6;
       border-radius: var(--radius-md);
       padding: 14px 18px;
       margin-bottom: 20px;
@@ -695,7 +719,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      color: #fef08a;
+      color: #9A3412;
     }
 
     .expiring-alert-left {
@@ -732,16 +756,16 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
       padding: 20px 18px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
       transition: all 0.2s ease;
       position: relative;
       overflow: hidden;
     }
 
     .kpi-card:hover {
-      border-color: var(--card-border-hover);
+      border-color: #B8C0FF;
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 12px 28px -6px rgba(184, 192, 255, 0.35);
     }
 
     .kpi-top {
@@ -754,7 +778,7 @@
     .kpi-title {
       font-size: 12.5px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -766,14 +790,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--primary);
+      background: #F1F5F9;
+      color: #334155;
+      border: 1px solid var(--card-border);
     }
 
     .kpi-value {
       font-size: 28px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
       letter-spacing: -0.02em;
       line-height: 1.1;
       margin-bottom: 6px;
@@ -809,13 +834,13 @@
     .section-title-wrap h3 {
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
       letter-spacing: -0.01em;
     }
 
     .section-title-wrap p {
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       margin-top: 2px;
     }
 
@@ -851,26 +876,27 @@
     }
 
     .chip {
-      background: rgba(255, 255, 255, 0.05);
+      background: #FFFFFF;
       border: 1px solid var(--card-border);
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: #475569;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .chip:hover {
-      background: rgba(255, 255, 255, 0.09);
-      color: #fff;
+      background: #F8FAFD;
+      color: #090D16;
+      border-color: #CBD5E1;
     }
 
     .chip.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #041014;
+      background: #090D16;
+      border-color: #090D16;
+      color: #FFFFFF;
       font-weight: 700;
     }
 
@@ -880,7 +906,7 @@
       overflow-x: auto;
       border-radius: var(--radius-md);
       border: 1px solid var(--card-border);
-      background: var(--card-bg-elevated);
+      background: #FFFFFF;
     }
 
     table {
@@ -891,21 +917,21 @@
     }
 
     th {
-      background: rgba(0, 0, 0, 0.3);
+      background: #F8FAFC;
       padding: 12px 14px;
       font-size: 11.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-secondary);
+      color: #475569;
       border-bottom: 1px solid var(--card-border);
       white-space: nowrap;
     }
 
     td {
       padding: 13px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--text);
+      border-bottom: 1px solid #F1F5F9;
+      color: #090D16;
       vertical-align: middle;
     }
 
@@ -914,7 +940,7 @@
     }
 
     tbody tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+      background: #F8FAFD;
     }
 
     /* Badges */
@@ -930,63 +956,63 @@
     }
 
     .badge-active {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--success);
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #166534;
     }
 
     .badge-trial {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--accent);
+      background: #FFE8D6;
+      border: 1px solid #FFD3B6;
+      color: #9A3412;
     }
 
     .badge-monthly {
-      background: rgba(20, 184, 166, 0.15);
-      border: 1px solid rgba(20, 184, 166, 0.35);
-      color: var(--primary);
+      background: #E7D8FF;
+      border: 1px solid #B8C0FF;
+      color: #3730A3;
     }
 
     .badge-custom {
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      color: var(--purple);
+      background: #F3E8FF;
+      border: 1px solid #D8B4FE;
+      color: #6B21A8;
     }
 
     .badge-expiring {
-      background: rgba(245, 158, 11, 0.18);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: var(--warning);
+      background: #FFEDD5;
+      border: 1px solid #FFD3B6;
+      color: #C2410C;
     }
 
     .badge-expired {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--text-muted);
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      color: #64748B;
     }
 
     .badge-suspended {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: var(--warning);
+      background: #FEF3C7;
+      border: 1px solid #FCD34D;
+      color: #B45309;
     }
 
     .badge-revoked {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      color: var(--danger);
+      background: #FFE4E6;
+      border: 1px solid #FDA4AF;
+      color: #9F1239;
     }
 
     .badge-paid {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--success);
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #166534;
     }
 
     .badge-pending {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: var(--warning);
+      background: #FFE8D6;
+      border: 1px solid #FFD3B6;
+      color: #9A3412;
     }
 
     /* Device Slot Pill */
@@ -1000,9 +1026,9 @@
       border-radius: 8px;
       font-family: 'JetBrains Mono', monospace;
     }
-    .slot-pill.slot-0 { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
-    .slot-pill.slot-1 { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3); }
-    .slot-pill.slot-2 { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .slot-pill.slot-0 { background: #F1F5F9; color: var(--text-muted); border: 1px solid #E2E8F0; }
+    .slot-pill.slot-1 { background: #E7D8FF; color: #4338CA; border: 1px solid #B8C0FF; }
+    .slot-pill.slot-2 { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }
 
     /* Action Buttons in Tables */
     .table-actions {
@@ -1013,7 +1039,7 @@
     }
 
     .action-btn {
-      background: rgba(255, 255, 255, 0.06);
+      background: #F8FAFC;
       border: 1px solid var(--card-border);
       color: var(--text-secondary);
       padding: 6px 10px;
@@ -1028,8 +1054,9 @@
       text-decoration: none;
     }
     .action-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+      color: #090D16;
     }
 
     /* Pagination Bar */
@@ -1052,7 +1079,7 @@
 
     /* Skeleton Loading Placeholder */
     .skeleton {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+      background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -1069,7 +1096,7 @@
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(3, 7, 18, 0.82);
+      background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(8px);
       z-index: 1000;
       display: none;
@@ -1092,7 +1119,7 @@
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: var(--shadow-lg), 0 0 40px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 25px 60px -15px rgba(184, 192, 255, 0.4), 0 10px 20px rgba(15, 23, 42, 0.05);
       position: relative;
       animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -1113,7 +1140,7 @@
     .modal-header h3 {
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
+      color: #090D16;
     }
 
     .modal-close-btn {
@@ -1127,7 +1154,7 @@
       align-items: center;
       justify-content: center;
     }
-    .modal-close-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+    .modal-close-btn:hover { color: #090D16; background: #F1F5F9; }
 
     .modal-body {
       padding: 24px;
@@ -1142,25 +1169,25 @@
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
-      background: rgba(0, 0, 0, 0.15);
+      background: #F8FAFC;
     }
 
     /* Sinhala Policy Callout Box */
     .policy-callout {
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: #FFF4ED;
+      border: 1px solid #FFD3B6;
       border-radius: var(--radius-md);
       padding: 12px 14px;
       margin-bottom: 18px;
       font-size: 13px;
       line-height: 1.5;
-      color: #fef08a;
+      color: #9A3412;
     }
 
     .policy-callout.danger {
-      background: rgba(244, 63, 94, 0.12);
-      border-color: rgba(244, 63, 94, 0.35);
-      color: #fecdd3;
+      background: #FFE4E6;
+      border-color: #FDA4AF;
+      color: #9F1239;
     }
 
     /* ========================================================================= */
@@ -1179,12 +1206,12 @@
     }
 
     .toast {
-      background: var(--card-bg-elevated);
+      background: #FFFFFF;
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
       padding: 14px 18px;
-      box-shadow: var(--shadow-lg);
-      color: #fff;
+      box-shadow: 0 10px 30px rgba(184, 192, 255, 0.35);
+      color: #090D16;
       display: flex;
       align-items: flex-start;
       gap: 12px;
@@ -1198,14 +1225,15 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .toast.success { border-color: rgba(16, 185, 129, 0.4); }
-    .toast.error { border-color: rgba(244, 63, 94, 0.4); }
-    .toast.warning { border-color: rgba(245, 158, 11, 0.4); }
-    .toast.info { border-color: rgba(56, 189, 248, 0.4); }
+    .toast.success { border-color: #86EFAC; }
+    .toast.error { border-color: #FDA4AF; }
+    .toast.warning { border-color: #FFD3B6; }
+    .toast.info { border-color: #B8C0FF; }
 
     .toast-content h4 {
       font-size: 13.5px;
       font-weight: 700;
+      color: #090D16;
       margin-bottom: 2px;
     }
 
@@ -1236,7 +1264,7 @@
       .sidebar-backdrop {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(15, 23, 42, 0.5);
         backdrop-filter: blur(4px);
         z-index: 95;
         display: none;
@@ -1338,7 +1366,7 @@
           <label>Super Admin Email (Immutable)</label>
           <div class="input-wrapper">
             <span class="input-icon"><i data-lucide="shield-check"></i></span>
-            <input id="setupAdminEmail" type="email" readonly value="chamilka.ch@gmail.com" style="background:rgba(255,255,255,0.03);color:#94a3b8;cursor:not-allowed;">
+            <input id="setupAdminEmail" type="email" readonly value="chamilka.ch@gmail.com" style="background:#F1F5F9;color:#64748B;cursor:not-allowed;">
           </div>
         </div>
 
@@ -1371,7 +1399,7 @@
       </form>
 
       <div style="text-align:center;margin-top:24px;border-top:1px solid var(--card-border);padding-top:16px;">
-        <a href="app.html" style="color:var(--primary);font-size:13px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+        <a href="app.html" style="color:#4338CA;font-size:13px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
           <i data-lucide="arrow-left"></i>
           <span>Launch Front-Desk POS Terminal</span>
         </a>
@@ -1537,7 +1565,7 @@
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Total Customers</span>
-                <div class="kpi-icon-wrap"><i data-lucide="users"></i></div>
+                <div class="kpi-icon-wrap" style="background:#F1F5F9;color:#334155;border:1px solid #E2E8F0;"><i data-lucide="users"></i></div>
               </div>
               <div id="kpiTotalCustomers" class="kpi-value">0</div>
               <div class="kpi-footer">Active business client accounts</div>
@@ -1546,45 +1574,45 @@
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Active Licenses</span>
-                <div class="kpi-icon-wrap" style="color:var(--success);"><i data-lucide="shield-check"></i></div>
+                <div class="kpi-icon-wrap" style="background:#E0F2FE;color:#0284C7;border:1px solid #BAE6FD;"><i data-lucide="shield-check"></i></div>
               </div>
-              <div id="kpiActiveLicenses" class="kpi-value" style="color:var(--success);">0</div>
+              <div id="kpiActiveLicenses" class="kpi-value">0</div>
               <div id="kpiLicenseBreakdown" class="kpi-footer">0 Trials • 0 Standard</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Device Slots Bound</span>
-                <div class="kpi-icon-wrap" style="color:var(--accent);"><i data-lucide="smartphone"></i></div>
+                <div class="kpi-icon-wrap" style="background:#E7D8FF;color:#4338CA;border:1px solid #B8C0FF;"><i data-lucide="smartphone"></i></div>
               </div>
-              <div id="kpiActiveDeviceSlots" class="kpi-value" style="color:var(--accent);">0</div>
+              <div id="kpiActiveDeviceSlots" class="kpi-value">0</div>
               <div id="kpiDeviceSlotsText" class="kpi-footer">Active slots across licenses</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Expiring in 3 Days</span>
-                <div class="kpi-icon-wrap" style="color:var(--warning);"><i data-lucide="clock"></i></div>
+                <div class="kpi-icon-wrap" style="background:#FFE8D6;color:#C2410C;border:1px solid #FFD3B6;"><i data-lucide="clock"></i></div>
               </div>
-              <div id="kpiExpiringSoon" class="kpi-value" style="color:var(--warning);">0</div>
+              <div id="kpiExpiringSoon" class="kpi-value">0</div>
               <div class="kpi-footer">&lt; 72 hours remaining</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Monthly Revenue</span>
-                <div class="kpi-icon-wrap" style="color:var(--primary);"><i data-lucide="banknote"></i></div>
+                <div class="kpi-icon-wrap" style="background:#FFE8D6;color:#9A3412;border:1px solid #FFD3B6;"><i data-lucide="banknote"></i></div>
               </div>
-              <div id="kpiMonthlyRevenue" class="kpi-value" style="color:var(--primary);">Rs. 0</div>
+              <div id="kpiMonthlyRevenue" class="kpi-value">Rs. 0</div>
               <div id="kpiMonthlyPaidCount" class="kpi-footer">0 paid subscriptions</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Pending Invoices</span>
-                <div class="kpi-icon-wrap" style="color:var(--purple);"><i data-lucide="clock-alert"></i></div>
+                <div class="kpi-icon-wrap" style="background:#E7D8FF;color:#6D28D9;border:1px solid #B8C0FF;"><i data-lucide="clock-alert"></i></div>
               </div>
-              <div id="kpiPendingPayments" class="kpi-value" style="color:var(--purple);">0</div>
+              <div id="kpiPendingPayments" class="kpi-value">0</div>
               <div class="kpi-footer">Awaiting bank verification</div>
             </div>
           </div>
@@ -1839,27 +1867,27 @@
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Monthly Revenue (LKR)</span>
-                <div class="kpi-icon-wrap" style="color:var(--primary);"><i data-lucide="wallet"></i></div>
+                <div class="kpi-icon-wrap" style="background:#FFE8D6;color:#9A3412;border:1px solid #FFD3B6;"><i data-lucide="wallet"></i></div>
               </div>
-              <div id="paySummaryTotalRevenue" class="kpi-value" style="color:var(--primary);">Rs. 0</div>
+              <div id="paySummaryTotalRevenue" class="kpi-value">Rs. 0</div>
               <div class="kpi-footer">Collected in current calendar month</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Paid Subscriptions</span>
-                <div class="kpi-icon-wrap" style="color:var(--success);"><i data-lucide="check-circle-2"></i></div>
+                <div class="kpi-icon-wrap" style="background:#DCFCE7;color:#059669;border:1px solid #86EFAC;"><i data-lucide="check-circle-2"></i></div>
               </div>
-              <div id="paySummaryPaidCount" class="kpi-value" style="color:var(--success);">0</div>
+              <div id="paySummaryPaidCount" class="kpi-value">0</div>
               <div class="kpi-footer">Standard LKR 2,500 payments</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-top">
                 <span class="kpi-title">Pending Payment Invoices</span>
-                <div class="kpi-icon-wrap" style="color:var(--warning);"><i data-lucide="hourglass"></i></div>
+                <div class="kpi-icon-wrap" style="background:#E7D8FF;color:#6D28D9;border:1px solid #B8C0FF;"><i data-lucide="hourglass"></i></div>
               </div>
-              <div id="paySummaryPendingCount" class="kpi-value" style="color:var(--warning);">0</div>
+              <div id="paySummaryPendingCount" class="kpi-value">0</div>
               <div id="paySummaryPendingAmount" class="kpi-footer">Rs. 0 pending collection</div>
             </div>
           </div>
@@ -2019,10 +2047,10 @@
                 </div>
               </div>
 
-              <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:var(--radius-md);border:1px solid var(--card-border);">
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:#F8FAFD;border-radius:var(--radius-md);border:1px solid var(--card-border);">
                 <div class="admin-avatar" style="width:48px;height:48px;font-size:18px;">CA</div>
                 <div>
-                  <div style="font-size:16px;font-weight:800;color:#fff;">Chamilka (Super Admin)</div>
+                  <div style="font-size:16px;font-weight:800;color:#090D16;">Chamilka (Super Admin)</div>
                   <div style="font-size:13px;color:var(--text-secondary);">chamilka.ch@gmail.com</div>
                   <span class="badge badge-active" style="margin-top:6px;">
                     <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
@@ -2052,22 +2080,22 @@
               </div>
 
               <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;">
-                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#F8FAFD;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
                   <span style="color:var(--text-secondary);">Project Reference:</span>
                   <span class="font-mono" style="color:var(--accent);">meiiweucccymseqewouk</span>
                 </div>
 
-                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#F8FAFD;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
                   <span style="color:var(--text-secondary);">Auth Mode:</span>
-                  <span id="secAuthMode" style="font-weight:700;color:#fff;">Detecting...</span>
+                  <span id="secAuthMode" style="font-weight:700;color:#090D16;">Detecting...</span>
                 </div>
 
-                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#F8FAFD;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
                   <span style="color:var(--text-secondary);">Connection Latency:</span>
                   <span id="secPingLatency" class="font-mono" style="color:var(--success);">—</span>
                 </div>
 
-                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+                <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#F8FAFD;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
                   <span style="color:var(--text-secondary);">Database RLS:</span>
                   <span style="color:var(--success);font-weight:700;">Active & Enforced</span>
                 </div>
@@ -2399,11 +2427,11 @@
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-            <div style="background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--card-border);">
+            <div style="background:#F8FAFD;padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--card-border);">
               <span style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">License ID</span>
               <div id="linkSubIdDisplay" class="font-mono" style="font-weight:700;color:var(--accent);margin-top:2px;">—</div>
             </div>
-            <div style="background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--card-border);">
+            <div style="background:#F8FAFD;padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--card-border);">
               <span style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">Expiry Date</span>
               <div id="linkExpiryDisplay" style="font-weight:700;color:var(--success);margin-top:2px;">—</div>
             </div>
@@ -2502,7 +2530,7 @@
       <form id="formRenewLicense" autocomplete="off" onsubmit="event.preventDefault(); return false;">
         <input type="hidden" id="renewSubId" value="">
         <div class="modal-body">
-          <div style="background:rgba(255,255,255,0.03);padding:12px 16px;border-radius:var(--radius-md);border:1px solid var(--card-border);margin-bottom:18px;">
+          <div style="background:#F8FAFD;padding:12px 16px;border-radius:var(--radius-md);border:1px solid var(--card-border);margin-bottom:18px;">
             <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
               <span style="color:var(--text-secondary);font-size:12px;">License ID:</span>
               <strong id="renewSubIdDisplay" class="font-mono" style="color:var(--accent);">—</strong>
@@ -2624,26 +2652,26 @@
         
         <!-- Summary Strip -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:10px;margin-bottom:20px;">
-          <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+          <div style="background:#F8FAFD;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
             <div style="font-size:11px;color:var(--text-secondary);">STATUS</div>
             <div id="detStatusBadge" style="margin-top:4px;">—</div>
           </div>
-          <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+          <div style="background:#F8FAFD;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
             <div style="font-size:11px;color:var(--text-secondary);">PLAN</div>
             <div id="detPlanBadge" style="margin-top:4px;">—</div>
           </div>
-          <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+          <div style="background:#F8FAFD;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
             <div style="font-size:11px;color:var(--text-secondary);">DEVICE SLOTS</div>
             <div id="detSlotBadge" style="margin-top:4px;">—</div>
           </div>
-          <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
+          <div style="background:#F8FAFD;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);">
             <div style="font-size:11px;color:var(--text-secondary);">COLOMBO EXPIRY</div>
             <div id="detExpiryText" style="font-size:12px;font-weight:700;margin-top:4px;">—</div>
           </div>
         </div>
 
-        <h4 style="font-size:14px;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-          <i data-lucide="smartphone" style="width:16px;height:16px;color:var(--primary);"></i>
+        <h4 style="font-size:14px;color:#090D16;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="smartphone" style="width:16px;height:16px;color:var(--accent);"></i>
           <span>Bound POS Devices (Max 2 Active)</span>
         </h4>
         <div class="table-container" style="margin-bottom:20px;">
@@ -2662,8 +2690,8 @@
           </table>
         </div>
 
-        <h4 style="font-size:14px;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-          <i data-lucide="file-clock" style="width:16px;height:16px;color:var(--primary);"></i>
+        <h4 style="font-size:14px;color:#090D16;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="file-clock" style="width:16px;height:16px;color:var(--accent);"></i>
           <span>Historical Audit Log for this License</span>
         </h4>
         <div class="table-container">

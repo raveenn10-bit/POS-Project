@@ -2031,12 +2031,12 @@
     shop = shop || {};
     options = options || {};
 
-    var shopName = shop.name || 'Harsh Apex POS';
+    var shopName = (shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex POS';
     var shopLogo = shop.logo || '';
-    var shopAddress = shop.address || '';
-    var shopPhone = shop.phone || '';
-    var shopRegNo = shop.regNo || '';
-    var currency = shop.currency || 'Rs.';
+    var shopAddress = (shop.address && shop.address.trim()) || '';
+    var shopPhone = (shop.phone && shop.phone.trim()) || '';
+    var shopRegNo = (shop.regNo || shop.taxNo || shop.vatNo || '').trim();
+    var currency = (shop.currency && shop.currency.trim()) || 'Rs.';
 
     var invoiceId = sale.number || sale.id || ('RCP-' + Date.now());
     var isReprint = Boolean(options.isReprint || sale.isReprint);
@@ -2104,7 +2104,7 @@
           <div class="slip-title"><b>${escapeHtml(shopName)}</b></div>
           ${shopAddress ? `<div class="slip-meta">${escapeHtml(shopAddress)}</div>` : ''}
           ${shopPhone ? `<div class="slip-meta">Tel: ${escapeHtml(shopPhone)}</div>` : ''}
-          ${shopRegNo ? `<div class="slip-meta">BRN/Tax: ${escapeHtml(shopRegNo)}</div>` : ''}
+          ${shopRegNo ? `<div class="slip-meta">Tax / BRN: ${escapeHtml(shopRegNo)}</div>` : ''}
         </div>
 
         <hr class="slip-divider">
@@ -2171,7 +2171,7 @@
         </div>
 
         <div class="slip-footer">
-          ${escapeHtml(shop.receiptFooter || shop.footerNote || 'Thank you for your business! Please come again.')}
+          ${escapeHtml((shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footer && shop.footer.trim()) || (shop.footerNote && shop.footerNote.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us! Returns accepted within 3 days with receipt.')}
         </div>
         <div class="slip-branding">
           Powered by Harsh Apex Digital
@@ -2185,7 +2185,7 @@
    */
   function getThermalSlipHTML(sale, shop, options) {
     options = options || {};
-    var paperWidth = options.paperWidth || '58mm';
+    var paperWidth = options.paperWidth || (shop && shop.receiptWidth) || '58mm';
     var invoiceId = (sale && (sale.id || sale.number)) || 'Receipt';
 
     return `<!DOCTYPE html>
@@ -2210,7 +2210,7 @@
   function generateThermalSlipPDF(sale, shop, options) {
     options = options || {};
     var action = (options.action || 'download').toLowerCase();
-    var paperWidth = options.paperWidth || '58mm';
+    var paperWidth = options.paperWidth || (shop && shop.receiptWidth) || '58mm';
     var is80 = paperWidth === '80mm';
     var slipWidthMm = is80 ? 80 : 58;
     var filename = (options.filename || ('Receipt-' + (sale.id || sale.number || Date.now()))) + '.pdf';

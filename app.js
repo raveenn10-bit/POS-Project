@@ -353,7 +353,7 @@ if (db.products.length === 0) {
   ];
 }
 
-const money = n => `${db.shop.currency || 'Rs.'} ${Number(n || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const money = n => `${(db && db.shop && db.shop.currency && db.shop.currency.trim()) || 'Rs.'} ${Number(n || 0).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 // -------------------------------------------------------------
 // Grocery Unit Utilities & Accurate Decimal Conversions
@@ -527,6 +527,10 @@ $('btnRestoreSnapshot').onclick = () => {
 function show(tab) {
   document.querySelectorAll('.panel').forEach(e => e.classList.toggle('active', e.id === tab));
   document.querySelectorAll('[data-tab]').forEach(e => e.classList.toggle('active', e.dataset.tab === tab));
+  const mobBar = $('mobileCartBar');
+  if (mobBar) {
+    mobBar.style.display = (tab === 'billing' && Array.isArray(cart) && cart.length > 0) ? 'flex' : 'none';
+  }
   window.scrollTo(0, 0);
   render();
 }
@@ -1220,6 +1224,21 @@ function renderCart() {
   $('grandTotal').textContent = money(total);
   const received = Number($('received').value || 0);
   $('balance').textContent = money(Math.max(0, Number((received - total).toFixed(2))));
+
+  // Update Mobile Floating Cart Bar (iPhone & Android)
+  const mobBar = $('mobileCartBar');
+  if (mobBar) {
+    const isBillingActive = $('billing') && $('billing').classList.contains('active');
+    if (cart.length > 0 && isBillingActive) {
+      const totalUnits = cart.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
+      const unitsLabel = Number.isInteger(totalUnits) ? totalUnits : totalUnits.toFixed(2);
+      if ($('mobCartCount')) $('mobCartCount').textContent = `${cart.length} Item${cart.length === 1 ? '' : 's'} (${unitsLabel})`;
+      if ($('mobCartTotal')) $('mobCartTotal').textContent = money(total);
+      mobBar.style.display = 'flex';
+    } else {
+      mobBar.style.display = 'none';
+    }
+  }
 }
 
 $('cartList').onclick = e => {
@@ -1470,10 +1489,10 @@ function receiptHTML(s, isReprint = false) {
 
   return `
     ${shop.logo ? `<div class="center" style="margin-bottom:8px"><img src="${esc(shop.logo)}" alt="Logo" style="max-height:48px;max-width:130px;object-fit:contain;background:#fff;padding:2px;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges"></div>` : ''}
-    <h2 class="center bold">${esc(shop.name || 'Harsh Apex POS')}</h2>
-    ${shop.address ? `<p class="center">${esc(shop.address)}</p>` : ''}
-    ${shop.phone ? `<p class="center">Tel: ${esc(shop.phone)}</p>` : ''}
-    ${shop.regNo ? `<p class="center">BRN/Tax: ${esc(shop.regNo)}</p>` : ''}
+    <h2 class="center bold">${esc((shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex POS')}</h2>
+    ${shop.address && shop.address.trim() ? `<p class="center">${esc(shop.address.trim())}</p>` : ''}
+    ${shop.phone && shop.phone.trim() ? `<p class="center">Tel: ${esc(shop.phone.trim())}</p>` : ''}
+    ${(shop.regNo || shop.taxNo || shop.vatNo) ? `<p class="center">Tax / BRN: ${esc((shop.regNo || shop.taxNo || shop.vatNo).trim())}</p>` : ''}
     <hr>
     ${duplicate ? '<div class="center bold" style="border:1px dashed #000;padding:3px;margin:4px 0;background:#f5f5f5">*** DUPLICATE / REPRINT RECEIPT ***</div>' : ''}
     <p>
@@ -1515,7 +1534,7 @@ function receiptHTML(s, isReprint = false) {
       ${s.isCredit ? `Credit Due: <span style="float:right">${money(s.total)}</span>` : ''}
     </p>
     <hr>
-    <p class="center" style="font-size:11px">${esc(shop.receiptFooter || 'Thank you for your business! Please come again.')}</p>
+    <p class="center" style="font-size:11px">${esc((shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footer && shop.footer.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us! Returns accepted within 3 days with receipt.')}</p>
     <p class="center" style="font-size:10px;margin-top:6px;color:#888">Powered by Harsh Apex Digital</p>
   `;
 }
@@ -1526,8 +1545,12 @@ async function printReceipt(sale, options = {}) {
   if (options.forceTransport && window.PrintSystem && window.PrintSystem.printManager) {
     try {
       const pm = window.PrintSystem.printManager;
-      const opts = Object.assign({ shop: db.shop, isReprint: !!options.isReprint }, options);
-      const res = await pm.printReceipt(sale, opts);
+      const opts = Object.assign({
+        shop: db.shop,
+        isReprint: !!options.isReprint,
+        paperWidth: (db.shop && db.shop.receiptWidth) || '58mm'
+      }, options);
+      const res = await pm.printReceipt(sale, db.shop, opts);
       if (res && res.success) {
         toast(res.message || 'Receipt dispatched to printer!');
         return;
@@ -1674,12 +1697,21 @@ async function printBluetoothThermal(s) {
   if (window.PrintSystem && window.PrintSystem.printManager) {
     return printReceipt(s, { isReprint: true, forceTransport: 'ble' });
   }
+  const shop = db.shop || {};
+  const curr = (shop.currency && shop.currency.trim()) || 'Rs.';
+  const storeName = (shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex POS';
+  const storeAddress = shop.address && shop.address.trim() ? shop.address.trim() : '';
+  const storePhone = shop.phone && shop.phone.trim() ? shop.phone.trim() : '';
+  const storeReg = (shop.regNo || shop.taxNo || shop.vatNo || '').trim();
+  const footerMsg = (shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footer && shop.footer.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us! Returns accepted within 3 days with receipt.';
+
   const ESC = '\x1B', GS = '\x1D';
   let text = `${ESC}@`; // Initialize
   text += `${ESC}a\x01`; // Center
-  text += `${db.shop.name || 'Harsh Apex POS'}\n`;
-  if (db.shop.address) text += `${db.shop.address}\n`;
-  if (db.shop.phone) text += `Tel: ${db.shop.phone}\n`;
+  text += `${storeName}\n`;
+  if (storeAddress) text += `${storeAddress}\n`;
+  if (storePhone) text += `Tel: ${storePhone}\n`;
+  if (storeReg) text += `Tax / BRN: ${storeReg}\n`;
   text += `--------------------------------\n`;
   text += `${ESC}a\x00`; // Left align
   text += `Bill: ${s.number}\nDate: ${new Date(s.at).toLocaleString()}\nPay: ${s.method}\n`;
@@ -1692,18 +1724,19 @@ async function printBluetoothThermal(s) {
     text += `${x.name}\n  ${qtyStr} x ${unitPrice} = ${lineTotal}\n`;
   });
   text += `--------------------------------\n`;
-  text += `Subtotal: Rs. ${s.subtotal.toFixed(2)}\n`;
-  if (s.discount > 0) text += `Discount: -Rs. ${s.discount.toFixed(2)}\n`;
-  text += `Total:    Rs. ${s.total.toFixed(2)}\n`;
+  text += `Subtotal: ${curr} ${s.subtotal.toFixed(2)}\n`;
+  if (s.discount > 0) text += `Discount: -${curr} ${s.discount.toFixed(2)}\n`;
+  text += `Total:    ${curr} ${s.total.toFixed(2)}\n`;
   if (s.method === 'Cash') {
-    text += `Paid:     Rs. ${s.received.toFixed(2)}\n`;
-    text += `Bal:      Rs. ${s.change.toFixed(2)}\n`;
+    text += `Paid:     ${curr} ${s.received.toFixed(2)}\n`;
+    text += `Bal:      ${curr} ${s.change.toFixed(2)}\n`;
   } else if (s.method === 'Card') {
     text += `Payment:  Card (Approved)\n`;
   }
   text += `--------------------------------\n`;
   text += `${ESC}a\x01`; // Center
-  if (db.shop.receiptFooter) text += `${db.shop.receiptFooter}\n`;
+  text += `${footerMsg}\n`;
+  text += `Powered by Harsh Apex Digital\n`;
   text += `\n\n\n${GS}V\x41\x00`; // Cut paper
 
   if (!navigator.bluetooth) {
@@ -1803,10 +1836,18 @@ function formatBillWhatsAppText(s) {
     const lineTotal = money(x.lineTotal !== undefined ? x.lineTotal : (x.qty * x.price));
     return `${x.name} (${qtyStr}) = ${lineTotal}`;
   });
+  const shop = db.shop || {};
+  const storeName = (shop.name && shop.name.trim()) || (shop.shopName && shop.shopName.trim()) || 'Harsh Apex POS';
+  const storeAddress = shop.address && shop.address.trim() ? shop.address.trim() : '';
+  const storePhone = shop.phone && shop.phone.trim() ? `Tel: ${shop.phone.trim()}` : '';
+  const storeReg = (shop.regNo || shop.taxNo || shop.vatNo || '').trim() ? `Tax / BRN: ${(shop.regNo || shop.taxNo || shop.vatNo).trim()}` : '';
+  const footerMsg = (shop.receiptFooter && shop.receiptFooter.trim()) || (shop.footer && shop.footer.trim()) || (shop.footerMessage && shop.footerMessage.trim()) || 'Thank you for shopping with us! Returns accepted within 3 days with receipt.';
+
   return [
-    `*${db.shop.name || 'Harsh Apex POS'}*`,
-    db.shop.address,
-    db.shop.phone ? `Tel: ${db.shop.phone}` : '',
+    `*${storeName}*`,
+    storeAddress,
+    storePhone,
+    storeReg,
     `--------------------------------`,
     `Receipt: ${s.number} (${new Date(s.at).toLocaleString()})`,
     `Payment: ${s.method}`,
@@ -1818,7 +1859,8 @@ function formatBillWhatsAppText(s) {
     `*Total Amount: ${money(s.total)}*`,
     s.method === 'Cash' ? `Paid: ${money(s.received)} | Change: ${money(s.change)}` : '',
     s.method === 'Card' ? `Card Paid: ${money(s.total)}` : '',
-    db.shop.receiptFooter || 'Thank you for shopping with us!'
+    footerMsg,
+    `Powered by Harsh Apex Digital`
   ].filter(Boolean).join('\n');
 }
 
@@ -2250,7 +2292,7 @@ $('saveShop').onclick = () => {
     receiptWidth: $('receiptWidth').value || '58mm',
     receiptFooter: $('shopFooter').value.trim(),
     allowNegativeStock: $('allowNegativeStockCheckbox') ? $('allowNegativeStockCheckbox').checked : false,
-    logo: db.shop.logo || 'harsh-apex-logo.png'
+    logo: (db.shop && db.shop.logo) || 'harsh-apex-logo.png'
   };
 
   if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
@@ -2258,26 +2300,34 @@ $('saveShop').onclick = () => {
       shopName: db.shop.name,
       address: db.shop.address,
       phone: db.shop.phone,
-      vatNo: db.shop.regNo
+      vatNo: db.shop.regNo,
+      currency: db.shop.currency,
+      receiptWidth: db.shop.receiptWidth,
+      footerNote: db.shop.receiptFooter
     });
   }
 
   if (save()) {
-    updateShopDisplay();
+    if (typeof render === 'function') {
+      render();
+    } else {
+      updateShopDisplay();
+    }
     toast('Store details and receipt settings saved!');
   }
 };
 
 function updateShopDisplay() {
-  $('headerShopTitle').textContent = db.shop.name || 'Harsh Apex Retail POS';
-  $('headerShopSubtitle').textContent = `${db.shop.phone ? db.shop.phone + ' • ' : ''}Offline • Smart Retail POS`;
-  $('shopName').value = db.shop.name || '';
-  $('shopPhone').value = db.shop.phone || '';
-  $('shopAddress').value = db.shop.address || '';
-  $('shopReg').value = db.shop.regNo || '';
-  $('shopCurrency').value = db.shop.currency || 'Rs.';
-  $('receiptWidth').value = db.shop.receiptWidth || '58mm';
-  $('shopFooter').value = db.shop.receiptFooter || '';
+  if (!db || !db.shop) return;
+  if ($('headerShopTitle')) $('headerShopTitle').textContent = db.shop.name || 'Harsh Apex Retail POS';
+  if ($('headerShopSubtitle')) $('headerShopSubtitle').textContent = `${db.shop.phone ? db.shop.phone + ' • ' : ''}Offline • Smart Retail POS`;
+  if ($('shopName')) $('shopName').value = db.shop.name || '';
+  if ($('shopPhone')) $('shopPhone').value = db.shop.phone || '';
+  if ($('shopAddress')) $('shopAddress').value = db.shop.address || '';
+  if ($('shopReg')) $('shopReg').value = db.shop.regNo || '';
+  if ($('shopCurrency')) $('shopCurrency').value = db.shop.currency || 'Rs.';
+  if ($('receiptWidth')) $('receiptWidth').value = db.shop.receiptWidth || '58mm';
+  if ($('shopFooter')) $('shopFooter').value = db.shop.receiptFooter || '';
   if ($('allowNegativeStockCheckbox')) {
     $('allowNegativeStockCheckbox').checked = Boolean(db.shop.allowNegativeStock);
   }

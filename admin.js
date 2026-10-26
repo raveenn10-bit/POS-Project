@@ -968,7 +968,7 @@ function renderCustomersTable() {
     return `
       <tr>
         <td>
-          <div style="font-weight:700;color:#fff;">${escapeHtml(c.business_name)}</div>
+          <div style="font-weight:700;color:var(--text);">${escapeHtml(c.business_name)}</div>
           <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(c.notes || 'Standard Client')}</div>
         </td>
         <td>${escapeHtml(c.contact_name || '—')}</td>
@@ -1151,7 +1151,7 @@ function renderLicensesTable() {
           </div>
         </td>
         <td>
-          <div style="font-weight:700;color:#fff;">${escapeHtml(lic.shop_name || 'Apex Store')}</div>
+          <div style="font-weight:700;color:var(--text);">${escapeHtml(lic.shop_name || 'Apex Store')}</div>
           <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
             <span>${escapeHtml(lic.customer_name || 'Client')}</span>
             ${waLink}
@@ -1554,7 +1554,7 @@ async function openLicenseDetailsModal(licenseId) {
     } else {
       devTbody.innerHTML = devices.map(d => `
         <tr>
-          <td class="font-mono" style="font-weight:700;color:#fff;">${escapeHtml(d.device_id)}</td>
+          <td class="font-mono" style="font-weight:700;color:var(--text);">${escapeHtml(d.device_id)}</td>
           <td>${escapeHtml(d.device_name || 'Terminal')}</td>
           <td>
             <span class="badge ${d.binding_status === 'active' ? 'badge-active' : 'badge-expired'}">${d.binding_status}</span>
