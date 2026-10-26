@@ -24,6 +24,7 @@
     root.saveInvoiceConfig = exports.saveInvoiceConfig;
     root.resetInvoiceConfig = exports.resetInvoiceConfig;
     root.openCustomizeModal = exports.openCustomizeModal;
+    root.printInvoice = exports.printInvoice;
     root.PDFInvoice = exports;
   }
 })(typeof self !== 'undefined' ? self : this, function () {
@@ -173,6 +174,9 @@
    */
   function formatColomboTime(dateInput) {
     if (!dateInput) return '10:24 AM';
+    if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput.trim())) {
+      return '10:24 AM';
+    }
     var d = new Date(dateInput);
     if (isNaN(d.getTime())) return '10:24 AM';
     try {
@@ -1098,26 +1102,32 @@
     var storeEmail = config.email || shop.email || 'info@harshapexpos.lk';
     var storeWebsite = config.website || shop.website || 'www.harshapexpos.lk';
     var vatNo = config.vatNo || shop.vatNo || shop.regNo || '114455667-7000';
-    var logoUrl = config.logoUrl || shop.logo || '';
+    var customLogoUrl = config.logoUrl || (shop.logo && shop.logo !== 'harsh-apex-logo.png' && shop.logo !== 'default' ? shop.logo : '');
     var tagline = config.tagline || shop.tagline || 'Simple Sales. Stronger Businesses.';
 
+    // Items list (if empty, populate with reference demo items from media_1793000369506.jpg)
+    var items = Array.isArray(sale.items) && sale.items.length > 0 ? sale.items : null;
+    var isDefaultDemo = !items;
+
     // Invoice Meta
-    var rawId = sale.id || sale.number;
-    var invoiceNo = rawId ? (String(rawId).startsWith('INV-') ? String(rawId) : 'INV-' + rawId) : 'INV-2024-001235';
-    var rawDate = sale.date || sale.at;
+    var rawId = sale.number || sale.id;
+    var invoiceNo;
+    if (rawId) {
+      var strId = String(rawId).trim();
+      invoiceNo = strId.toUpperCase().startsWith('INV-') ? strId : 'INV-' + strId;
+    } else {
+      invoiceNo = 'INV-2024-001235';
+    }
+    var rawDate = sale.at || sale.date;
     var invoiceDate = formatColomboDate(rawDate);
     var invoiceTime = formatColomboTime(rawDate);
     var cashierName = sale.cashier || shop.cashier || 'Kasun Perera';
     var paymentMethod = sale.paymentMethod || sale.method || 'Cash';
 
     // Customer Info
-    var customerName = sale.customerName || (sale.customer && sale.customer.name) || 'Nimal Fernando';
-    var customerPhone = sale.customerPhone || (sale.customer && sale.customer.phone) || '077 123 4567';
-    var customerAddress = sale.customerAddress || (sale.customer && sale.customer.address) || 'No. 45, Galle Road, Colombo 06, Sri Lanka';
-
-    // Items list (if empty, populate with reference demo items from media_1792991063235.jpg)
-    var items = Array.isArray(sale.items) && sale.items.length > 0 ? sale.items : null;
-    var isDefaultDemo = !items;
+    var customerName = sale.customerName || sale.creditCustomer || (sale.customer && sale.customer.name) || (isDefaultDemo ? 'Nimal Fernando' : 'Cash / Walk-in Customer');
+    var customerPhone = sale.customerPhone || sale.creditPhone || (sale.customer && sale.customer.phone) || (isDefaultDemo ? '077 123 4567' : '-');
+    var customerAddress = sale.customerAddress || (sale.customer && sale.customer.address) || (isDefaultDemo ? 'No. 45, Galle Road, Colombo 06, Sri Lanka' : '-');
 
     if (isDefaultDemo) {
       items = [
@@ -1134,7 +1144,7 @@
     var calcGrossSubtotal = 0;
     var calcItemDiscount = 0;
     items.forEach(function (it) {
-      var p = Number(it.price || it.unitPrice || 0);
+      var p = Number(it.unitPrice !== undefined ? it.unitPrice : (it.price || 0));
       var q = Number(it.qty !== undefined ? it.qty : 1);
       var d = Number(it.discount || 0);
       calcGrossSubtotal += p * q;
@@ -1161,10 +1171,10 @@
       grandTotal = 6725.00;
     }
 
-    var amountPaid = Number(sale.received !== undefined && sale.received !== null ? sale.received : grandTotal);
-    var balance = Number(sale.change !== undefined && sale.change !== null ? sale.change : Math.max(0, amountPaid - grandTotal));
+    var amountPaid = Number(sale.received !== undefined && sale.received !== null ? sale.received : (sale.paid !== undefined && sale.paid !== null ? sale.paid : (sale.total !== undefined ? sale.total : grandTotal)));
+    var balance = Number(sale.change !== undefined && sale.change !== null ? sale.change : (sale.balance !== undefined && sale.balance !== null ? sale.balance : Math.max(0, amountPaid - grandTotal)));
 
-    // Modern 3D Faceted Logo SVG matching media_1792991063235.jpg
+    // Modern 3D Faceted Logo SVG matching media_1793000369506.jpg
     var defaultLogoSvg = `
       <svg width="44" height="52" viewBox="0 0 46 54" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -1209,9 +1219,9 @@
         if (it.sellUnit || it.unit) {
           qStr += ' ' + (it.sellUnit || it.unit);
         }
-        var price = Number(it.price || it.unitPrice || 0);
+        var price = Number(it.unitPrice !== undefined ? it.unitPrice : (it.price || 0));
         var discount = Number(it.discount || 0);
-        var lineTotal = Number(it.total !== undefined ? it.total : (price * q - discount));
+        var lineTotal = Number(it.lineTotal !== undefined ? it.lineTotal : (it.total !== undefined ? it.total : (price * q - discount)));
 
         return `
           <tr class="${rowClass}">
@@ -1236,7 +1246,7 @@
             <header class="ha-header">
               <div class="ha-header-left">
                 <div class="ha-logo-box">
-                  ${logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" class="ha-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" /><div style="display:none">${defaultLogoSvg}</div>` : defaultLogoSvg}
+                  ${customLogoUrl ? `<img src="${escapeHtml(customLogoUrl)}" alt="Logo" class="ha-logo-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';" /><div style="display:none">${defaultLogoSvg}</div>` : defaultLogoSvg}
                 </div>
                 <div class="ha-brand-meta">
                   <div class="ha-brand-title">Harsh Apex</div>
@@ -2235,10 +2245,12 @@
 
       var host = document.createElement('div');
       host.style.position = 'fixed';
-      host.style.left = '-9999px';
       host.style.top = '0';
+      host.style.left = '0';
       host.style.width = slipWidthMm + 'mm';
-      host.style.zIndex = '-9999';
+      host.style.opacity = '0.01';
+      host.style.pointerEvents = 'none';
+      host.style.zIndex = '-999';
       host.innerHTML = `<style>${getThermalSlipCSS(paperWidth)}</style>${getThermalSlipBodyHTML(sale, shop, options)}`;
       document.body.appendChild(host);
 
@@ -2396,10 +2408,12 @@
             try {
               var host = document.createElement('div');
               host.style.position = 'fixed';
-              host.style.left = '-9999px';
               host.style.top = '0';
+              host.style.left = '0';
               host.style.width = '210mm';
-              host.style.zIndex = '-9999';
+              host.style.opacity = '0.01';
+              host.style.pointerEvents = 'none';
+              host.style.zIndex = '-999';
               host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
               document.body.appendChild(host);
 
@@ -2451,10 +2465,12 @@
         if (!html2pdfLib) return Promise.resolve(null);
         var host = document.createElement('div');
         host.style.position = 'fixed';
-        host.style.left = '-9999px';
         host.style.top = '0';
+        host.style.left = '0';
         host.style.width = '210mm';
-        host.style.zIndex = '-9999';
+        host.style.opacity = '0.01';
+        host.style.pointerEvents = 'none';
+        host.style.zIndex = '-999';
         host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
         document.body.appendChild(host);
         var target = host.querySelector('.invoice-page') || host;
@@ -2502,10 +2518,12 @@
       if (html2pdfLib) {
         var host = document.createElement('div');
         host.style.position = 'fixed';
-        host.style.left = '-9999px';
         host.style.top = '0';
+        host.style.left = '0';
         host.style.width = '210mm';
-        host.style.zIndex = '-9999';
+        host.style.opacity = '0.01';
+        host.style.pointerEvents = 'none';
+        host.style.zIndex = '-999';
         host.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
         document.body.appendChild(host);
 
@@ -2549,6 +2567,31 @@
   }
 
   /**
+   * Robust direct print method: populates #invoicePrintContainer, clears #receipt, and calls window.print()
+   */
+  function printInvoice(sale, shop, configOverride) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    var config = Object.assign({}, getInvoiceConfig(), configOverride || {});
+    var container = document.getElementById('invoicePrintContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'invoicePrintContainer';
+      document.body.appendChild(container);
+    }
+    var receiptEl = document.getElementById('receipt');
+    if (receiptEl) receiptEl.innerHTML = '';
+
+    container.innerHTML = `<style>${getInvoiceCSS(config.primaryColor, config.navyHeaderColor)}</style>${getInvoiceBodyHTML(sale, shop, config)}`;
+    setTimeout(function () {
+      try {
+        window.print();
+      } catch (e) {
+        console.warn('printInvoice error:', e);
+      }
+    }, 150);
+  }
+
+  /**
    * Helper to open the customization drawer / modal directly in browser
    */
   function openCustomizeModal() {
@@ -2570,6 +2613,7 @@
     getInvoiceConfig: getInvoiceConfig,
     saveInvoiceConfig: saveInvoiceConfig,
     resetInvoiceConfig: resetInvoiceConfig,
-    openCustomizeModal: openCustomizeModal
+    openCustomizeModal: openCustomizeModal,
+    printInvoice: printInvoice
   };
 });

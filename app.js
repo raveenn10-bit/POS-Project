@@ -1087,6 +1087,7 @@ function addToCart(p, initialQty = 1, initialUnit = null) {
     cart.push({
       id: p.id,
       name: p.name,
+      sku: p.sku || p.barcode || '',
       price: p.price,
       cost: p.cost,
       unit: p.unit || 'pcs',
@@ -1383,6 +1384,7 @@ $('checkout').onclick = () => {
     items: cart.map(x => ({
       id: x.id,
       name: x.name,
+      sku: x.sku || (db.products.find(p => p.id === x.id) || {}).sku || (db.products.find(p => p.id === x.id) || {}).barcode || '-',
       price: x.price,
       cost: x.cost,
       qty: x.qty,
@@ -1547,6 +1549,95 @@ async function printReceipt(sale, options = {}) {
   window.print();
 }
 
+// A4 Invoice Modal & Preview State
+let currentInvoiceSale = null;
+
+function getSampleInvoiceSale() {
+  return {
+    id: 'INV-2024-001235',
+    number: 'INV-2024-001235',
+    date: '2024-08-15',
+    at: '2024-08-15T10:24:00+05:30',
+    cashier: 'Kasun Perera',
+    paymentMethod: 'Cash',
+    customerName: 'Nimal Fernando',
+    customerPhone: '077 123 4567',
+    customerAddress: 'No. 45, Galle Road, Colombo 06, Sri Lanka',
+    items: [
+      { name: 'Anchor Full Cream Milk Powder 400g', sku: 'ANC-MILK-400', qty: 2, price: 1250.00, discount: 0.00, lineTotal: 2500.00 },
+      { name: 'Munchee Marie Biscuits 200g', sku: 'MUN-BIS-200', qty: 1, price: 280.00, discount: 0.00, lineTotal: 280.00 },
+      { name: 'Nestlé Milo 400g', sku: 'NES-MILO-400', qty: 1, price: 1450.00, discount: 50.00, lineTotal: 1400.00 },
+      { name: 'Keells Basmathi Rice 1kg', sku: 'KEE-RICE-1KG', qty: 1, price: 1650.00, discount: 0.00, lineTotal: 1650.00 },
+      { name: 'Sunlight Detergent Powder 400g', sku: 'SUN-DET-400', qty: 1, price: 550.00, discount: 0.00, lineTotal: 550.00 },
+      { name: 'Lifebuoy Total Soap 100g', sku: 'LIF-SOAP-100', qty: 3, price: 160.00, discount: 0.00, lineTotal: 480.00 }
+    ],
+    subtotal: 6860.00,
+    discount: 50.00,
+    serviceCharge: 0.00,
+    vat: 915.00,
+    total: 6725.00,
+    received: 6725.00,
+    change: 0.00
+  };
+}
+
+// Open interactive A4 Invoice Preview Modal
+function openInvoicePreviewModal(sale) {
+  currentInvoiceSale = sale || lastSale || getSampleInvoiceSale();
+  const modal = $('invoicePreviewModal');
+  const container = $('invoiceModalContainer');
+  if (!modal || !container) return;
+
+  const rawNum = currentInvoiceSale.number || currentInvoiceSale.id || 'INV-2024-001235';
+  const displayId = String(rawNum).startsWith('INV-') ? String(rawNum) : 'INV-' + rawNum;
+  if ($('invoiceModalTitle')) $('invoiceModalTitle').textContent = `Invoice - ${displayId}`;
+  if ($('invoiceModalSubtitle')) {
+    const rawDate = currentInvoiceSale.at || currentInvoiceSale.date;
+    const dStr = rawDate ? new Date(rawDate).toLocaleDateString() : '2024-08-15';
+    $('invoiceModalSubtitle').textContent = `Bill ${displayId} · ${dStr} · Total: ${money(currentInvoiceSale.total || 6725)}`;
+  }
+
+  const cfg = typeof PDFInvoice !== 'undefined' ? PDFInvoice.getInvoiceConfig() : {};
+  if (typeof PDFInvoice !== 'undefined' && PDFInvoice.getInvoiceBodyHTML) {
+    container.innerHTML = `<style>${PDFInvoice.getInvoiceCSS(cfg.primaryColor, cfg.navyHeaderColor)}</style>${PDFInvoice.getInvoiceBodyHTML(currentInvoiceSale, db.shop, cfg)}`;
+  } else if (typeof getInvoiceBodyHTML === 'function') {
+    container.innerHTML = getInvoiceBodyHTML(currentInvoiceSale, db.shop);
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeInvoicePreviewModal() {
+  const modal = $('invoicePreviewModal');
+  if (modal) modal.style.display = 'none';
+}
+
+if ($('closeInvoicePreviewModalBtn')) {
+  $('closeInvoicePreviewModalBtn').onclick = closeInvoicePreviewModal;
+}
+if ($('invoiceModalPrintBtn')) {
+  $('invoiceModalPrintBtn').onclick = () => {
+    if (typeof printInvoice === 'function') {
+      printInvoice(currentInvoiceSale, db.shop);
+    } else {
+      window.print();
+    }
+  };
+}
+if ($('invoiceModalPdfBtn')) {
+  $('invoiceModalPdfBtn').onclick = () => {
+    downloadPdfInvoice(currentInvoiceSale);
+  };
+}
+if ($('invoiceModalCustomizeBtn')) {
+  $('invoiceModalCustomizeBtn').onclick = () => {
+    closeInvoicePreviewModal();
+    show('settings');
+    const el = $('a4InvoiceCustomizationCard');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+}
+
 // Download Crisp A4 PDF Invoice matching reference specification
 function downloadPdfInvoice(sale) {
   if (!sale) return;
@@ -1564,7 +1655,9 @@ function downloadPdfInvoice(sale) {
 }
 
 if ($('printLast')) {
-  $('printLast').onclick = () => { if (lastSale) downloadPdfInvoice(lastSale); };
+  $('printLast').onclick = () => {
+    openInvoicePreviewModal(lastSale || getSampleInvoiceSale());
+  };
 }
 if ($('printThermalLast')) {
   $('printThermalLast').onclick = () => { if (lastSale) printReceipt(lastSale, { isReprint: true }); };
@@ -2058,7 +2151,7 @@ $('closeBillModalBtn').onclick = closeBillModal;
 
 if ($('billModalPdf')) {
   $('billModalPdf').onclick = () => {
-    if (selectedModalSale) downloadPdfInvoice(selectedModalSale);
+    if (selectedModalSale) openInvoicePreviewModal(selectedModalSale);
   };
 }
 
@@ -2160,6 +2253,15 @@ $('saveShop').onclick = () => {
     logo: db.shop.logo || 'harsh-apex-logo.png'
   };
 
+  if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+    PDFInvoice.saveInvoiceConfig({
+      shopName: db.shop.name,
+      address: db.shop.address,
+      phone: db.shop.phone,
+      vatNo: db.shop.regNo
+    });
+  }
+
   if (save()) {
     updateShopDisplay();
     toast('Store details and receipt settings saved!');
@@ -2182,6 +2284,40 @@ function updateShopDisplay() {
   const currentLogo = db.shop.logo || 'harsh-apex-logo.png';
   if ($('headerShopLogo')) $('headerShopLogo').src = currentLogo;
   if ($('shopLogoPreview')) $('shopLogoPreview').src = currentLogo;
+
+  // Sync A4 Invoice Customization controls
+  if (typeof PDFInvoice !== 'undefined' && PDFInvoice.getInvoiceConfig) {
+    const invCfg = PDFInvoice.getInvoiceConfig();
+    if ($('invShopName')) $('invShopName').value = invCfg.shopName || db.shop.name || '';
+    if ($('invTagline')) $('invTagline').value = invCfg.tagline || 'Simple Sales. Stronger Businesses.';
+    if ($('invAddress')) $('invAddress').value = invCfg.address || db.shop.address || '';
+    if ($('invPhone')) $('invPhone').value = invCfg.phone || db.shop.phone || '';
+    if ($('invEmail')) $('invEmail').value = invCfg.email || 'info@harshapexpos.lk';
+    if ($('invWebsite')) $('invWebsite').value = invCfg.website || 'www.harshapexpos.lk';
+    if ($('invVatNo')) $('invVatNo').value = invCfg.vatNo || db.shop.regNo || '';
+    if ($('invPrimaryColor')) $('invPrimaryColor').value = invCfg.primaryColor || '#2563eb';
+    if ($('invShowSku')) $('invShowSku').checked = invCfg.showSku !== false;
+    if ($('invShowCustomer')) $('invShowCustomer').checked = invCfg.showCustomer !== false;
+    if ($('invShowShopDetails')) $('invShowShopDetails').checked = invCfg.showShopDetails !== false;
+    if ($('invShowQr')) $('invShowQr').checked = invCfg.showQr !== false;
+    if ($('invShowBadges')) $('invShowBadges').checked = invCfg.showBadges !== false;
+    if ($('invShowVat')) $('invShowVat').checked = invCfg.showVat !== false;
+
+    // A4 invoice logo preview
+    const customLogo = invCfg.logoUrl || (db.shop.logo && db.shop.logo !== 'harsh-apex-logo.png' && db.shop.logo !== 'default' ? db.shop.logo : '');
+    const logoImg = $('invLogoPreview');
+    const defaultSvg = $('invDefaultLogoSvgBox');
+    if (logoImg && defaultSvg) {
+      if (customLogo) {
+        logoImg.src = customLogo;
+        logoImg.style.display = 'block';
+        defaultSvg.style.display = 'none';
+      } else {
+        logoImg.style.display = 'none';
+        defaultSvg.style.display = 'flex';
+      }
+    }
+  }
 }
 
 // Business Logo Upload & Reset
@@ -2206,6 +2342,9 @@ if ($('shopLogoInput')) {
         ctx.drawImage(img, 0, 0, w, h);
         const compressed = canvas.toDataURL('image/png', 0.9);
         db.shop.logo = compressed;
+        if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+          PDFInvoice.saveInvoiceConfig({ logoUrl: compressed });
+        }
         save();
         updateShopDisplay();
         toast('Business logo saved successfully!');
@@ -2221,10 +2360,124 @@ if ($('resetShopLogoBtn')) {
   $('resetShopLogoBtn').onclick = () => {
     if (confirm('Reset business logo to default?')) {
       db.shop.logo = 'harsh-apex-logo.png';
+      if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+        PDFInvoice.saveInvoiceConfig({ logoUrl: '' });
+      }
       save();
       updateShopDisplay();
       toast('Logo reset to default.');
     }
+  };
+}
+
+// A4 Invoice Custom Logo Upload
+if ($('invLogoInput')) {
+  $('invLogoInput').onchange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 384;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else { w = Math.round((w * maxDim) / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/png', 0.92);
+        db.shop.logo = compressed;
+        if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+          PDFInvoice.saveInvoiceConfig({ logoUrl: compressed });
+        }
+        save();
+        updateShopDisplay();
+        toast('Invoice custom logo saved!');
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+}
+
+// Reset A4 Invoice Logo to default 3D 'H' logo
+if ($('invLogoResetBtn')) {
+  $('invLogoResetBtn').onclick = () => {
+    db.shop.logo = 'harsh-apex-logo.png';
+    if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+      PDFInvoice.saveInvoiceConfig({ logoUrl: '' });
+    }
+    save();
+    updateShopDisplay();
+    toast('Invoice logo reset to default 3D H vector!');
+  };
+}
+
+// Color Preset buttons for A4 Invoice
+document.querySelectorAll('.inv-color-preset').forEach(btn => {
+  btn.onclick = () => {
+    const col = btn.getAttribute('data-color');
+    if ($('invPrimaryColor')) $('invPrimaryColor').value = col;
+    if (typeof PDFInvoice !== 'undefined' && PDFInvoice.saveInvoiceConfig) {
+      PDFInvoice.saveInvoiceConfig({ primaryColor: col });
+    }
+  };
+});
+
+// Save A4 Invoice Config Button
+if ($('saveInvoiceConfigBtn')) {
+  $('saveInvoiceConfigBtn').onclick = () => {
+    if (typeof PDFInvoice === 'undefined') return;
+    const newCfg = {
+      shopName: $('invShopName') ? $('invShopName').value.trim() : '',
+      tagline: $('invTagline') ? $('invTagline').value.trim() : '',
+      address: $('invAddress') ? $('invAddress').value.trim() : '',
+      phone: $('invPhone') ? $('invPhone').value.trim() : '',
+      email: $('invEmail') ? $('invEmail').value.trim() : '',
+      website: $('invWebsite') ? $('invWebsite').value.trim() : '',
+      vatNo: $('invVatNo') ? $('invVatNo').value.trim() : '',
+      primaryColor: $('invPrimaryColor') ? $('invPrimaryColor').value : '#2563eb',
+      showSku: $('invShowSku') ? $('invShowSku').checked : true,
+      showCustomer: $('invShowCustomer') ? $('invShowCustomer').checked : true,
+      showShopDetails: $('invShowShopDetails') ? $('invShowShopDetails').checked : true,
+      showQr: $('invShowQr') ? $('invShowQr').checked : true,
+      showBadges: $('invShowBadges') ? $('invShowBadges').checked : true,
+      showVat: $('invShowVat') ? $('invShowVat').checked : true
+    };
+    PDFInvoice.saveInvoiceConfig(newCfg);
+    // Sync store details to db.shop
+    if (newCfg.shopName) db.shop.name = newCfg.shopName;
+    if (newCfg.address) db.shop.address = newCfg.address;
+    if (newCfg.phone) db.shop.phone = newCfg.phone;
+    if (newCfg.vatNo) db.shop.regNo = newCfg.vatNo;
+    save();
+    updateShopDisplay();
+    toast('A4 Invoice settings and store details saved!');
+  };
+}
+
+// Reset A4 Invoice Config Button
+if ($('resetInvoiceConfigBtn')) {
+  $('resetInvoiceConfigBtn').onclick = () => {
+    if (typeof PDFInvoice === 'undefined') return;
+    if (confirm('Reset all A4 invoice settings to defaults?')) {
+      PDFInvoice.resetInvoiceConfig();
+      updateShopDisplay();
+      toast('A4 Invoice settings reset to defaults!');
+    }
+  };
+}
+
+// Preview A4 Invoice Button in Settings
+if ($('previewInvoiceBtn')) {
+  $('previewInvoiceBtn').onclick = () => {
+    openInvoicePreviewModal(lastSale || getSampleInvoiceSale());
   };
 }
 

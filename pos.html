@@ -531,7 +531,7 @@
         </div>
 
         <div class="actions" style="flex-wrap:wrap">
-          <button class="primary" id="printLast">📄 Download PDF Invoice</button>
+          <button class="primary" id="printLast">🧾 View / Print A4 Invoice</button>
           <button class="secondary" id="printThermalLast">🖨️ Thermal Print</button>
           <button class="secondary" id="btPrintLast">📶 Bluetooth Thermal</button>
           <button class="secondary" id="shareLast">📤 WhatsApp / Share</button>
@@ -825,6 +825,141 @@
         <button class="primary" id="saveShop" style="margin-top:12px;width:100%">Save Store Details</button>
       </div>
 
+      <!-- A4 Invoice Customization & Live Preview -->
+      <div class="card" id="a4InvoiceCustomizationCard">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:20px">🧾</span>
+            <h3 style="margin:0">A4 Invoice Customization &amp; Live Preview</h3>
+          </div>
+          <button type="button" id="previewInvoiceBtn" class="primary" style="padding:6px 14px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+            👁️ Preview A4 Invoice
+          </button>
+        </div>
+        <p class="muted" style="margin-top:0">Customize your professional A4 invoice header, logo, brand colors, contact information, and layout toggles matching your business.</p>
+
+        <!-- Shop Name & Tagline -->
+        <div class="flex" style="gap:12px;flex-wrap:wrap">
+          <div class="grow" style="min-width:200px">
+            <label for="invShopName">Shop Name on Invoice</label>
+            <input id="invShopName" placeholder="e.g. Harsh Apex General Store">
+          </div>
+          <div class="grow" style="min-width:200px">
+            <label for="invTagline">Invoice Subtitle / Tagline</label>
+            <input id="invTagline" placeholder="Simple Sales. Stronger Businesses.">
+          </div>
+        </div>
+
+        <!-- Store Contact Information -->
+        <div class="flex" style="gap:12px;flex-wrap:wrap">
+          <div class="grow" style="min-width:240px">
+            <label for="invAddress">Store Address</label>
+            <input id="invAddress" placeholder="e.g. No. 123, Main Street, Colombo 07, Sri Lanka">
+          </div>
+          <div class="grow" style="min-width:180px">
+            <label for="invPhone">Phone Number</label>
+            <input id="invPhone" placeholder="e.g. +94 76 123 4567">
+          </div>
+        </div>
+
+        <div class="flex" style="gap:12px;flex-wrap:wrap">
+          <div class="grow" style="min-width:180px">
+            <label for="invEmail">Store Email</label>
+            <input id="invEmail" placeholder="e.g. info@harshapexpos.lk">
+          </div>
+          <div class="grow" style="min-width:180px">
+            <label for="invWebsite">Store Website</label>
+            <input id="invWebsite" placeholder="e.g. www.harshapexpos.lk">
+          </div>
+          <div class="grow" style="min-width:160px">
+            <label for="invVatNo">VAT / Tax Reg. No.</label>
+            <input id="invVatNo" placeholder="e.g. 114455667-7000">
+          </div>
+        </div>
+
+        <!-- Custom Logo Upload & Instant Preview -->
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px">
+          <label style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px">Invoice Brand Logo</label>
+          <div class="flex" style="align-items:center;gap:14px;flex-wrap:wrap">
+            <div id="invLogoContainer" style="width:58px;height:58px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;overflow:hidden">
+              <img id="invLogoPreview" src="harsh-apex-logo.png" alt="Invoice Logo" style="max-width:100%;max-height:100%;object-fit:contain;display:none">
+              <div id="invDefaultLogoSvgBox" style="display:flex;align-items:center;justify-content:center">
+                <svg width="40" height="46" viewBox="0 0 46 54" fill="none">
+                  <path d="M4 4 L17 11 L17 43 L4 36 Z" fill="#1e40af"/>
+                  <path d="M4 36 L17 43 L17 50 L4 43 Z" fill="#0c2340"/>
+                  <path d="M17 21 L29 14 L29 31 L17 38 Z" fill="#38bdf8"/>
+                  <path d="M29 11 L42 4 L42 36 L29 43 Z" fill="#1d4ed8"/>
+                  <path d="M29 31 L42 38 L42 50 L29 43 Z" fill="#0284c7"/>
+                </svg>
+              </div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <label style="margin:0;cursor:pointer;padding:6px 12px;font-size:12px;display:inline-flex;align-items:center;gap:6px" class="primary" as="button">
+                  📷 Upload Custom Logo
+                  <input type="file" id="invLogoInput" accept="image/*" hidden>
+                </label>
+                <button type="button" id="invLogoResetBtn" class="secondary" style="font-size:12px;padding:6px 12px">🔄 Use Default 3D 'H' Logo</button>
+              </div>
+              <small class="muted" style="display:block;margin-top:4px">PNG, JPG, or SVG. Clear transparent background recommended. Defaults to modern 3D geometric blue faceted 'H' logo.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Theme Color Picker -->
+        <div style="margin-top:12px">
+          <label style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px">Primary Theme Color</label>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <input type="color" id="invPrimaryColor" value="#2563eb" style="width:40px;height:36px;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;padding:2px;background:#fff">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <button type="button" class="inv-color-preset" data-color="#2563eb" style="padding:4px 10px;border-radius:6px;border:1px solid #2563eb;background:#eff6ff;color:#1e40af;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2563eb"></span> Royal Blue
+              </button>
+              <button type="button" class="inv-color-preset" data-color="#0c2340" style="padding:4px 10px;border-radius:6px;border:1px solid #0c2340;background:#f8fafc;color:#0c2340;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0c2340"></span> Navy
+              </button>
+              <button type="button" class="inv-color-preset" data-color="#059669" style="padding:4px 10px;border-radius:6px;border:1px solid #059669;background:#ecfdf5;color:#047857;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#059669"></span> Emerald
+              </button>
+              <button type="button" class="inv-color-preset" data-color="#4f46e5" style="padding:4px 10px;border-radius:6px;border:1px solid #4f46e5;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4f46e5"></span> Indigo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visibility Toggles -->
+        <div style="margin-top:12px">
+          <label style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px">Layout &amp; Section Visibility</label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowSku" checked style="accent-color:var(--primary);cursor:pointer"> Show SKU Column
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowCustomer" checked style="accent-color:var(--primary);cursor:pointer"> Show Customer Details
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowShopDetails" checked style="accent-color:var(--primary);cursor:pointer"> Show Shop Details
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowQr" checked style="accent-color:var(--primary);cursor:pointer"> Show QR Code &amp; Web
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowBadges" checked style="accent-color:var(--primary);cursor:pointer"> Show Benefit Badges
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:0">
+              <input type="checkbox" id="invShowVat" checked style="accent-color:var(--primary);cursor:pointer"> Show VAT (18%)
+            </label>
+          </div>
+        </div>
+
+        <!-- Save and Reset Buttons -->
+        <div class="flex" style="gap:10px;margin-top:14px">
+          <button type="button" id="saveInvoiceConfigBtn" class="primary" style="flex:1">💾 Save A4 Invoice Settings</button>
+          <button type="button" id="resetInvoiceConfigBtn" class="secondary" style="font-size:12px">🔄 Reset to Defaults</button>
+        </div>
+      </div>
+
       <!-- Automated Local Snapshots & Backup -->
       <div class="card">
         <div class="flex" style="justify-content:space-between;align-items:center">
@@ -933,11 +1068,43 @@
       </div>
 
       <div class="actions" style="margin-top:14px;flex-wrap:wrap">
-        <button id="billModalPdf" class="primary">📄 Download PDF</button>
+        <button id="billModalPdf" class="primary">🧾 View / Print A4</button>
         <button id="billModalPrint" class="secondary">🖨️ Thermal Slip</button>
         <button id="billModalBt" class="secondary">📶 Bluetooth</button>
         <button id="billModalShare" class="secondary">📤 WhatsApp</button>
         <button id="billModalVoid" class="danger">⚠️ Void Bill</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 INVOICE PREVIEW & PRINT MODAL -->
+  <div id="invoicePreviewModal" class="modal-overlay" style="display:none;z-index:99999">
+    <div class="modal-content invoice-modal-content" style="max-width:920px;width:96%;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:14px;background:#f8fafc;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25)">
+      <!-- Modal Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#ffffff;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">🧾</span>
+          <div>
+            <h3 id="invoiceModalTitle" style="margin:0;font-size:16px;font-weight:800;color:#0f172a">A4 Invoice Preview</h3>
+            <span id="invoiceModalSubtitle" style="font-size:11px;color:#64748b">Exact A4 Print &amp; PDF Representation</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button id="invoiceModalPrintBtn" type="button" class="primary" style="padding:7px 14px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+            🖨️ Print A4
+          </button>
+          <button id="invoiceModalPdfBtn" type="button" class="secondary" style="padding:7px 14px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+            ⬇️ Download PDF
+          </button>
+          <button id="invoiceModalCustomizeBtn" type="button" class="secondary" style="padding:7px 12px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+            ⚙️ Customize
+          </button>
+          <button id="closeInvoicePreviewModalBtn" type="button" class="modal-close" style="position:static;font-size:22px;line-height:1;padding:4px 8px;cursor:pointer" title="Close">×</button>
+        </div>
+      </div>
+      <!-- Modal Body (Scrollable Preview) -->
+      <div id="invoiceModalBody" style="flex:1;overflow-y:auto;padding:20px;display:flex;justify-content:center;background:#f1f5f9">
+        <div id="invoiceModalContainer" style="width:100%;max-width:210mm;box-shadow:0 10px 30px rgba(0,0,0,0.1);background:#fff;border-radius:6px;overflow:hidden"></div>
       </div>
     </div>
   </div>
