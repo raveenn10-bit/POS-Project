@@ -270,22 +270,72 @@ window.initExpiryClock = function(payload) {
     }
   };
   q('#activateLicense').onclick = async () => {
-    const code = q('#activationCode').value.trim(), payload = await verify(code);
-    if (!payload) {
-      error.textContent = 'Invalid, expired, or wrong-device activation code.';
+    const btn = q('#activateLicense');
+    if (btn.disabled) return;
+    const code = q('#activationCode').value.trim();
+    if (!code) {
+      error.textContent = 'Please enter or paste your activation code.';
       error.style.display = 'block';
       return;
     }
-    localStorage.setItem(LICENSE_KEY, code);
-    window.apexActiveLicense = payload;
-    watch(payload);
-    if (typeof window.initExpiryClock === 'function') {
-      window.initExpiryClock(payload);
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Verifying & Activating...';
+    error.style.display = 'none';
+
+    try {
+      const payload = await verify(code);
+      if (!payload) {
+        error.textContent = 'Invalid, expired, or wrong-device activation code.';
+        error.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
+
+      localStorage.setItem(LICENSE_KEY, code);
+      window.apexActiveLicense = payload;
+      btn.style.background = '#16a34a';
+      btn.textContent = '✓ Activated! Opening POS...';
+
+      // Start watcher and online sync heartbeat
+      watch(payload);
+      window.addEventListener('online', performOnlineCheckin);
+      setInterval(performOnlineCheckin, 30 * 60 * 1000);
+      try { performOnlineCheckin(); } catch (e) {}
+
+      // Smooth fade-out of the activation gate overlay
+      gate.style.transition = 'opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1)';
+      gate.style.opacity = '0';
+
+      setTimeout(() => {
+        try { gate.remove(); } catch (e) {}
+        document.body.style.overflow = '';
+
+        if (typeof window.initExpiryClock === 'function') {
+          window.initExpiryClock(payload);
+        }
+        if (typeof updateShopDisplay === 'function') {
+          updateShopDisplay();
+        }
+        if (typeof render === 'function') {
+          render();
+        }
+        if (typeof show === 'function') {
+          show('billing');
+        }
+
+        const planName = payload.plan === 'trial' ? '7-Day Free Trial' : payload.plan === 'custom' ? 'Custom Plan' : payload.plan === 'yearly' ? 'Yearly Pro' : 'Monthly License';
+        if (typeof toast === 'function') {
+          toast(`✓ ${planName} Activated! Welcome to Apex POS.`);
+        }
+      }, 300);
+    } catch (err) {
+      error.textContent = 'Activation error: ' + (err.message || 'Please check code format');
+      error.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
-    performOnlineCheckin();
-    gate.remove();
-    document.body.style.overflow = '';
-    alert(`${payload.plan === 'trial' ? '7-day trial' : payload.plan === 'custom' ? 'Custom plan' : 'Monthly subscription'} activated successfully.`);
   };
 })();
 
@@ -340,6 +390,26 @@ db.shop.receiptFooter ||= 'Thank you for shopping with us! Returns accepted with
 db.shop.logo ||= 'harsh-apex-logo.png';
 db.shop.allowNegativeStock = Boolean(db.shop.allowNegativeStock);
 db.categories ||= ['General', 'Grocery', 'Beverages', 'Snacks', 'Bakery', 'Dairy & Frozen', 'Household', 'Personal Care', 'Other'];
+db.customers ||= [];
+if (Array.isArray(db.sales)) {
+  db.sales.forEach(s => {
+    if (s.creditCustomer && s.creditCustomer.trim()) {
+      const trimmed = s.creditCustomer.trim();
+      const exists = db.customers.some(c => c.name.toLowerCase() === trimmed.toLowerCase());
+      if (!exists) {
+        db.customers.push({
+          id: uid(),
+          name: trimmed,
+          phone: s.creditPhone || '',
+          address: '',
+          creditLimit: 0,
+          notes: 'Customer from sales record',
+          createdAt: s.at || new Date().toISOString()
+        });
+      }
+    }
+  });
+}
 db.products.forEach(p => {
   if (!p.category) p.category = 'General';
   if (!p.unit) p.unit = 'pcs';
@@ -572,12 +642,9 @@ window.setMobileBillingMode = setMobileBillingMode;
 
 function show(tab) {
   closePosDrawer();
+
   if (tab === 'customers') {
-    tab = 'reports';
-    setTimeout(() => {
-      const ledger = $('creditLedgerCard');
-      if (ledger) ledger.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    renderCustomers();
   }
 
   document.querySelectorAll('.panel').forEach(e => e.classList.toggle('active', e.id === tab));
@@ -1537,6 +1604,26 @@ $('checkout').onclick = () => {
 
   db.sales.push(sale);
 
+  if (isCredit && creditCustomer) {
+    db.customers ||= [];
+    const trimmed = creditCustomer.trim();
+    let cust = db.customers.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (!cust) {
+      cust = {
+        id: uid(),
+        name: trimmed,
+        phone: creditPhone || '',
+        address: '',
+        creditLimit: 0,
+        notes: 'Auto-added from Credit Bill ' + sale.number,
+        createdAt: new Date().toISOString()
+      };
+      db.customers.push(cust);
+    } else if (creditPhone && !cust.phone) {
+      cust.phone = creditPhone;
+    }
+  }
+
   if (!save()) {
     db = JSON.parse(backupDb);
     return;
@@ -2164,6 +2251,382 @@ $('creditList').onclick = e => {
   toast(`Payment settled for ${s.creditCustomer}!`);
 };
 
+// -------------------------------------------------------------
+// 10b. Customer Management & Dedicated Credit Ledger Subsystem
+// -------------------------------------------------------------
+let customerFilterMode = 'all'; // 'all', 'due', 'settled'
+
+function getCustomerBalance(customer) {
+  if (!customer) return { due: 0, settled: 0, bills: [], settledBills: [] };
+  const custName = (customer.name || '').trim().toLowerCase();
+  const custPhone = (customer.phone || '').trim();
+
+  const isMyBill = s => {
+    if (!s || !s.isCredit || s.status === 'voided') return false;
+    const billCust = (s.creditCustomer || '').trim().toLowerCase();
+    const billPhone = (s.creditPhone || '').trim();
+    return (billCust && billCust === custName) || (custPhone && billPhone && billPhone === custPhone);
+  };
+
+  const allMyCreditBills = (db.sales || []).filter(isMyBill);
+  const unpaidBills = allMyCreditBills.filter(s => !s.creditSettled);
+  const settledBills = allMyCreditBills.filter(s => s.creditSettled);
+
+  const due = unpaidBills.reduce((sum, s) => sum + (s.total || 0), 0);
+  const settled = settledBills.reduce((sum, s) => sum + (s.total || 0), 0);
+
+  return { due, settled, bills: unpaidBills, settledBills };
+}
+
+function renderCustomers() {
+  if (!$('customers')) return;
+  db.customers ||= [];
+
+  const allUnpaidCreditBills = (db.sales || []).filter(s => s.isCredit && !s.creditSettled && s.status !== 'voided');
+  const totalCreditDue = allUnpaidCreditBills.reduce((sum, s) => sum + (s.total || 0), 0);
+
+  // Compute KPI metrics
+  let dueAccounts = 0;
+  let settledAccounts = 0;
+  db.customers.forEach(c => {
+    const bal = getCustomerBalance(c);
+    if (bal.due > 0) dueAccounts++;
+    else settledAccounts++;
+  });
+
+  if ($('custTotalCount')) $('custTotalCount').textContent = db.customers.length;
+  if ($('custTotalDue')) $('custTotalDue').textContent = money(totalCreditDue);
+  if ($('custDueAccounts')) $('custDueAccounts').textContent = dueAccounts;
+  if ($('custSettledAccounts')) $('custSettledAccounts').textContent = settledAccounts;
+
+  // Datalist for autocomplete in billing panel
+  const datalist = $('posCustomerDatalist');
+  if (datalist) {
+    datalist.innerHTML = db.customers.map(c => `
+      <option value="${esc(c.name)}">${c.phone ? esc(c.phone) : ''}</option>
+    `).join('');
+  }
+
+  // Filter and search
+  const q = ($('posCustomerSearch') ? $('posCustomerSearch').value : '').toLowerCase().trim();
+  const filtered = db.customers.filter(c => {
+    const bal = getCustomerBalance(c);
+    if (customerFilterMode === 'due' && bal.due <= 0) return false;
+    if (customerFilterMode === 'settled' && bal.due > 0) return false;
+
+    if (!q) return true;
+    const nameMatch = (c.name || '').toLowerCase().includes(q);
+    const phoneMatch = (c.phone || '').toLowerCase().includes(q);
+    const addrMatch = (c.address || '').toLowerCase().includes(q);
+    return nameMatch || phoneMatch || addrMatch;
+  });
+
+  if ($('posCustomerCountPill')) {
+    $('posCustomerCountPill').textContent = `${filtered.length} Customer${filtered.length === 1 ? '' : 's'}`;
+  }
+
+  // Render Customer Cards List
+  const listEl = $('posCustomerList');
+  if (listEl) {
+    if (!filtered.length) {
+      listEl.innerHTML = `
+        <div class="empty" style="padding:28px 16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:6px">👥</div>
+          <b>${q ? 'No matching customers found' : 'No customers registered yet'}</b>
+          <p class="muted" style="margin:4px 0 0 0;font-size:13px">Use the form above to add a customer, or create a credit sale during checkout.</p>
+        </div>
+      `;
+    } else {
+      listEl.innerHTML = filtered.map(c => {
+        const bal = getCustomerBalance(c);
+        const hasDue = bal.due > 0;
+        const cleanPhone = (c.phone || '').replace(/[^0-9]/g, '');
+        const waPhone = cleanPhone.startsWith('0') ? '94' + cleanPhone.slice(1) : (cleanPhone.startsWith('94') ? cleanPhone : '94' + cleanPhone);
+        const waMsg = encodeURIComponent(
+          `Hello ${c.name},\n\nThis is a polite reminder from ${db.shop.name || 'Harsh Apex POS'}.\nYour current outstanding credit balance is ${money(bal.due)} (${bal.bills.length} unpaid bill${bal.bills.length === 1 ? '' : 's'}).\n\nPlease arrange settlement when convenient. Thank you!`
+        );
+        const waLink = `https://wa.me/${waPhone}?text=${waMsg}`;
+
+        return `
+          <div class="item" style="padding:14px 10px;border-bottom:1px solid #f1f5f9;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="flex:1;min-width:200px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <b style="font-size:15px;color:#0f172a;">${esc(c.name)}</b>
+                ${hasDue ? `<span class="pill credit" style="font-size:11px;font-weight:700">Due: ${money(bal.due)}</span>` : `<span class="pill settled" style="font-size:11px">✓ Settled</span>`}
+              </div>
+              <div class="muted" style="font-size:12px;margin-top:3px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;">
+                ${c.phone ? `<a href="tel:${esc(c.phone)}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:3px">📞 ${esc(c.phone)}</a>` : '<span>No phone</span>'}
+                ${c.address ? `<span>📍 ${esc(c.address)}</span>` : ''}
+                ${c.creditLimit ? `<span>Limit: ${money(c.creditLimit)}</span>` : ''}
+              </div>
+              ${c.notes ? `<div class="muted" style="font-size:11px;font-style:italic;margin-top:2px">${esc(c.notes)}</div>` : ''}
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              ${hasDue && c.phone ? `
+                <a href="${waLink}" target="_blank" class="secondary" style="padding:6px 10px;font-size:12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;text-decoration:none;border-radius:8px;display:inline-flex;align-items:center;gap:4px">
+                  💬 WhatsApp
+                </a>
+              ` : ''}
+              ${hasDue ? `
+                <button type="button" class="primary" data-cust-settle-all="${esc(c.id)}" style="padding:6px 12px;font-size:12px">
+                  💵 Settle (${money(bal.due)})
+                </button>
+              ` : ''}
+              <button type="button" class="secondary" data-cust-edit="${esc(c.id)}" style="padding:6px 9px;font-size:12px" title="Edit Customer">
+                ✏️ Edit
+              </button>
+              <button type="button" class="danger" data-cust-delete="${esc(c.id)}" style="padding:6px 8px;font-size:12px" title="Delete Customer">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Render Active Credit Bills Ledger Table
+  const billsListEl = $('posCreditBillsList');
+  if (billsListEl) {
+    if ($('posCreditBillsCountPill')) {
+      $('posCreditBillsCountPill').textContent = `${allUnpaidCreditBills.length} Bill${allUnpaidCreditBills.length === 1 ? '' : 's'} (${money(totalCreditDue)})`;
+    }
+
+    if (!allUnpaidCreditBills.length) {
+      billsListEl.innerHTML = `
+        <div class="empty" style="padding:20px;text-align:center;">
+          <p class="muted" style="margin:0;font-size:13px">✓ All customer credit bills have been settled! No pending dues.</p>
+        </div>
+      `;
+    } else {
+      billsListEl.innerHTML = allUnpaidCreditBills.slice().reverse().map(s => `
+        <div class="item" style="padding:12px 10px;border-bottom:1px solid #f1f5f9;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="flex:1;min-width:180px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <b style="font-size:14px;color:#0f172a;">${esc(s.creditCustomer || 'Customer')}</b>
+              <span class="pill credit" style="font-size:10px">${esc(s.number)}</span>
+            </div>
+            <div class="muted" style="font-size:12px;margin-top:2px;">
+              ${esc(s.creditPhone || 'No phone')} · ${esc(s.date)} · ${s.items.length} items
+            </div>
+          </div>
+          <b style="color:#b45309;font-size:15px;margin-right:6px;">${money(s.total)}</b>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="primary" data-cust-bill-settle="${esc(s.id)}" style="padding:6px 12px;font-size:12px">
+              ✓ Settle (ගෙවන්න)
+            </button>
+            <button type="button" class="secondary" data-cust-bill-view="${esc(s.id)}" style="padding:6px 9px;font-size:12px">
+              🧾 View
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+// Customer filter chips event listeners
+const custFilterButtons = document.querySelectorAll('#customerFilterChips [data-cust-filter]');
+custFilterButtons.forEach(btn => {
+  btn.onclick = () => {
+    custFilterButtons.forEach(b => b.classList.toggle('active', b === btn));
+    customerFilterMode = btn.dataset.custFilter;
+    renderCustomers();
+  };
+});
+
+if ($('posCustomerSearch')) {
+  $('posCustomerSearch').addEventListener('input', () => renderCustomers());
+}
+
+if ($('creditCustomer')) {
+  $('creditCustomer').addEventListener('input', () => {
+    const val = $('creditCustomer').value.trim().toLowerCase();
+    const found = (db.customers || []).find(c => c.name.toLowerCase() === val);
+    if (found && found.phone && $('creditPhone') && !$('creditPhone').value) {
+      $('creditPhone').value = found.phone;
+    }
+  });
+}
+
+if ($('btnNewCustomerShortcut')) {
+  $('btnNewCustomerShortcut').onclick = () => {
+    $('posCustId').value = '';
+    $('posCustName').value = '';
+    $('posCustPhone').value = '';
+    $('posCustAddress').value = '';
+    $('posCustCreditLimit').value = '';
+    $('posCustNotes').value = '';
+    if ($('customerFormTitle')) $('customerFormTitle').textContent = 'Add New Customer (නව පාරිභෝගිකයෙකු ඇතුළත් කරන්න)';
+    const card = $('customerFormCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth' });
+    $('posCustName').focus();
+  };
+}
+
+if ($('btnCancelCustomerEdit')) {
+  $('btnCancelCustomerEdit').onclick = () => {
+    $('posCustId').value = '';
+    $('posCustName').value = '';
+    $('posCustPhone').value = '';
+    $('posCustAddress').value = '';
+    $('posCustCreditLimit').value = '';
+    $('posCustNotes').value = '';
+    if ($('customerFormTitle')) $('customerFormTitle').textContent = 'Add New Customer (නව පාරිභෝගිකයෙකු ඇතුළත් කරන්න)';
+  };
+}
+
+if ($('posCustomerForm')) {
+  $('posCustomerForm').onsubmit = e => {
+    e.preventDefault();
+    const id = $('posCustId').value;
+    const name = $('posCustName').value.trim();
+    if (!name) return alert('Customer Name is required.');
+
+    const phone = $('posCustPhone').value.trim();
+    const address = $('posCustAddress').value.trim();
+    const creditLimit = parseFloat($('posCustCreditLimit').value) || 0;
+    const notes = $('posCustNotes').value.trim();
+
+    db.customers ||= [];
+    if (id) {
+      const cust = db.customers.find(c => c.id === id);
+      if (cust) {
+        cust.name = name;
+        cust.phone = phone;
+        cust.address = address;
+        cust.creditLimit = creditLimit;
+        cust.notes = notes;
+        cust.updatedAt = new Date().toISOString();
+      }
+    } else {
+      const dup = db.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+      if (dup) {
+        if (!confirm(`A customer named "${name}" already exists. Save anyway?`)) return;
+      }
+      db.customers.push({
+        id: uid(),
+        name,
+        phone,
+        address,
+        creditLimit,
+        notes,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    save();
+    render();
+    toast(`✓ Customer "${name}" saved!`);
+    $('btnCancelCustomerEdit').click();
+  };
+}
+
+// Click handling for customer directory list
+if ($('posCustomerList')) {
+  $('posCustomerList').onclick = e => {
+    // Settle All Credit for Customer
+    const settleAllId = e.target.closest('[data-cust-settle-all]')?.dataset.custSettleAll;
+    if (settleAllId) {
+      const cust = db.customers.find(c => c.id === settleAllId);
+      if (!cust) return;
+      const bal = getCustomerBalance(cust);
+      if (bal.due <= 0) return alert('This customer has no outstanding credit balance.');
+
+      const method = prompt(
+        `Settle TOTAL outstanding credit of Rs. ${bal.due.toFixed(2)} from ${cust.name}?\n(${bal.bills.length} pending bill${bal.bills.length === 1 ? '' : 's'})\n\nEnter Payment Method: Cash, Card, or Bank Transfer:`,
+        'Cash'
+      );
+      if (!method) return;
+
+      const settledAt = new Date().toISOString();
+      bal.bills.forEach(s => {
+        s.creditSettled = true;
+        s.creditSettledAt = settledAt;
+        s.settleMethod = method.trim();
+        s.profit = s.items.reduce((sum, x) => sum + (x.price - x.cost) * x.qty, 0) - s.discount;
+      });
+
+      save();
+      render();
+      toast(`✓ All credit bills settled for ${cust.name}!`);
+      return;
+    }
+
+    // Edit Customer
+    const editId = e.target.closest('[data-cust-edit]')?.dataset.custEdit;
+    if (editId) {
+      const cust = db.customers.find(c => c.id === editId);
+      if (!cust) return;
+      $('posCustId').value = cust.id;
+      $('posCustName').value = cust.name;
+      $('posCustPhone').value = cust.phone || '';
+      $('posCustAddress').value = cust.address || '';
+      $('posCustCreditLimit').value = cust.creditLimit || '';
+      $('posCustNotes').value = cust.notes || '';
+      if ($('customerFormTitle')) $('customerFormTitle').textContent = `Edit Customer: ${cust.name}`;
+      const card = $('customerFormCard');
+      if (card) card.scrollIntoView({ behavior: 'smooth' });
+      $('posCustName').focus();
+      return;
+    }
+
+    // Delete Customer
+    const delId = e.target.closest('[data-cust-delete]')?.dataset.custDelete;
+    if (delId) {
+      const cust = db.customers.find(c => c.id === delId);
+      if (!cust) return;
+      const bal = getCustomerBalance(cust);
+      if (bal.due > 0) {
+        return alert(`Cannot delete "${cust.name}" because they have an outstanding credit balance of Rs. ${bal.due.toFixed(2)}. Please settle all dues first.`);
+      }
+      if (!confirm(`Delete customer "${cust.name}"? Past settled bills will remain in sales history.`)) return;
+      db.customers = db.customers.filter(c => c.id !== delId);
+      save();
+      render();
+      toast(`Customer "${cust.name}" removed.`);
+      return;
+    }
+  };
+}
+
+// Click handling for active credit bills list
+if ($('posCreditBillsList')) {
+  $('posCreditBillsList').onclick = e => {
+    const settleBillId = e.target.closest('[data-cust-bill-settle]')?.dataset.custBillSettle;
+    if (settleBillId) {
+      const s = db.sales.find(x => x.id === settleBillId);
+      if (!s) return;
+      const method = prompt(
+        `Settle Bill ${s.number} (Rs. ${s.total.toFixed(2)}) from ${s.creditCustomer || 'Customer'}?\nEnter Payment Method: Cash, Card, or Bank Transfer:`,
+        'Cash'
+      );
+      if (!method) return;
+
+      s.creditSettled = true;
+      s.creditSettledAt = new Date().toISOString();
+      s.settleMethod = method.trim();
+      s.profit = s.items.reduce((sum, x) => sum + (x.price - x.cost) * x.qty, 0) - s.discount;
+
+      save();
+      render();
+      toast(`✓ Bill ${s.number} settled for ${s.creditCustomer}!`);
+      return;
+    }
+
+    const viewBillId = e.target.closest('[data-cust-bill-view]')?.dataset.custBillView;
+    if (viewBillId) {
+      const s = db.sales.find(x => x.id === viewBillId);
+      if (s && typeof openBillModal === 'function') {
+        openBillModal(s);
+      }
+      return;
+    }
+  };
+}
+
 function renderSalesHistory(sales) {
   $('reportList').innerHTML = sales.slice().reverse().map(s => {
     let statusPill = '';
@@ -2710,6 +3173,7 @@ if (clearPosBtn) {
     if (!confirm('Are you sure you want to completely clear all products, sales history, and customer records? This will reset the POS to a clean production state.')) return;
     db.products = [];
     db.sales = [];
+    db.customers = [];
     db.debts = [];
     db.holdBills = [];
     cart = [];
@@ -2737,6 +3201,7 @@ function render() {
   renderProducts();
   renderBillProducts();
   renderCart();
+  renderCustomers();
   renderReports();
   renderSnapshots();
 }

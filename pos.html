@@ -1204,7 +1204,8 @@
           <div id="creditSection" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:12px;margin:10px 0">
             <b>Customer Credit Details (ණය විස්තර)</b>
             <label style="margin-top:6px">Customer Name *</label>
-            <input id="creditCustomer" placeholder="Enter customer name">
+            <input id="creditCustomer" placeholder="Enter or select customer name" list="posCustomerDatalist" autocomplete="off">
+            <datalist id="posCustomerDatalist"></datalist>
             <label>Customer Phone (optional)</label>
             <input id="creditPhone" type="tel" placeholder="07X XXXXXXX">
           </div>
@@ -1306,6 +1307,95 @@
           <button id="btnExportReportCsv" class="secondary" style="padding:4px 8px;font-size:12px">📥 Export Report</button>
         </div>
         <div id="reportList"></div>
+      </div>
+    </section>
+
+    <!-- 4b. CUSTOMERS & CREDIT LEDGER -->
+    <section id="customers" class="panel">
+      <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2>👥 Customers &amp; Credit Ledger (පාරිභෝගික ණය පොත)</h2>
+        <button id="btnNewCustomerShortcut" class="primary" type="button" style="padding:7px 12px;font-size:13px;font-weight:700">
+          ➕ New Customer
+        </button>
+      </div>
+
+      <!-- Customer KPI Summary Cards -->
+      <div class="stats stats-4" style="margin-bottom:12px">
+        <div class="stat"><span>Total Customers</span><strong id="custTotalCount">0</strong></div>
+        <div class="stat warn"><span>Total Credit Due</span><strong id="custTotalDue">Rs. 0</strong></div>
+        <div class="stat danger"><span>Unsettled Accounts</span><strong id="custDueAccounts">0</strong></div>
+        <div class="stat"><span>Settled Accounts</span><strong id="custSettledAccounts">0</strong></div>
+      </div>
+
+      <!-- Add / Edit Customer Card -->
+      <div class="card" id="customerFormCard">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 id="customerFormTitle" style="margin:0">Add New Customer (නව පාරිභෝගිකයෙකු ඇතුළත් කරන්න)</h3>
+          <span class="muted" style="font-size:12px">Credit Ledger &amp; Profile</span>
+        </div>
+        <form id="posCustomerForm">
+          <input type="hidden" id="posCustId">
+          <div class="flex">
+            <div class="grow">
+              <label>Full Name / Business Name *</label>
+              <input id="posCustName" required placeholder="e.g. Nimal Perera / City Grocery">
+            </div>
+            <div class="grow">
+              <label>Phone / WhatsApp Number</label>
+              <input id="posCustPhone" type="tel" placeholder="e.g. 077 123 4567">
+            </div>
+          </div>
+
+          <div class="flex">
+            <div class="grow">
+              <label>Address / Location</label>
+              <input id="posCustAddress" placeholder="e.g. No 12, Temple Road, Colombo">
+            </div>
+            <div class="grow">
+              <label>Credit Limit (ණය සීමාව - Rs.)</label>
+              <input id="posCustCreditLimit" type="number" min="0" step="100" placeholder="e.g. 25000">
+            </div>
+          </div>
+
+          <label>Notes / Remarks (අමතර සටහන්)</label>
+          <input id="posCustNotes" placeholder="Optional notes (e.g. Regular wholesale buyer)">
+
+          <div class="actions">
+            <button class="primary" type="submit" id="btnSaveCustomer">💾 Save Customer</button>
+            <button class="secondary" type="button" id="btnCancelCustomerEdit">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Customer Directory List & Search -->
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Customer Directory (පාරිභෝගික නාමාවලිය)</h3>
+          <span class="pill category" id="posCustomerCountPill">0 Customers</span>
+        </div>
+
+        <!-- Filter Chips: All, Has Credit Due, Settled -->
+        <div class="chips" id="customerFilterChips" style="margin-bottom:8px">
+          <button type="button" class="chip active" data-cust-filter="all">All Customers</button>
+          <button type="button" class="chip" data-cust-filter="due">⚠️ Has Credit Due</button>
+          <button type="button" class="chip" data-cust-filter="settled">✓ Settled / Clear</button>
+        </div>
+
+        <input id="posCustomerSearch" placeholder="Search customer by name, phone or address...">
+
+        <div id="posCustomerList" style="margin-top:10px"></div>
+      </div>
+
+      <!-- Active Credit Bills Ledger (නොගෙවූ ණය බිල්පත් ලේඛනය) -->
+      <div class="card" id="creditBillsCard">
+        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <h3 style="margin:0">Active Credit Bills (නොගෙවූ ණය බිල්පත් ලේඛනය)</h3>
+            <p class="muted" style="margin:2px 0 0 0;font-size:12px">One-tap settlement and payment tracking</p>
+          </div>
+          <span class="pill credit" id="posCreditBillsCountPill">0 Bills</span>
+        </div>
+        <div id="posCreditBillsList"></div>
       </div>
     </section>
 
@@ -1747,6 +1837,10 @@
     <button data-tab="reports">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
       Reports
+    </button>
+    <button data-tab="customers">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      Customers
     </button>
     <button data-tab="settings">
       <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
