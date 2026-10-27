@@ -10,6 +10,7 @@
  * - Static Files        -> POS App, Admin Portal, Landing Page, Assets
  */
 
+require('./lib/env');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -24,6 +25,8 @@ const licensesHandler = require('./api/licenses');
 const devicesHandler = require('./api/devices');
 const paymentsHandler = require('./api/payments');
 const firebaseTokenHandler = require('./api/firebase-token');
+const checkoutHandler = require('./api/checkout');
+const webhookHandler = require('./api/webhooks/payments-lk');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const ROOT_DIR = __dirname;
@@ -60,6 +63,7 @@ function parseRequestBody(req) {
       }
     });
     req.on('end', () => {
+      req.rawBody = raw;
       if (!raw) return resolve({});
       const contentType = req.headers['content-type'] || '';
       if (contentType.includes('application/json') || raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
@@ -170,6 +174,16 @@ const server = http.createServer(async (req, res) => {
     return firebaseTokenHandler(req, res);
   }
 
+  if (pathname === '/api/checkout' || pathname.startsWith('/api/checkout/')) {
+    req.body = await parseRequestBody(req);
+    return checkoutHandler(req, res);
+  }
+
+  if (pathname === '/api/webhooks/payments-lk' || pathname === '/api/webhook' || pathname.startsWith('/api/webhooks/')) {
+    req.body = await parseRequestBody(req);
+    return webhookHandler(req, res);
+  }
+
   // Static File Routing
   let targetFile = pathname;
   if (targetFile === '/' || targetFile === '') {
@@ -178,6 +192,12 @@ const server = http.createServer(async (req, res) => {
     targetFile = '/admin.html';
   } else if (targetFile === '/pos' || targetFile === '/app') {
     targetFile = '/app.html';
+  } else if (targetFile === '/payment-success') {
+    targetFile = '/payment-success.html';
+  } else if (targetFile === '/payment-cancel') {
+    targetFile = '/payment-cancel.html';
+  } else if (targetFile === '/payment-failed') {
+    targetFile = '/payment-failed.html';
   } else if (targetFile === '/refund-policy') {
     targetFile = '/refund-policy.html';
   } else if (targetFile === '/privacy-policy') {

@@ -5,13 +5,15 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test-licensing-system.js && node test-server-api.js && node test-firebase-identity-bridge.js",
+    "test": "node test-licensing-system.js && node test-server-api.js && node test-firebase-identity-bridge.js && node test-payments-lk.js",
+    "test:payments": "node test-payments-lk.js",
     "test:sync": "node test-storage-sync.js",
     "test:firebase": "node test-firebase-identity-bridge.js",
-    "test:all": "node test-all.js && node test-storage-sync.js && node test-firebase-identity-bridge.js",
+    "test:all": "node test-all.js && node test-storage-sync.js && node test-firebase-identity-bridge.js && node test-payments-lk.js",
     "build:desktop": "node scripts/build-desktop.js"
   },
   "dependencies": {
+    "@payments-lk/node": "^0.4.1",
     "@supabase/supabase-js": "^2.49.1"
   },
   "engines": {

@@ -4,6 +4,8 @@ service-account*.json
 *.pem
 *.key
 .env*
+env.local
+env.*
 
 # Node / Scratch
 node_modules/

@@ -57,20 +57,38 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'POST') {
       const body = req.body || {};
+      let checkoutInfo = null;
+
+      if (body.generateCheckoutLink || body.createCheckout || body.paymentMethod === 'payments.lk_link') {
+        const { PaymentsLk } = require('@payments-lk/node');
+        const lk = new PaymentsLk(process.env.PAYMENTS_LK_SECRET_KEY || 'sk_test_0yF21CdEf0p2juSe3ZFJwCDy3M9GAM4b');
+        const amt = parseFloat(body.amount || body.amount_lkr || 2500);
+        const ref = body.reference || `ADMIN-${body.licenseId || 'SUB'}-${Date.now()}`;
+        const chk = await lk.checkouts.create({
+          amountCents: Math.round(amt * 100),
+          description: `Harsh Apex POS - License Payment (${body.licenseId || 'Subscription'})`,
+          reference: ref,
+          successUrl: 'https://pos.harshapex.com.lk/payment-success?ref=' + encodeURIComponent(ref),
+          cancelUrl: 'https://pos.harshapex.com.lk/payment-cancel'
+        }, { idempotencyKey: 'admin-chk-' + ref });
+        checkoutInfo = { id: chk.id, url: chk.url };
+      }
+
       const payment = await db.recordPayment({
         licenseId: body.licenseId || body.subscriptionId,
         customerName: body.customerName,
         amount: body.amount || body.amount_lkr,
         paymentMethod: body.paymentMethod || body.method || 'cash',
-        reference: body.reference || body.paymentReference,
-        notes: body.notes,
-        status: body.status || 'paid',
+        reference: checkoutInfo ? checkoutInfo.id : (body.reference || body.paymentReference),
+        notes: checkoutInfo ? `Payments.lk Checkout Link: ${checkoutInfo.url} | ${body.notes || ''}` : body.notes,
+        status: checkoutInfo ? 'pending' : (body.status || 'paid'),
         adminEmail
       });
 
       return sendJson(res, 201, {
         success: true,
-        payment
+        payment,
+        checkout: checkoutInfo
       });
     }
 

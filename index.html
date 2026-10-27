@@ -353,6 +353,26 @@
           <button type="button" class="lang-btn" data-lang="en">English</button>
         </div>
 
+        <!-- Online Card Payment Button -->
+        <button type="button" class="btn btn-pay-now-action" data-plan="monthly" style="background:rgba(15,23,42,0.85);border:1px solid rgba(45,212,191,0.4);color:#f8fafc;padding:6px 12px;border-radius:10px;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s ease;" title="Pay Online with Visa, Mastercard or Payments.lk">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <!-- Visa -->
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:3px;padding:1px 3px;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
+              <svg width="24" height="14" viewBox="0 0 48 32"><path d="M19.4 21.6h-2.7l1.7-10.4h2.7l-1.7 10.4zm11.2-10.1c-.6-.2-1.4-.4-2.5-.4-2.8 0-4.7 1.5-4.7 3.6 0 1.6 1.4 2.4 2.5 2.9 1.1.5 1.5.9 1.5 1.3 0 .7-.9 1-1.7 1-1.1 0-1.8-.2-2.7-.6l-.4-.2-.4 2.4c.7.3 1.9.6 3.2.6 3 0 4.9-1.5 4.9-3.7 0-1.2-.7-2.2-2.3-2.9-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.3zm7.4 0h-2.1c-.6 0-1.1.2-1.4 1l-3.9 9.1h2.8l.6-1.5h3.4l.3 1.5h2.5l-2.2-10.1zm-3.3 6.6l1.4-3.8.8 3.8h-2.2zm-18-6.6l-2.6 7.1-.3-1.4c-.5-1.7-2.1-3.6-3.9-4.5l2.5 8.9h2.8l4.2-10.1h-2.7z" fill="#1434CB"/><path d="M8.3 11.2H4.1l-.1.4c3.2.8 5.4 2.8 6.2 5.1l-.9-4.5c-.2-.7-.6-1-1-1z" fill="#F8A01A"/></svg>
+            </span>
+            <!-- Mastercard -->
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#1e293b;border-radius:3px;padding:1px 3px;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
+              <svg width="22" height="14" viewBox="0 0 48 32"><circle cx="18" cy="16" r="9" fill="#EB001B"/><circle cx="30" cy="16" r="9" fill="#F79E1B"/><path d="M24 10.6c1.6 1.4 2.6 3.4 2.6 5.4s-1 4-2.6 5.4c-1.6-1.4-2.6-3.4-2.6-5.4s1-4 2.6-5.4z" fill="#FF5F00"/></svg>
+            </span>
+            <!-- Payments.lk -->
+            <span style="display:inline-flex;align-items:center;gap:3px;background:#fff;border-radius:3px;padding:1px 5px;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
+              <svg width="12" height="12" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#006EA7"/><path d="M7 16h18M16 7v18" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><circle cx="16" cy="16" r="4.5" fill="#00D2B4"/></svg>
+              <span style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:9.5px;color:#0f172a;letter-spacing:-0.03em;">Payments<span style="color:#006ea7">.lk</span></span>
+            </span>
+          </div>
+          <span>Pay Online</span>
+        </button>
+
         <!-- Primary POS Launch Button -->
         <a href="app.html" class="btn btn-primary pos-launch-btn">
           <span data-i18n="nav_launch">POS විවෘත කරන්න</span>
@@ -417,6 +437,21 @@
         </svg>
       </a>
 
+      <!-- Mobile Drawer Pay Online Button -->
+      <button type="button" class="btn btn-pay-now-action" data-plan="monthly" style="width:100%;margin-top:8px;background:rgba(15,23,42,0.85);border:1px solid rgba(45,212,191,0.4);color:#f8fafc;padding:9px 12px;border-radius:10px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:3px;padding:1px 3px;">
+          <svg width="22" height="13" viewBox="0 0 48 32"><path d="M19.4 21.6h-2.7l1.7-10.4h2.7l-1.7 10.4zm11.2-10.1c-.6-.2-1.4-.4-2.5-.4-2.8 0-4.7 1.5-4.7 3.6 0 1.6 1.4 2.4 2.5 2.9 1.1.5 1.5.9 1.5 1.3 0 .7-.9 1-1.7 1-1.1 0-1.8-.2-2.7-.6l-.4-.2-.4 2.4c.7.3 1.9.6 3.2.6 3 0 4.9-1.5 4.9-3.7 0-1.2-.7-2.2-2.3-2.9-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.3zm7.4 0h-2.1c-.6 0-1.1.2-1.4 1l-3.9 9.1h2.8l.6-1.5h3.4l.3 1.5h2.5l-2.2-10.1zm-3.3 6.6l1.4-3.8.8 3.8h-2.2zm-18-6.6l-2.6 7.1-.3-1.4c-.5-1.7-2.1-3.6-3.9-4.5l2.5 8.9h2.8l4.2-10.1h-2.7z" fill="#1434CB"/><path d="M8.3 11.2H4.1l-.1.4c3.2.8 5.4 2.8 6.2 5.1l-.9-4.5c-.2-.7-.6-1-1-1z" fill="#F8A01A"/></svg>
+        </span>
+        <span style="display:inline-flex;align-items:center;justify-content:center;background:#1e293b;border-radius:3px;padding:1px 3px;">
+          <svg width="20" height="13" viewBox="0 0 48 32"><circle cx="18" cy="16" r="9" fill="#EB001B"/><circle cx="30" cy="16" r="9" fill="#F79E1B"/><path d="M24 10.6c1.6 1.4 2.6 3.4 2.6 5.4s-1 4-2.6 5.4c-1.6-1.4-2.6-3.4-2.6-5.4s1-4 2.6-5.4z" fill="#FF5F00"/></svg>
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:3px;background:#fff;border-radius:3px;padding:1px 5px;">
+          <svg width="12" height="12" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#006EA7"/><path d="M7 16h18M16 7v18" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><circle cx="16" cy="16" r="4.5" fill="#00D2B4"/></svg>
+          <span style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:9.5px;color:#0f172a;">Payments<span style="color:#006ea7">.lk</span></span>
+        </span>
+        <span>💳 Pay Online</span>
+      </button>
+
       <!-- WhatsApp Help -->
       <div class="drawer-contact-card">
         <span style="font-size:12px;color:var(--text-muted)">ක්ෂණික තාක්ෂණික සහය (WhatsApp):</span>
@@ -466,6 +501,51 @@
               </svg>
               <span data-i18n="hero_cta_secondary">ස්ථාපනය කරන අයුරු (Android / iPhone)</span>
             </a>
+          </div>
+
+          <!-- Interactive Real Payment Badges (Visa, Mastercard, Payments.lk) -->
+          <div class="hero-payments-trust btn-pay-now-action" data-plan="monthly" style="margin-top:22px;margin-bottom:20px;padding:12px 18px;background:rgba(15,23,42,0.75);border:1px solid rgba(45,212,191,0.3);border-radius:14px;display:inline-flex;align-items:center;gap:14px;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 10px 25px -5px rgba(0,0,0,0.4);transition:all 0.25s ease;" title="Click to pay online via Payments.lk">
+            <div style="display:flex;flex-direction:column;text-align:left;">
+              <span style="font-size:10px;font-weight:700;color:#2dd4bf;text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:5px;">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;"></span>
+                Online Card Payment
+              </span>
+              <span style="font-size:12px;font-weight:600;color:#f8fafc;">Instant License Activation</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;">
+              <!-- Real Visa Card Badge -->
+              <div class="card-icon-pill" title="Pay with Visa" style="width:48px;height:30px;background:#ffffff;border-radius:5px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35);overflow:hidden;padding:2px 4px;box-sizing:border-box;">
+                <svg width="40" height="24" viewBox="0 0 48 32">
+                  <path d="M19.4 21.6h-2.7l1.7-10.4h2.7l-1.7 10.4zm11.2-10.1c-.6-.2-1.4-.4-2.5-.4-2.8 0-4.7 1.5-4.7 3.6 0 1.6 1.4 2.4 2.5 2.9 1.1.5 1.5.9 1.5 1.3 0 .7-.9 1-1.7 1-1.1 0-1.8-.2-2.7-.6l-.4-.2-.4 2.4c.7.3 1.9.6 3.2.6 3 0 4.9-1.5 4.9-3.7 0-1.2-.7-2.2-2.3-2.9-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.3zm7.4 0h-2.1c-.6 0-1.1.2-1.4 1l-3.9 9.1h2.8l.6-1.5h3.4l.3 1.5h2.5l-2.2-10.1zm-3.3 6.6l1.4-3.8.8 3.8h-2.2zm-18-6.6l-2.6 7.1-.3-1.4c-.5-1.7-2.1-3.6-3.9-4.5l2.5 8.9h2.8l4.2-10.1h-2.7z" fill="#1434CB"/>
+                  <path d="M8.3 11.2H4.1l-.1.4c3.2.8 5.4 2.8 6.2 5.1l-.9-4.5c-.2-.7-.6-1-1-1z" fill="#F8A01A"/>
+                </svg>
+              </div>
+
+              <!-- Real Mastercard Badge -->
+              <div class="card-icon-pill" title="Pay with Mastercard" style="width:48px;height:30px;background:#1e293b;border-radius:5px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35);overflow:hidden;box-sizing:border-box;">
+                <svg width="40" height="24" viewBox="0 0 48 32">
+                  <circle cx="18" cy="16" r="9" fill="#EB001B"/>
+                  <circle cx="30" cy="16" r="9" fill="#F79E1B"/>
+                  <path d="M24 10.6c1.6 1.4 2.6 3.4 2.6 5.4s-1 4-2.6 5.4c-1.6-1.4-2.6-3.4-2.6-5.4s1-4 2.6-5.4z" fill="#FF5F00"/>
+                </svg>
+              </div>
+
+              <!-- Real Payments.lk Gateway Badge -->
+              <div class="card-icon-pill" title="Powered by Payments.lk" style="height:30px;padding:0 9px;background:#ffffff;border-radius:5px;display:flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(0,0,0,0.35);box-sizing:border-box;">
+                <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="6" fill="#006EA7"/>
+                  <path d="M7 16h18M16 7v18" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="4.5" fill="#00D2B4"/>
+                </svg>
+                <span style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:11px;color:#0f172a;letter-spacing:-0.03em;">Payments<span style="color:#006ea7">.lk</span></span>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:4px;color:#2dd4bf;font-weight:700;font-size:12px;background:rgba(45,212,191,0.12);padding:6px 12px;border-radius:20px;border:1px solid rgba(45,212,191,0.25);">
+              <span>💳 Pay Now</span>
+              <span style="font-size:14px;">→</span>
+            </div>
           </div>
 
           <div class="hero-trust-bar">
@@ -1517,6 +1597,36 @@
               </ul>
             </div>
 
+            <!-- Clickable Accepted Payment Badges Row (Plan 2 - Business Pro) -->
+            <div class="pricing-card-accepted-payments btn-pay-now-action" data-plan="monthly" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 12px;margin-bottom:12px;background:rgba(15,23,42,0.65);border:1px solid rgba(45,212,191,0.3);border-radius:10px;cursor:pointer;transition:transform 0.2s ease, border-color 0.2s ease;" title="Click to pay via Visa, Mastercard or Payments.lk">
+              <span style="font-size:11px;font-weight:700;color:var(--emerald-mint);margin-right:2px;letter-spacing:0.02em;">Accepted Cards:</span>
+              <div style="width:38px;height:24px;background:#ffffff;border-radius:4px;display:flex;align-items:center;justify-content:center;padding:1px 3px;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="34" height="20" viewBox="0 0 48 32">
+                  <path d="M19.4 21.6h-2.7l1.7-10.4h2.7l-1.7 10.4zm11.2-10.1c-.6-.2-1.4-.4-2.5-.4-2.8 0-4.7 1.5-4.7 3.6 0 1.6 1.4 2.4 2.5 2.9 1.1.5 1.5.9 1.5 1.3 0 .7-.9 1-1.7 1-1.1 0-1.8-.2-2.7-.6l-.4-.2-.4 2.4c.7.3 1.9.6 3.2.6 3 0 4.9-1.5 4.9-3.7 0-1.2-.7-2.2-2.3-2.9-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.3zm7.4 0h-2.1c-.6 0-1.1.2-1.4 1l-3.9 9.1h2.8l.6-1.5h3.4l.3 1.5h2.5l-2.2-10.1zm-3.3 6.6l1.4-3.8.8 3.8h-2.2zm-18-6.6l-2.6 7.1-.3-1.4c-.5-1.7-2.1-3.6-3.9-4.5l2.5 8.9h2.8l4.2-10.1h-2.7z" fill="#1434CB"/>
+                  <path d="M8.3 11.2H4.1l-.1.4c3.2.8 5.4 2.8 6.2 5.1l-.9-4.5c-.2-.7-.6-1-1-1z" fill="#F8A01A"/>
+                </svg>
+              </div>
+              <div style="width:38px;height:24px;background:#1e293b;border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="32" height="20" viewBox="0 0 48 32">
+                  <circle cx="18" cy="16" r="9" fill="#EB001B"/>
+                  <circle cx="30" cy="16" r="9" fill="#F79E1B"/>
+                  <path d="M24 10.6c1.6 1.4 2.6 3.4 2.6 5.4s-1 4-2.6 5.4c-1.6-1.4-2.6-3.4-2.6-5.4s1-4 2.6-5.4z" fill="#FF5F00"/>
+                </svg>
+              </div>
+              <div style="height:24px;padding:0 7px;background:#ffffff;border-radius:4px;display:flex;align-items:center;gap:4px;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="4" fill="#006EA7"/>
+                  <path d="M7 16h18M16 7v18" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="4.5" fill="#00D2B4"/>
+                </svg>
+                <span style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:10px;color:#0f172a;letter-spacing:-0.03em;">Payments<span style="color:#006ea7">.lk</span></span>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-pay-now-action" data-plan="monthly" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#0ea5e9 0%,#059669 100%);border:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+              <span>💳 Pay Now (Payments.lk)</span>
+            </button>
             <a href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-whatsapp wa-contact-link" style="width:100%;">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
               <span data-i18n="plan_2_btn">WhatsApp මගින් ලබාගන්න</span>
@@ -1559,6 +1669,36 @@
               </ul>
             </div>
 
+            <!-- Clickable Accepted Payment Badges Row (Plan 3 - Annual Super Saver) -->
+            <div class="pricing-card-accepted-payments btn-pay-now-action" data-plan="yearly" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 12px;margin-bottom:12px;background:rgba(15,23,42,0.65);border:1px solid rgba(45,212,191,0.3);border-radius:10px;cursor:pointer;transition:transform 0.2s ease, border-color 0.2s ease;" title="Click to pay via Visa, Mastercard or Payments.lk">
+              <span style="font-size:11px;font-weight:700;color:var(--emerald-mint);margin-right:2px;letter-spacing:0.02em;">Accepted Cards:</span>
+              <div style="width:38px;height:24px;background:#ffffff;border-radius:4px;display:flex;align-items:center;justify-content:center;padding:1px 3px;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="34" height="20" viewBox="0 0 48 32">
+                  <path d="M19.4 21.6h-2.7l1.7-10.4h2.7l-1.7 10.4zm11.2-10.1c-.6-.2-1.4-.4-2.5-.4-2.8 0-4.7 1.5-4.7 3.6 0 1.6 1.4 2.4 2.5 2.9 1.1.5 1.5.9 1.5 1.3 0 .7-.9 1-1.7 1-1.1 0-1.8-.2-2.7-.6l-.4-.2-.4 2.4c.7.3 1.9.6 3.2.6 3 0 4.9-1.5 4.9-3.7 0-1.2-.7-2.2-2.3-2.9-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.3zm7.4 0h-2.1c-.6 0-1.1.2-1.4 1l-3.9 9.1h2.8l.6-1.5h3.4l.3 1.5h2.5l-2.2-10.1zm-3.3 6.6l1.4-3.8.8 3.8h-2.2zm-18-6.6l-2.6 7.1-.3-1.4c-.5-1.7-2.1-3.6-3.9-4.5l2.5 8.9h2.8l4.2-10.1h-2.7z" fill="#1434CB"/>
+                  <path d="M8.3 11.2H4.1l-.1.4c3.2.8 5.4 2.8 6.2 5.1l-.9-4.5c-.2-.7-.6-1-1-1z" fill="#F8A01A"/>
+                </svg>
+              </div>
+              <div style="width:38px;height:24px;background:#1e293b;border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="32" height="20" viewBox="0 0 48 32">
+                  <circle cx="18" cy="16" r="9" fill="#EB001B"/>
+                  <circle cx="30" cy="16" r="9" fill="#F79E1B"/>
+                  <path d="M24 10.6c1.6 1.4 2.6 3.4 2.6 5.4s-1 4-2.6 5.4c-1.6-1.4-2.6-3.4-2.6-5.4s1-4 2.6-5.4z" fill="#FF5F00"/>
+                </svg>
+              </div>
+              <div style="height:24px;padding:0 7px;background:#ffffff;border-radius:4px;display:flex;align-items:center;gap:4px;box-shadow:0 1px 4px rgba(0,0,0,0.3);flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="4" fill="#006EA7"/>
+                  <path d="M7 16h18M16 7v18" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="4.5" fill="#00D2B4"/>
+                </svg>
+                <span style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:10px;color:#0f172a;letter-spacing:-0.03em;">Payments<span style="color:#006ea7">.lk</span></span>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-pay-now-action" data-plan="yearly" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#0ea5e9 0%,#059669 100%);border:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+              <span>💳 Pay Now (Payments.lk)</span>
+            </button>
             <a href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-secondary wa-contact-link" style="width:100%;">
               <span data-i18n="plan_3_btn">වාර්ෂික පැකේජය ලබාගන්න</span>
             </a>
@@ -1788,6 +1928,138 @@
       </svg>
     </a>
   </div>
+
+  <!-- ==========================================================================
+       Payments.lk Checkout Modal & Integration
+       ========================================================================== -->
+  <div id="paymentsLkModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px);z-index:99999;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#0f172a;border:1px solid rgba(45,212,191,0.3);border-radius:20px;padding:32px 28px;max-width:480px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);color:#f8fafc;position:relative;">
+      <button id="closePaymentsLkModalBtn" type="button" style="position:absolute;top:16px;right:16px;background:transparent;border:none;color:#94a3b8;font-size:24px;cursor:pointer;line-height:1;">×</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <span style="font-size:28px;">💳</span>
+        <div>
+          <h3 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;">Payments.lk Online Checkout</h3>
+          <div style="font-size:12px;color:#2dd4bf;font-weight:600;">Secure Hosted Gateway (Sandbox Active)</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94a3b8;line-height:1.5;margin:0 0 18px 0;">
+        Enter your merchant details below. You will be redirected to Payments.lk's hosted checkout to complete payment securely with Visa or Mastercard.
+      </p>
+
+      <form id="paymentsLkCheckoutForm" onsubmit="event.preventDefault(); window.submitPaymentsLkCheckout();">
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Plan Selection</label>
+          <select id="checkoutPlanSelect" style="width:100%;padding:10px 12px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#ffffff;font-size:14px;outline:none;">
+            <option value="monthly">Business Pro Monthly — LKR 2,500 / month</option>
+            <option value="yearly">Annual Super Saver — LKR 24,000 / year (Save Rs. 6,000)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Full Name *</label>
+          <input type="text" id="checkoutCustName" required placeholder="e.g. Kasun Perera" style="width:100%;padding:10px 12px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#ffffff;font-size:14px;box-sizing:border-box;outline:none;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Store / Shop Name *</label>
+          <input type="text" id="checkoutShopName" required placeholder="e.g. Apex Super Mart" style="width:100%;padding:10px 12px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#ffffff;font-size:14px;box-sizing:border-box;outline:none;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">WhatsApp / Mobile Number *</label>
+          <input type="tel" id="checkoutPhone" required placeholder="e.g. 0770663154" style="width:100%;padding:10px 12px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#ffffff;font-size:14px;box-sizing:border-box;outline:none;">
+        </div>
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Email Address (Optional)</label>
+          <input type="email" id="checkoutEmail" placeholder="e.g. merchant@apexpos.lk" style="width:100%;padding:10px 12px;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#ffffff;font-size:14px;box-sizing:border-box;outline:none;">
+        </div>
+
+        <div id="checkoutStatusError" style="display:none;padding:10px 12px;background:rgba(239,68,68,0.15);border:1px solid #ef4444;border-radius:8px;color:#fca5a5;font-size:13px;margin-bottom:14px;"></div>
+
+        <button type="submit" id="btnSubmitPaymentsLkCheckout" style="width:100%;padding:12px 18px;background:linear-gradient(135deg,#0ea5e9 0%,#059669 100%);border:none;border-radius:10px;color:#ffffff;font-weight:700;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+          <span>🔒 Proceed to Secure Payment Page →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function initPaymentsLkButtons() {
+      const modal = document.getElementById('paymentsLkModal');
+      const closeBtn = document.getElementById('closePaymentsLkModalBtn');
+      const planSelect = document.getElementById('checkoutPlanSelect');
+      const errBox = document.getElementById('checkoutStatusError');
+      const submitBtn = document.getElementById('btnSubmitPaymentsLkCheckout');
+
+      function openModal(plan) {
+        if (plan && planSelect) planSelect.value = plan;
+        if (errBox) errBox.style.display = 'none';
+        if (modal) modal.style.display = 'flex';
+      }
+
+      function closeModal() {
+        if (modal) modal.style.display = 'none';
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-pay-now-action');
+        if (!btn) return;
+        e.preventDefault();
+        const plan = btn.getAttribute('data-plan') || 'monthly';
+        openModal(plan);
+      });
+
+      window.submitPaymentsLkCheckout = async function() {
+        if (errBox) errBox.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span>⚡ Connecting to Payments.lk...</span>';
+        }
+
+        const plan = planSelect ? planSelect.value : 'monthly';
+        const name = (document.getElementById('checkoutCustName')?.value || '').trim();
+        const shop = (document.getElementById('checkoutShopName')?.value || '').trim();
+        const phone = (document.getElementById('checkoutPhone')?.value || '').trim();
+        const email = (document.getElementById('checkoutEmail')?.value || '').trim();
+
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              plan: plan,
+              customerName: name,
+              shopName: shop,
+              customerPhone: phone,
+              customerEmail: email
+            })
+          });
+
+          const data = await res.json();
+          if (!res.ok || !data.success || !data.url) {
+            throw new Error(data.error || 'Payments.lk gateway error');
+          }
+
+          // Redirect customer to Payments.lk hosted payment page
+          window.location.href = data.url;
+        } catch (err) {
+          console.error('Checkout error:', err);
+          if (errBox) {
+            errBox.textContent = 'Unable to initiate payment: ' + (err.message || 'Please check your connection and try again.');
+            errBox.style.display = 'block';
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>🔒 Proceed to Secure Payment Page →</span>';
+          }
+        }
+      };
+    })();
+  </script>
 
   <script src="landing.js"></script>
 </body>

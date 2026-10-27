@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Payment Successful | Harsh Apex Retail POS</title>
+  <meta name="description" content="Payment successfully verified via Payments.lk for Harsh Apex Retail POS.">
+  <link rel="canonical" href="https://pos.harshapex.com.lk/payment-success">
+  <link rel="icon" type="image/png" href="harsh-apex-logo.png">
+  <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="legal.css">
+  <style>
+    .status-card {
+      max-width: 680px;
+      margin: 60px auto 40px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.2);
+    }
+    .status-icon {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 2px solid #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+      font-size: 38px;
+    }
+    .info-table {
+      width: 100%;
+      margin: 24px 0;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+    .info-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .info-table td:first-child {
+      color: var(--text-muted);
+      font-weight: 500;
+      width: 40%;
+    }
+    .info-table td:last-child {
+      color: #f8fafc;
+      font-weight: 600;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body class="legal-page-wrapper">
+  <div class="bg-ambient"></div>
+
+  <header class="navbar">
+    <div class="container nav-content">
+      <a href="/" class="brand-wrapper">
+        <img src="harsh-apex-logo.png" alt="Harsh Apex Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">HARSH APEX</span>
+          <span class="brand-sub">Retail POS</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="app.html" class="btn btn-primary pos-launch-btn">
+          <span>Launch POS Terminal</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="status-card">
+      <div class="status-icon">✓</div>
+      <div style="font-size:12px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">
+        Payments.lk Verified Checkout
+      </div>
+      <h1 style="font-size:28px;font-weight:800;color:#ffffff;margin:0 0 12px;">Payment Successful!</h1>
+      <p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin:0 0 24px;">
+        ගෙවීම සාර්ථකව තහවුරු විය. Your Harsh Apex POS subscription payment has been received and verified.
+      </p>
+
+      <table class="info-table">
+        <tr>
+          <td>Transaction Reference:</td>
+          <td id="lblRef">Loading...</td>
+        </tr>
+        <tr>
+          <td>Payment Gateway:</td>
+          <td>Payments.lk (Hosted Secure Sandbox)</td>
+        </tr>
+        <tr>
+          <td>Subscription Status:</td>
+          <td style="color:#10b981;">Active / Paid</td>
+        </tr>
+        <tr>
+          <td>Timestamp:</td>
+          <td id="lblTime">-</td>
+        </tr>
+      </table>
+
+      <div style="background:rgba(16, 185, 129, 0.08);border:1px dashed #10b981;border-radius:12px;padding:16px;margin-bottom:28px;text-align:left;">
+        <div style="font-weight:700;color:#10b981;font-size:13px;margin-bottom:4px;">🚀 Ready to use immediately</div>
+        <p style="font-size:13px;color:#cbd5e1;line-height:1.5;margin:0;">
+          Your POS terminal is activated. You can launch the POS web app now. If you need dedicated WhatsApp onboarding assistance, reach our 24/7 hotline below.
+        </p>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="app.html" class="btn btn-primary" style="padding:12px 24px;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
+          <span>🚀 Launch POS Terminal</span>
+        </a>
+        <a id="btnWaReceipt" href="https://wa.me/94770663154" target="_blank" rel="noopener" class="btn btn-whatsapp" style="padding:12px 24px;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
+          <span>💬 WhatsApp Support</span>
+        </a>
+        <a href="/" class="btn btn-secondary" style="padding:12px 20px;">
+          <span>Home</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref') || params.get('checkout_id') || 'REF-ONLINE-PAYMENT';
+      const plan = params.get('plan') || 'pro';
+      document.getElementById('lblRef').textContent = ref;
+      document.getElementById('lblTime').textContent = new Date().toLocaleString('en-LK', { timeZone: 'Asia/Colombo' });
+
+      // Update WhatsApp link with receipt context
+      const waBtn = document.getElementById('btnWaReceipt');
+      if (waBtn) {
+        const msg = encodeURIComponent(`Hello Harsh Apex POS, I just completed my Payments.lk online payment! Reference: ${ref} (Plan: ${plan}). Please assist with onboarding.`);
+        waBtn.href = `https://wa.me/94770663154?text=${msg}`;
+      }
+    })();
+  </script>
+</body>
+</html>
